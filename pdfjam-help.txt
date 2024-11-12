@@ -2,194 +2,191 @@ pdfjam is a shell-script front end to the LaTeX 'pdfpages' package; see
 https://www.ctan.org/tex-archive/macros/latex/contrib/pdfpages
 
 Usage: pdfjam [OPTIONS] [--] [FILE1 [SEL1]] [FILE2 [SEL2]]...
-where
-* 'FILE1' etc. are PDF files (JPG and PNG files are also allowed).  For
-   input from /dev/stdin, use the special name '/dev/stdin' in place of any
-   of FILE1, FILE2, etc: this can be mixed with 'real' files as needed, to
-   allow input through a pipe (note that if /dev/stdin is connected to tty,
-   an error results).  If 'FILE1' is absent, pdfjam will use '/dev/stdin'
-   (and will use '-' for the page selection -- see next item).
-* 'SEL1' is a page selection for FILE1, etc.
-   To select all pages (the default) use '-'.  See the pdfpages manual for
-   more details.  An example:
-          ... file1 '{},2,4-6,9-' ...
-   makes an empty page, followed by pages 2,4,5,6 of file1, followed by pages
-   9 onwards (up to the end of file1).
-   A page selection can be applied to more than one file, e.g.,
-          ... file1 file2 file3 1-7 ...
-   applies page selection '1-7' to all three files; but for example
-          ... file1 file2 2- file3 1-7 ...
-   would apply the page selection '2-' to file1 and file2, and '1-7'
-   to file3.  A page selection applies to all the files *immediately*
-   preceding it in the argument list.  A missing page selection defaults to
-   '-'; this includes the case where 'FILE1' is absent and so /dev/stdin gets
-   used by default.
-* 'options' are pdfpages specifications in the form '--KEY VALUE' (see
-   below), or
-     --help  (or -h, or -u)
-                  Output this text only; no processing of PDF files.
-     --configpath
-                  Output the 'configpath' variable and exit immediately; no
-                  processing of PDF files.
-     --version (or -V)
-                  Output the version number of pdfjam and exit immediately; no
-                  processing of PDF files.
-     --quiet  (or -q)
-                  Suppress verbose commentary on progress.
-     --batch
-                  Run pdfjam sequentially on each input file in turn, and
-                  produce a separate output file for each input, rather
-                  than the default behaviour (which is a single run of
-                  pdfjam on all of the input files, producing a single
-                  output document).  For the location of output
-                  files, see '--outfile'.  The --batch option cannot be
-                  used in the case of input from stdin.
-     --outfile PATH  (or -o PATH)
-                  Specifies where the output file(s) will go.  If PATH is an
-                  existing directory, pdfjam will attempt to write its
-                  output PDF file(s) there, with name(s) derived from the
-                  input file name(s) and the --suffix option (see below).
-                  Otherwise the output file will be PATH.  If '/dev/stdin'
-                  is the only or last input file, PATH cannot be a directory.
-                  Your current default PATH for output is:
-                  $outFile
-     --suffix STRING
-                  Specifies a suffix for output file names, to be used when
-                  --outfile is either (a) a directory, or
-                                      (b) not specified in a --batch call.
-                  A good STRING should be descriptive: for example,
-                           --suffix 'rotated'
-                  would append the text '-rotated' to the name of the input
-                  file in order to make the output file name, as in
-                  'myfile-rotated.pdf'.  The STRING must not have zero
-                  length.
-                  [Default for you at this site: suffix=$suffix]
-     --checkfiles
-     --no-checkfiles
-                  If the Unix 'file' utility is available, with options
-                  -L and -b, the output of 'file -Lb FILE1' should be
-                  'PDF document...' where '...' gives version information.
-                  If this is the case on your system you should use
-                  '--checkfiles'; otherwise use '--no-checkfiles',
-                  in which case all input PDF files must have .pdf or .PDF
-                  as their name extension.
-                  [Default for you at this site: checkfiles=$checkfiles]
-     --preamble STRING
-                  Append the supplied STRING to the preamble of the LaTeX
-                  source file(s), immediately before the '\begin{document}'
-                  line.  An example:
-                      pdfjam --nup 2x2 myfile.pdf -o myfile-4up.pdf \\
-                          --preamble '\usepackage{fancyhdr} \pagestyle{fancy}'
-                  The '--preamble' option can be used, for example, to load
-                  LaTeX packages and/or to set global options.  If '--preamble'
-                  is used more than once in the call, the supplied preamble
-                  strings are simply concatenated.  For a note on avoiding
-                  clashes, see the README file, also available at
-                  https://github.com/pdfjam/pdfjam
-     --keepinfo
-     --no-keepinfo
-                  Preserve (or not) Title, Author, Subject and Keywords
-                  (from the last input PDF file, if more than one) in the
-                  output PDF file.  This requires the pdfinfo utility, from
-                  the xpdf package, and the LaTeX 'hyperref' package; if
-                  either of those is not available, '--keepinfo' is ignored.
-                  [Default for you at this site: keepinfo=$keepinfo]
-     --pdftitle STRING
-     --pdfauthor STRING
-     --pdfsubject STRING
-     --pdfkeywords STRING
-                  Provide text for the  Title, Author, Subject and Keywords
-                  in the output PDF file.  Requires the  LaTeX 'hyperref'
-                  package.  These options, individually, over-ride --keepinfo.
-     --otheredge
-     --no-otheredge
-                  Rotate every odd page by 180 degrees (or not).  Thus changes
-                  along which edge the pages are flipped in duplex printing.
-     --landscape
-     --no-landscape
-                  Specify landscape page orientation (or not) in the
-                  output PDF file.
-                  [Default for you at this site: landscape=$landscape]
-     --twoside
-     --no-twoside
-                  Specify (or not) the 'twoside' document class option.
-                  [Default for you at this site: twoside=$twoside]
-     --paper PAPERSPEC  (or simply --PAPERSPEC)
-                  Specify a LaTeX paper size, for example
-                  '--paper a4' or simply '--a4paper' for ISO A4 paper.
-                  A wide range of paper sizes is available thanks to the
-                  LaTeX 'geometry' package.  For details see documentation
-                  for LaTeX and/or the 'geometry' package.
-                  If no default value is set and libpaper is not available,
-                  A4 is used.
-                  [Default for you at this site: paper=$paper]
-     --papersize 'WIDTH,HEIGHT'
-                  Specify a custom paper size in points = 1/72 inch (known as
-                  bp in LaTeX and as pt in other software), e.g.
-                      --papersize 612,792
-                  Units may also be specified explicitly, e.g.
-                      --papersize 10in,18cm
-                  [Default for you at this site: papersize=$papersize]
-     --pagecolor RGBSPEC
-                  Specify a background colour for the output pages.  The
-                  RGBSPEC must be a comma-separated trio of integers
-                  between 0 and 255.  An example:
-                         --pagecolor 150,200,150
-                  [Default is no background colour]
-     --tidy
-     --no-tidy
-                  Specify whether the temporary directory created by
-                  pdfjam should be deleted.  Use '--no-tidy' or '--builddir'
-                  below to help debug most errors.
-                  [Default for you at this site: tidy=$tidy]
-     --builddir PATH
-                  Specifies a build directory to be used in place of a
-                  temporary one. Existing files inside will be overwritten.
-     --latex PATHTOLATEX
-                  Specify the LaTeX engine to be used (one of pdflatex,
-                  xelatex, lualatex).  The PATHTOLATEX string must be
-                  the full path to a suitable LaTeX executable (for example
-                  /usr/bin/xelatex on many unix systems).
-                  [Default for you at this site: latex=$latex]
-     --runs N
-                  Run latex N times, for each output document made.
-                  [Default for you at this site: runs=$runs]
-     --vanilla
-                  Suppress the reading of any pdfjam configuration files.
-     --enc
-                  Specify a command-line encoding
-                  [Default for you at this site: enc=$enc]
-     --KEY VALUE
-                  Specify options to '\includepdfmerge', in the LaTeX
-                  'pdfpages' package.  See the the pdfpages documentation
-                  (usually 'texdoc pdfpages') for more information.
-                  Here KEY is the name of any of the many options for
-                  '\includepdfmerge', and VALUE is a corresponding value.
-                  Examples:
-                      --nup 2x1     (for 2-up side-by-side imposition)
-                      --scale 0.7   (to scale all input pages to 70% size)
-                      --offset '1cm 0.5cm'
-                                    (to offset all pages -- note the quotes!)
-                      --frame true  (to put a frame round each input page)
-                      --booklet true (to reorder the pages in signatures,
-                                      generally useful with --nup)
-                      --signature N (specify the signature size, as the
-                                     number of original pages in a signature
-                                     in the final document. Caveat: booklet
-                                     is a short form for signature, so if
-                                     you use booklet true, signature will be
-                                     ignored)
-                      --trim '1cm 2cm 1cm 2cm' --clip true
-                                    (to trim those amounts from left, bottom,
-                                     right and top, respectively, of input
-                                     pages)
-                      --angle NNN (The angle of rotation in degrees. Angles
-                                   that are not either 90, 180 or 270 will
-                                   still create straight rectangular pages,
-                                   only the content will be rotated.)
-                  etc., etc.  For more information see the manual for
-                  the 'pdfpages' package, at
-                  https://www.ctan.org/tex-archive/macros/latex/contrib/pdfpages
+
+'FILE1' etc. are PDF files (JPG and PNG files are also allowed).  For
+input from /dev/stdin, use the special name '/dev/stdin' in place of any
+of FILE1, FILE2, etc: this can be mixed with 'real' files as needed, to
+allow input through a pipe (note that if /dev/stdin is connected to tty,
+an error results).  If 'FILE1' is absent, pdfjam will use '/dev/stdin'
+(and will use '-' for the page selection -- see next item).
+
+'SEL1' is a page selection for FILE1, etc.
+To select all pages (the default) use '-'.  See the pdfpages manual for
+more details.  An example:
+       ... file1 '{},2,4-6,9-' ...
+makes an empty page, followed by pages 2,4,5,6 of file1, followed by pages
+9 onwards (up to the end of file1).
+A page selection can be applied to more than one file, e.g.,
+       ... file1 file2 file3 1-7 ...
+applies page selection '1-7' to all three files; but for example
+       ... file1 file2 2- file3 1-7 ...
+would apply the page selection '2-' to file1 and file2, and '1-7'
+to file3.  A page selection applies to all the files *immediately*
+preceding it in the argument list.  A missing page selection defaults to
+'-'; this includes the case where 'FILE1' is absent and so /dev/stdin gets
+used by default.
+
+'options' are pdfpages specifications in the form '--KEY VALUE' (see
+below), or
+
+  -h, --help
+               Output this text only; no processing of PDF files.
+  --configpath
+               Output the 'configpath' variable and exit immediately; no
+               processing of PDF files.
+  -V, --version
+               Output the version number of pdfjam and exit immediately; no
+               processing of PDF files.
+  -q, --quiet
+               Suppress verbose commentary on progress.
+  --batch
+               Run pdfjam sequentially on each input file in turn, and
+               produce a separate output file for each input, rather
+               than the default behaviour (which is a single run of
+               pdfjam on all of the input files, producing a single
+               output document).  For the location of output
+               files, see '--outfile'.  The --batch option cannot be
+               used in the case of input from stdin.
+  -o, --outfile PATH
+               Specifies where the output file(s) will go.  If PATH is an
+               existing directory, pdfjam will attempt to write its
+               output PDF file(s) there, with name(s) derived from the
+               input file name(s) and the --suffix option (see below).
+               Otherwise the output file will be PATH.  If '/dev/stdin'
+               is the only or last input file, PATH cannot be a directory.
+               Your current default PATH for output is:
+               $outFile
+  --suffix STRING
+               Specifies a suffix for output file names, to be used when
+               --outfile is either (a) a directory, or
+                                   (b) not specified in a --batch call.
+               A good STRING should be descriptive: for example,
+                        --suffix 'rotated'
+               would append the text '-rotated' to the name of the input
+               file in order to make the output file name, as in
+               'myfile-rotated.pdf'.  The STRING must not have zero
+               length.
+               [Default for you at this site: suffix=$suffix]
+  --checkfiles, --no-checkfiles
+               If the Unix 'file' utility is available, with options
+               -L and -b, the output of 'file -Lb FILE1' should be
+               'PDF document...' where '...' gives version information.
+               If this is the case on your system you should use
+               '--checkfiles'; otherwise use '--no-checkfiles',
+               in which case all input PDF files must have .pdf or .PDF
+               as their name extension.
+               [Default for you at this site: checkfiles=$checkfiles]
+  --preamble STRING
+               Append the supplied STRING to the preamble of the LaTeX
+               source file(s), immediately before the '\begin{document}'
+               line.  An example:
+                   pdfjam --nup 2x2 myfile.pdf -o myfile-4up.pdf \\
+                       --preamble '\usepackage{fancyhdr} \pagestyle{fancy}'
+               The '--preamble' option can be used, for example, to load
+               LaTeX packages and/or to set global options.  If '--preamble'
+               is used more than once in the call, the supplied preamble
+               strings are simply concatenated.  For a note on avoiding
+               clashes, see the README file, also available at
+               https://github.com/pdfjam/pdfjam
+  --keepinfo, --no-keepinfo
+               Preserve (or not) Title, Author, Subject and Keywords
+               (from the last input PDF file, if more than one) in the
+               output PDF file.  This requires the pdfinfo utility, from
+               the xpdf package, and the LaTeX 'hyperref' package; if
+               either of those is not available, '--keepinfo' is ignored.
+               [Default for you at this site: keepinfo=$keepinfo]
+  --pdftitle STRING
+  --pdfauthor STRING
+  --pdfsubject STRING
+  --pdfkeywords STRING
+               Provide text for the  Title, Author, Subject and Keywords
+               in the output PDF file.  Requires the  LaTeX 'hyperref'
+               package.  These options, individually, over-ride --keepinfo.
+  --otheredge, --no-otheredge
+               Rotate every odd page by 180 degrees (or not).  Thus changes
+               along which edge the pages are flipped in duplex printing.
+  --landscape, --no-landscape
+               Specify landscape page orientation (or not) in the
+               output PDF file.
+               [Default for you at this site: landscape=$landscape]
+  --twoside, --no-twoside
+               Specify (or not) the 'twoside' document class option.
+               [Default for you at this site: twoside=$twoside]
+  --paper PAPERSPEC  (or simply --PAPERSPEC)
+               Specify a LaTeX paper size, for example
+               '--paper a4' or simply '--a4paper' for ISO A4 paper.
+               A wide range of paper sizes is available thanks to the
+               LaTeX 'geometry' package.  For details see documentation
+               for LaTeX and/or the 'geometry' package.
+               If no default value is set and libpaper is not available,
+               A4 is used.
+               [Default for you at this site: paper=$paper]
+  --papersize WIDTH,HEIGHT
+               Specify a custom paper size in points = 1/72 inch (known as
+               bp in LaTeX and as pt in other software), e.g.
+                   --papersize 612,792
+               Units may also be specified explicitly, e.g.
+                   --papersize 10in,18cm
+               [Default for you at this site: papersize=$papersize]
+  --pagecolor RGBSPEC
+               Specify a background colour for the output pages.  The
+               RGBSPEC must be a comma-separated trio of integers
+               between 0 and 255.  An example:
+                      --pagecolor 150,200,150
+               [Default is no background colour]
+  --tidy, --no-tidy
+               Specify whether the temporary directory created by
+               pdfjam should be deleted.  Use '--no-tidy' or '--builddir'
+               below to help debug most errors.
+               [Default for you at this site: tidy=$tidy]
+  --builddir PATH
+               Specifies a build directory to be used in place of a
+               temporary one. Existing files inside will be overwritten.
+  --latex PATHTOLATEX
+               Specify the LaTeX engine to be used (one of pdflatex,
+               xelatex, lualatex).  The PATHTOLATEX string must be
+               the full path to a suitable LaTeX executable (for example
+               /usr/bin/xelatex on many unix systems).
+               [Default for you at this site: latex=$latex]
+  --runs N
+               Run latex N times, for each output document made.
+               [Default for you at this site: runs=$runs]
+  --vanilla
+               Suppress the reading of any pdfjam configuration files.
+  --enc
+               Specify a command-line encoding
+               [Default for you at this site: enc=$enc]
+  --KEY VALUE
+               Specify options to '\includepdfmerge', in the LaTeX
+               'pdfpages' package.  See the the pdfpages documentation
+               (usually 'texdoc pdfpages') for more information.
+               Here KEY is the name of any of the many options for
+               '\includepdfmerge', and VALUE is a corresponding value.
+               Examples:
+                   --nup 2x1     (for 2-up side-by-side imposition)
+                   --scale 0.7   (to scale all input pages to 70% size)
+                   --offset '1cm 0.5cm'
+                                 (to offset all pages -- note the quotes!)
+                   --frame true  (to put a frame round each input page)
+                   --booklet true (to reorder the pages in signatures,
+                                   generally useful with --nup)
+                   --signature N (specify the signature size, as the
+                                  number of original pages in a signature
+                                  in the final document. Caveat: booklet
+                                  is a short form for signature, so if
+                                  you use booklet true, signature will be
+                                  ignored)
+                   --trim '1cm 2cm 1cm 2cm' --clip true
+                                 (to trim those amounts from left, bottom,
+                                  right and top, respectively, of input
+                                  pages)
+                   --angle NNN (The angle of rotation in degrees. Angles
+                                that are not either 90, 180 or 270 will
+                                still create straight rectangular pages,
+                                only the content will be rotated.)
+               etc., etc.  For more information see the manual for
+               the 'pdfpages' package, at
+               https://www.ctan.org/tex-archive/macros/latex/contrib/pdfpages
 * '--' can be used to signal that there are no more options to come.
 
 Defaults for the options '--suffix', '--keepinfo', '--paper', '--outfile',

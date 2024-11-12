@@ -1,46 +1,238 @@
-.TH pdfjam 1 "18 November 2020" "" ""
+.TH PDFJAM "1" "November 2024" "pdfjam 4.01" "User Commands"
 .SH "NAME"
 pdfjam \- A shell script for manipulating PDF files
 .SH "SYNOPSIS"
-pdfjam [OPTION [OPTION] ...\&] [SRC [PAGESPEC] [SRC [PAGESPEC]] ...]
+.B pdfjam
+[\fI\,options\/\fR] [\fI\,--\/\fR] [\fI\,file\/\fR[\fI\,pages\/\fR]]...
 .SH "DESCRIPTION"
-pdfjam provides a front end to most capabilities of the
-"pdfpages" package
-(by Andreas Matthias)
-of pdflatex.
-Detailed information can be found via "pdfjam \-\-help",
-and also in the web page mentioned below.
+pdfjam assembles a list of documents (pdf, jpg or png) into a single pdf.
+It allows to rotate, scale, reorder and combine pages freely
+using the power of the 'pdfpages' and 'graphicx' LaTeX packages; see
+https://www.ctan.org/tex\-archive/macros/latex/contrib/pdfpages and
+https://www.ctan.org/tex\-archive/macros/latex/contrib/graphicx
 .PP
-A working installation of pdflatex,
-with the pdfpages package,
-is required.
+Output is written to a generated name (unless specified via \fB\-\-outfile\fR).
+The input files are embedded as graphics in the output. Especially jpg files
+are kept as is without transcoding. Input from stdin is supported by specifying
+\fI\,/dev/stdin\/\fP as a file and is the default if no file is given.
 .PP
-The pdfjam script is distributed as (the main) part of the pdfjam package.
-The homepage of pdfjam is at https://github.com/pdfjam/pdfjam.
-.SH "SETUP"
-See https://github.com/pdfjam/pdfjam
+By specifying \fI\,pages\/\fP it is possible to specfiy which pages to include
+in which order.  The default '\-' selects all pages.  An example:
+.IP
+pdfjam file1 '{},2,4\-6,9\-' ...
+.PP
+makes an empty page, followed by pages 2,4,5,6 of file1, followed by pages
+9 onwards (up to the end of file1).
+.PP
+A page selection can be applied to more than one file, e.g.,
+.IP
+pdfjam file1 file2 file3 last\-1 ...
+.PP
+applies page selection 'last\-1' (reverting the page order) to all three files; but for example
+.IP
+pdfjam file1 file2 2\- file3 1\-7 ...
+.PP
+would apply the page selection '2\-' to file1 and file2, and '1\-7' to file3.
+A page selection applies to all the files *immediately* preceding it in the
+argument list.
+.PP
+See the pdfpages manual for more details on pagespec syntax.
+.SH "OPTIONS TO PDFPAGES AND GRAHPICX"
+Key value options to 'pdfpages' and 'graphicx' can be specified as \fI\,\-\-key value\,\fP.
+.SH "META OPTIONS"
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Output this text only; no processing of PDF files.
+.TP
+\fB\-\-configpath\fR
+Output the 'configpath' variable and exit immediately; no processing of PDF files.
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Output the version number of pdfjam and exit immediately; no
+processing of PDF files.
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress verbose commentary on progress.
+.SH "PROCESSING OPTIONS"
+.TP
+\fB\-\-batch\fR
+Run pdfjam sequentially on each input file in turn, and produce a separate
+output file for each input, rather than the default coalescing behaviour.  For
+the location of output files, see \fB\-\-outfile\fR.  The \fB\-\-batch\fR option
+cannot be used in the case of input from stdin.
+.TP
+\fB\-o\fR, \fB\-\-outfile\fR name
+Specifies where the output file(s) will go. If 'name' is an existing directory,
+pdfjam will attempt to write its output PDF file(s) there, with name(s) derived
+from the input file name(s) and the \fB\-\-suffix\fR option (see below).
+Otherwise the output pdf will be written at 'name'.
+Your current default PATH for output is:
+\fI\,$outfile\/\fP
+.TP
+\fB\-\-suffix\fR string
+Specifies a suffix for output file names, to be used when \fB\-\-outfile\fR is
+unspecified or a directory.  The STRING must not have zero length.
+[Default for you at this site: suffix=$suffix]
+.TP
+\fB\-\-checkfiles\fR, \fB\-\-no\-checkfiles\fR
+If the Unix 'file' utility is available, the output of 'file \fB\-Lb\fR FILE1'
+should be 'PDF document...' where '...' gives version information.  If this is
+the case on your system you should use \fB\-\-checkfiles\fR; otherwise use
+\fB\-\-no\-checkfiles\fR, in which case all input files must have the correct
+extensions (.pdf, .PDF, .jpg, .JPG, .png or .PNG).
+[Default for you at this site: checkfiles=$checkfiles]
+.TP
+\fB\-\-latex\fR pathtolatex
+Specify the LaTeX engine to be used (one of pdflatex,
+xelatex, lualatex).  The pathtolatex string must be
+the full path to a suitable LaTeX executable (for example
+\fI\,/usr/bin/xelatex\/\fP on many unix systems).
+[Default for you at this site: latex=$latex]
+.TP
+\fB\-\-tidy\fR, \fB\-\-no\-tidy\fR
+Specify whether the temporary directory created by pdfjam should be deleted.
+Use '\-\-no\-tidy' or '\-\-build\-dir' (see below) to help debug most errors.
+[Default for you at this site: tidy=$tidy]
+.TP
+\fB\-\-build\-dir\fR path
+Specifies a build directory to be used in place of a temporary one. Existing
+files inside will be overwritten. Overrides \fB\-\-tidy\fR.
+.TP
+\fB\-\-runs\fR N
+Run latex N times, for each output document made.
+[Default for you at this site: runs=$runs]
+.TP
+\fB\-\-vanilla\fR
+Suppress the reading of any pdfjam configuration files.
+.TP
+\fB\-\-enc\fR
+Specify a command\-line encoding
+[Default for you at this site: enc=$enc]
+.SH "PAPER OPTIONS"
+.TP
+\fB\-\-paper\fR papername, \fB\-\-papername\fR
+.IP
+Specify a LaTeX paper size, for example '\-\-paper a4' or simply '\-\-a4paper'
+for ISO A4 paper.  A wide range of paper sizes is available thanks to the
+LaTeX 'geometry' package.  For details see documentation
+for LaTeX and/or the 'geometry' package.  If no default value is set, obtain
+the system’s default paper via libpaper, falling back to A4.
+[Default for you at this site: paper=$paper]
+.TP
+\fB\-\-papersize\fR width,height
+Specify a custom paper size in points = 1/72 inch (known as bp in LaTeX and as
+pt in other software), e.g. \fB\-\-papersize\fR 612,792.
+Units may also be specified explicitly, e.g. \fB\-\-papersize\fR 10in,18cm.
+[Libpaper default: $papersize]
+.TP
+\fB\-\-landscape\fR, \fB\-\-no\-landscape\fR
+Specify landscape page orientation (or not) in the output PDF file.
+[Default for you at this site: landscape=$landscape]
+.TP
+\fB\-\-twoside\fR, \fB\-\-no\-twoside\fR
+Specify (or not) the 'twoside' document class option.
+[Default for you at this site: twoside=$twoside]
+.TP
+\fB\-\-other\-edge\fR, \fB\-\-no\-other\-edge\fR
+Rotate every odd page by 180 degrees (or not).
+Thus changes along which edge the pages are flipped in duplex printing.
+.TP
+\fB\-\-pagecolor\fR rgbspec
+Specify a background colour for the output pages.  The RGBSPEC must be a
+comma\-separated triple of integers between 0 and 255.  An example:
+\fB\-\-pagecolor\fR 150,200,150
+[Default is no background colour]
+.SH "PDFINFO OPTIONS"
+.TP
+\fB\-\-keepinfo\fR, \fB\-\-no\-keepinfo\fR
+Preserve (or not) Title, Author, Subject and Keywords
+(from the last input PDF file, if more than one) in the
+output PDF file.  This requires the pdfinfo utility, from
+the poppler-utils package, and the LaTeX 'hyperref' package; if
+either of those is not available, '\-\-keepinfo' is ignored.
+[Default for you at this site: keepinfo=$keepinfo]
+.TP
+\fB\-\-pdftitle\fR string, \fB\-\-pdfauthor\fR string, \fB\-\-pdfsubject\fR string, \fB\-\-pdfkeywords\fR string
+Provide text for the Title, Author, Subject and Keywords in the output PDF
+file.  Requires the LaTeX 'hyperref' package.  These options, individually,
+override \fB\-\-keepinfo\fR.
+.SH "ADVANCED OPTIONS"
+.TP
+\fB\-\-preamble\fR string
+Append the supplied STRING to the preamble of the LaTeX
+source file(s), immediately before the '\ebegin{document}'
+line to load LaTeX packages or set global options.  An example:
+.IP
+pdfjam \fB\-\-nup\fR 2x2 myfile.pdf \fB\-o\fR myfile\-4up.pdf \e
+\fB\-\-preamble\fR '\eusepackage{fancyhdr} \epagestyle{fancy}'
+.PP
+If '\-\-preamble' is used more than once in the call, the supplied preamble
+strings are concatenated.  For a note on avoiding clashes, see the README file,
+also available at $repository.
+.TP
+.TP
+\fB\-\-\fR
+Signals end of options processing.
+.SH "PDFPAGES AND GRAPHICX OPTIONS"
+.TP
+\fB\-\-KEY\fR VALUE
+Specify options to '\eincludepdfmerge', in the LaTeX 'pdfpages' package.  See
+the the pdfpages documentation (usually 'texdoc pdfpages') for more
+information.  Here KEY is the name of any of the many options
+for '\eincludepdfmerge', and VALUE is a corresponding value.
+Examples:
+.IP
+\fB\-\-nup\fR 2x1
+(for 2\-up side\-by\-side imposition)
+.IP
+\fB\-\-scale\fR 0.7
+(to scale all input pages to 70% size)
+.IP
+\fB\-\-offset\fR '1cm 0.5cm'
+(to offset all pages \fB\-\-\fR note the quotes!)
+.IP
+\fB\-\-frame\fR true
+(to put a frame round each input page)
+.IP
+\fB\-\-booklet\fR true (to reorder the pages in signatures,
+generally useful with \fB\-\-nup\fR)
+.IP
+\fB\-\-signature\fR N (specify the signature size, as the number of original
+pages in a signature in the final document. Caveat: booklet is a short form for
+signature, so if you use booklet true, signature will be ignored)
+.IP
+\fB\-\-trim\fR '1cm 2cm 1cm 2cm' \fB\-\-clip\fR true
+(to trim those amounts from left, bottom, right and top, respectively, of input
+pages)
+.IP
+\fB\-\-angle\fR NNN (The angle of rotation in degrees. Angles that are not
+either 90, 180 or 270 will still create straight rectangular pages, only the
+content will be rotated.)
 .SH "CONFIGURATION FILES"
-Configuration of the PDFjam utilities involves specifying the location of
-pdflatex,
-the location of temporary files,
-specification of default page size,
-etc.
-This is done in a block of lines near the top of the pdfjam script;
-settings made there are over-ridden by any that are found at a site-wide
-configuration file
-(at /etc/pdfjam.conf, /usr/share/etc/pdfjam.conf,
-/usr/local/share/pdfjam.conf, or /usr/local/etc/pdfjam.conf),
-which in turn are over-ridden by any
-that are found in a user-defaults file at ~/.pdfjam.conf.
-.SH "LIMITATIONS AND BUGS"
-pdfjam does not work with encrypted PDF files,
-and does not preserve hyperlinks.
+Defaults for the options
+\fB\-\-suffix\fR,
+\fB\-\-keepinfo\fR,
+\fB\-\-paper\fR,
+\fB\-\-outfile\fR,
+\fB\-\-landscape\fR,
+\fB\-\-twoside\fR,
+\fB\-\-tidy\fR,
+\fB\-\-latex\fR,
+\fB\-\-runs\fR,
+\fB\-\-checkfiles\fR and
+\fB\-\-preamble\fR
+can be set in site\-wide or user\-specific configuration files.
+The path that is searched for site\-wide configuration files (named pdfjam.conf)
+at this installation is
+.IP
+$configpath
 .PP
-Please report bugs!\& \(em either at GitHub or by email,
-see
-https://github.com/pdfjam/pdfjam.
-.SH "LICENSE"
-pdfjam is distributed under the GNU public license.
-.SH "AUTHOR"
-The pdfjam package was written by David Firth and is
-maintained by Reuben Thomas and Markus Kurtz.
+This configuration path can be changed by editing the pdfjam script if necessary.
+Any user\-specific configuration should be put in a file named .pdfjam.conf in
+your home directory.  (All of these files are ignored if the \fB\-\-vanilla\fR
+argument is used.)
+.SH "AUTHORS"
+David Firth (2002 to 2019), Reuben Thomas (2020 to 2024), Markus Kurtz (since 2024)
+.SH "SEE ALSO"
+For more information, including a sample configuration file, see
+$repository
