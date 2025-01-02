@@ -1,50 +1,46 @@
-.TH "pdfjam" "1" "18 November 2020" "" ""
+.TH pdfjam 1 "18 November 2020" "" ""
 .SH "NAME"
 pdfjam \- A shell script for manipulating PDF files
 .SH "SYNOPSIS"
-.PP
-pdfjam [OPTION [OPTION] \&.\&.\&.] [SRC [PAGESPEC] [SRC [PAGESPEC]] \&.\&.\&.]
-.PP
+pdfjam [OPTION [OPTION] ...\&] [SRC [PAGESPEC] [SRC [PAGESPEC]] ...]
 .SH "DESCRIPTION"
-.PP
 pdfjam provides a front end to most capabilities of the
-"pdfpages" package (by Andreas Matthias) of pdflatex.
-Detailed information can be found via
-"pdfjam --help", and also in the web page mentioned below\&.
+"pdfpages" package
+(by Andreas Matthias)
+of pdflatex.
+Detailed information can be found via "pdfjam \-\-help",
+and also in the web page mentioned below.
 .PP
-A working installation of pdflatex, with
-the pdfpages package, is required\&.
+A working installation of pdflatex,
+with the pdfpages package,
+is required.
 .PP
 The pdfjam script is distributed as (the main) part of the pdfjam package.
-The homepage of pdfjam is at https://github.com/pdfjam/pdfjam\&.
-.PP
+The homepage of pdfjam is at https://github.com/pdfjam/pdfjam.
 .SH "SETUP"
-.PP
 See https://github.com/pdfjam/pdfjam
-.PP
 .SH "CONFIGURATION FILES"
-.PP
 Configuration of the PDFjam utilities involves specifying the location of
-pdflatex, the location of temporary files, specification of default page size,
-etc.  This is done in a block of lines near the top of the pdfjam script;
+pdflatex,
+the location of temporary files,
+specification of default page size,
+etc.
+This is done in a block of lines near the top of the pdfjam script;
 settings made there are over-ridden by any that are found at a site-wide
-configuration file (at /etc/pdfjam.conf, /usr/share/etc/pdfjam.conf,
-/usr/local/share/pdfjam.conf, or /usr/local/etc/pdfjam.conf), which in turn are
-over-ridden by any that are found in a user-defaults file at ~/.pdfjam.conf\&.
-.PP
+configuration file
+(at /etc/pdfjam.conf, /usr/share/etc/pdfjam.conf,
+/usr/local/share/pdfjam.conf, or /usr/local/etc/pdfjam.conf),
+which in turn are over-ridden by any
+that are found in a user-defaults file at ~/.pdfjam.conf.
 .SH "LIMITATIONS AND BUGS"
+pdfjam does not work with encrypted PDF files,
+and does not preserve hyperlinks.
 .PP
-pdfjam does not work with encrypted PDF files, and does not
-preserve hyperlinks.
-.PP
-Please report bugs! --- either at GitHub or by email, see
-https://github.com/pdfjam/pdfjam\&.
-.PP
+Please report bugs!\& \(em either at GitHub or by email,
+see
+https://github.com/pdfjam/pdfjam.
 .SH "LICENSE"
-.PP
 pdfjam is distributed under the GNU public license.
-.PP
 .SH "AUTHOR"
-.PP
 The pdfjam package was written by David Firth and is
 maintained by Reuben Thomas and Markus Kurtz.
