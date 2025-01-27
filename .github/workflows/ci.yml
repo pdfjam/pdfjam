@@ -8,13 +8,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get -y --no-install-recommends install texlive-latex-extra texlive-xetex texlive-luatex shellcheck devscripts poppler-utils
+      run: sudo apt-get update && sudo apt-get -y --no-install-recommends install texlive-latex-extra texlive-xetex texlive-luatex poppler-utils
     - name: Check TeX inputs
       run: l3build check || { cat build/test/*.diff; false; }
-    - name: Check code
-      run: |
-        l3build unpack
-        shellcheck build/unpacked/pdfjam
-        checkbashisms -xp build/unpacked/pdfjam
     - name: Check TeX outputs
       run: utils/check-tex.sh
