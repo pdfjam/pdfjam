@@ -10,7 +10,7 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get -y --no-install-recommends install shellcheck devscripts groff
     - name: Unpack
-      run: l3build unpack
+      run: utils/build.sh N.NN
     - name: Shellcheck
       run: shellcheck build/unpacked/pdfjam
     - name: Check Bash-isms
