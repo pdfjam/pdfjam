@@ -101,7 +101,7 @@ embrace() {
 	value="$1"
 	case "$value" in
 	\{*\}) ;;
-	*,* | *\]*) value="{$value}" ;;
+	*,* | *=* | *\]*) value="{$value}" ;;
 	esac
 	printf %s "$value"
 }
@@ -482,6 +482,15 @@ while test -n "$1$2"; do
 			--shortedge)  ##  legacy
 				otheredge=
 				callOptions="$callOptions --no-otheredge"
+				;;
+			--templatesize)  ##  provide more friendly syntax
+				case "$2" in
+					\{*\}) value="$2" ;;
+					*) value="{${2%%,*}}{${2#*,}}" ;;
+				esac
+				miscOptions="$miscOptions,${1#--}=$value"
+				callOptions="$callOptions ${1} $(enquote "$2")"
+				shift
 				;;
 			--*) ##  miscellaneous options for \includepdfmerge
 				miscOptions="$miscOptions,${1#--}=$(embrace "$2")"
