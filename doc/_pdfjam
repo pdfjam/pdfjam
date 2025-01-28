@@ -1,242 +1,242 @@
 #compdef pdfjam
 
 _pdfjam() {
-  local paperformats=(a0 a1 a2 a3 a4 a5 a6 b0 b1 b2 b3 b4 b5 b6 c0 c1 c2 c3 c4 c5 c6 ansia ansib ansic ansid ansie letter legal executive b0j b1j b2j b3j b4j b5j b6j)
-  local options=(
-    # positional parameters
-    '*:file or pagespec:_files -g \*.\(pdf\|ps\|eps\|jpg\|png\)'
-    # pdfjam options
-    '(- :)'{-h,--help}'[Print help message.]'
-    '(- :)'{-V,--version}'[Print the version number.]'
-    "(- :)--configpath[Print the 'configpath' variable.]"
-    {-q,--quiet}'[Suppress verbose commentary on progress.]'
-    '--batch[Run pdfjam sequentially on each input file in turn, and produce a separate output file for each input.]'
-    {-o,--outfile}'[File or directory name for output(s).]:output:_output'
-    '--suffix[Suffix for output, when file name is not given explicitely.]:string: '
-    '(--no-checkfiles)--checkfiles[Use `file` utility to determine file type.]'
-    '(--checkfiles)--no-checkfiles[Rely on file extension to determine file type.]'
-    '*--preamble[Append code to the LaTeX preamble.]:tex code: '
-    '(--no-keepinfo)--keepinfo[Preserve Title, Author, Subject and Keywords (from the last input PDF) in the output PDF file.]'
-    '(--keepinfo)--no-keepinfo[Do not preserve Title, Author, Subject and Keywords in the output PDF file.]'
-    '--pdftitle[Set Title of the output PDF file.]:string: '
-    '--pdfauthor[Set Author of the output PDF file.]:string: '
-    '--pdfsubject[Set Subject of the output PDF file.]:string: '
-    '--pdfkeywords[Set Keywords of the output PDF file.]:string: '
-    '(--no-otheredge)--otheredge[Rotate every odd page by 180 degrees.]'
-    '(--otheredge)--no-otheredge[Do not rotate every odd page by 180 degrees.]'
-    '(--no-landscape)--landscape[Exchange width and height of paper, usually resulting in landscape.]'
-    '(--landscape)--no-landscape[Keep specified orientation of paper, usually resulting in portrait.]'
-    "(--no-twoside)--twoside[Specify 'twoside' document class option.]"
-    "(--twoside)--no-twoside[Do not specify 'twoside' document class option.]"
-    '--flip-other-edge[For signatures/booklets: flip paper for duplex printing on the other edge.]:bool:(true false)'
-    '--pagecolor[Background color.]:rgb:_pagecolor'
-    '(--builddir --tidy)--no-tidy[Preserve temporary build directory.]'
-    '(--builddir --no-tidy)--tidy[Clean temporary build directory.]'
-    '(--tidy --no-tidy)--builddir[Build directory.]:directory:_files -/'
-    '--latex[LaTeX engine to be used.]:engine:_absolute_command_paths:'
-    '--runs[Run latex N times, for each output document made.]:N: '
-    '--vanilla[Suppress the reading of any pdfjam configuration files.]'
-    '--enc[Command-line encoding.]:encoding:_enc'
-    # \includepdfmerge options
-    '--pages[Select pages to insert.]:pagespec: '
-    '--nup[Put multiple logical pages onto each sheet of paper.]:XxY:_nup'
-    '--landscape[Rotate output sheet format by 90 degrees.]:bool:(true false)'
-    '--delta[Put some horizontal and vertical space between the logical pages.]:Xdim Ydim:_dimens "\\ " "horizontal space,vertical space"'
-    '--offset[Displace the origin of the inserted pages.]:Xdim Ydim:_dimens "\\ " "horizontal displacement,vertical displacement"'
-    '--frame[Put a frame around each logical page.]:bool:(true false)'
-    '--column[Use column-major layout, where successive pages are arranged in columns down the paper.]:bool:(true false)'
-    '--columnstrict[For column-major layout only: Do not balance the columns on the last page.]:bool:(true false)'
-    '--openright[Put an empty page before the first logical page.]:bool:(true false)'
-    '--openrighteach[Put an empty page before the first logical page of each file.]:bool:(true false)'
-    '--pagecommand[Declare LATEX commands, which are executed on each sheet of paper.]:TEX: '
-    '--pagecommand\*[Declare LATEX commands, which are executed on the very first page only.]:TEX: '
-    '--picturecommand[Similar to pagecommand, but executed within a picture environment with base point at the lower left page corner.]:TEX: '
-    '--picturecommand\*[Similar to picturecommand, but for very first page only.]:TEX: '
-    '--turn[Tell PDF viewer to display landscape pages in lanscape orientation. On by default.]:bool:(true false)'
-    '--noautoscale[Suppress automatic scaling of pages.]:bool:(true false)'
-    '--fitpaper[Adjust the paper size to the one of the inserted document.]:bool:(true false)'
-    '--reflect[Reflect included pages.]:bool:(true false)'
-    '(--templatesize)--pagetemplate[Declare page to be used as a template. All other pages are scaled such that they match within its size.]:page number: '
-    '(--pagetemplate)--templatesize[Specify size of page template. All pages are scaled such that they match within this size.]:{Xdim}{Ydim}:_templatesize'
-    '--rotateoversize[Rotate oversized pages.]:bool:(true false)'
-    '--link[Each inserted page becomes the target of the hyperlink ⟨filename⟩.⟨page number⟩.]:bool:(true false)'
-    '--linkname[For link option only: Change the linkname base from ⟨filname⟩ to name.]:name: '
-    '--thread[Combine inserted pages to an article thread.]:bool:(true false)'
-    '--threadname[For thread option only: Change the thread name from ⟨filename⟩ to name.]:name: '
-    '--linkfit[For link option only: Specify, how the viewer displays a linked page.]:destination:_linkfit'
-    '--addtotoc[Add an entry to the table of contents.]:{page number, section, level, heading, label}:_addtotoc'
-    '--addtolist[Add an entry to the list of figures, the list of tables, or any other list.]:{page number, type, heading, label}:_addtolist'
-    '--pagebox[Specify which PDF bounding box specification to read.]:bounding box:(mediabox cropbox bleedbox trimbox artbox)'
-    # \includegraphicx options
-    '--viewport[Consider image to consist of given rectangle only.]:left bottom right top:_dimens "\\ " left,bottom,right,top'
-    '--trim[Similar to viewport, but here the four lengths specify the amount to remove or add to each side.]:left bottom right top:_dimens "\\ " left,bottom,right,top'
-    "--angle[Rotation angle.]:angle:($(seq 0 15 345))"
-    '--origin[Origin for rotation.]:origin:(c l r b t bl br tl tr)'
-    '--width[Required width. The graphic is scaled to this width.]:width:_dimen width'
-    '--height[Required height. The graphic is scaled to this height.]:height:_dimen height'
-    '--totalheight[Required height+depth. Differs from height if rotation has occured.]:height:_dimen height'
-    '--keepaspectratio[Do not distort figure if both width and height are given.]:bool:(true false)'
-    '--scale[Scale factor.]:float: '
-    '--clip[Clip the graphic to the viewport.]:bool:(true false)'
-    '--draft[Switch to draft mode.]:bool:(true false)'
-    '--interpolate[Enable interpolation of bitmap images by the viewer.]:bool:(true false)'
-    # \includepdfmerge groups
-    + '(booklet)'
-      '--signature[Create booklets by rearranging pages into signatures of 2 pages each.]:multiple of 4:_signature'
-      '--signature\*[Similar to signature, but for right-edge binding.]:multiple of 4:_signature'
-      '--booklet[Same as signature with signature size chosen such that all pages fit into one signature.]:bool:(true false)'
-      '--booklet\*[Similar to booklet, but for right-edge binding.]:bool:(true false)'
-    + '(duplicatepages)'
-      '--doublepages[Insert every page twice.]:bool:(true false)'
-      '--doublepagestwist[Insert every page twice: once upside down and once normally.]:bool:(true false)'
-      '--doublepagestwistodd[Insert every page twice: once normally and once upside down.]:bool:(true false)'
-      '--doublepagestwist\*[Insert every page twice: for odd pages, the first copy is upside down; for even pages, the second copy.]:bool:(true false)'
-      '--doublepagestwistodd\*[Insert every page twice: for odd pages, the second copy is upside down; for even pages, the first copy.]:bool:(true false)'
-      '--duplicatepages[Insert every page multiple times.]:number: '
-    # pdfjam paper group
-    + '(paper)'
-      "--paper[Paper size.]:paper name:($paperformats)"
-      "--papersize[Specify a paper size as 'WIDTH,HEIGHT'.]:width,height:_dimens , width,height"
-      --${^paperformats:#b?j}paper
-      --${(M)^paperformats:#b?j}
-  )
-  _arguments -S $options
+	local paperformats=(a0 a1 a2 a3 a4 a5 a6 b0 b1 b2 b3 b4 b5 b6 c0 c1 c2 c3 c4 c5 c6 ansia ansib ansic ansid ansie letter legal executive b0j b1j b2j b3j b4j b5j b6j)
+	local options=(
+		# positional parameters
+		'*:file or pagespec:_files -g \*.\(pdf\|ps\|eps\|jpg\|png\)'
+		# pdfjam options
+		'(- :)'{-h,--help}'[Print help message.]'
+		'(- :)'{-V,--version}'[Print the version number.]'
+		"(- :)--configpath[Print the 'configpath' variable.]"
+		{-q,--quiet}'[Suppress verbose commentary on progress.]'
+		'--batch[Run pdfjam sequentially on each input file in turn, and produce a separate output file for each input.]'
+		{-o,--outfile}'[File or directory name for output(s).]:output:_output'
+		'--suffix[Suffix for output, when file name is not given explicitely.]:string: '
+		'(--no-checkfiles)--checkfiles[Use `file` utility to determine file type.]'
+		'(--checkfiles)--no-checkfiles[Rely on file extension to determine file type.]'
+		'*--preamble[Append code to the LaTeX preamble.]:tex code: '
+		'(--no-keepinfo)--keepinfo[Preserve Title, Author, Subject and Keywords (from the last input PDF) in the output PDF file.]'
+		'(--keepinfo)--no-keepinfo[Do not preserve Title, Author, Subject and Keywords in the output PDF file.]'
+		'--pdftitle[Set Title of the output PDF file.]:string: '
+		'--pdfauthor[Set Author of the output PDF file.]:string: '
+		'--pdfsubject[Set Subject of the output PDF file.]:string: '
+		'--pdfkeywords[Set Keywords of the output PDF file.]:string: '
+		'(--no-otheredge)--otheredge[Rotate every odd page by 180 degrees.]'
+		'(--otheredge)--no-otheredge[Do not rotate every odd page by 180 degrees.]'
+		'(--no-landscape)--landscape[Exchange width and height of paper, usually resulting in landscape.]'
+		'(--landscape)--no-landscape[Keep specified orientation of paper, usually resulting in portrait.]'
+		"(--no-twoside)--twoside[Specify 'twoside' document class option.]"
+		"(--twoside)--no-twoside[Do not specify 'twoside' document class option.]"
+		'--flip-other-edge[For signatures/booklets: flip paper for duplex printing on the other edge.]:bool:(true false)'
+		'--pagecolor[Background color.]:rgb:_pagecolor'
+		'(--builddir --tidy)--no-tidy[Preserve temporary build directory.]'
+		'(--builddir --no-tidy)--tidy[Clean temporary build directory.]'
+		'(--tidy --no-tidy)--builddir[Build directory.]:directory:_files -/'
+		'--latex[LaTeX engine to be used.]:engine:_absolute_command_paths:'
+		'--runs[Run latex N times, for each output document made.]:N: '
+		'--vanilla[Suppress the reading of any pdfjam configuration files.]'
+		'--enc[Command-line encoding.]:encoding:_enc'
+		# \includepdfmerge options
+		'--pages[Select pages to insert.]:pagespec: '
+		'--nup[Put multiple logical pages onto each sheet of paper.]:XxY:_nup'
+		'--landscape[Rotate output sheet format by 90 degrees.]:bool:(true false)'
+		'--delta[Put some horizontal and vertical space between the logical pages.]:Xdim Ydim:_dimens "\\ " "horizontal space,vertical space"'
+		'--offset[Displace the origin of the inserted pages.]:Xdim Ydim:_dimens "\\ " "horizontal displacement,vertical displacement"'
+		'--frame[Put a frame around each logical page.]:bool:(true false)'
+		'--column[Use column-major layout, where successive pages are arranged in columns down the paper.]:bool:(true false)'
+		'--columnstrict[For column-major layout only: Do not balance the columns on the last page.]:bool:(true false)'
+		'--openright[Put an empty page before the first logical page.]:bool:(true false)'
+		'--openrighteach[Put an empty page before the first logical page of each file.]:bool:(true false)'
+		'--pagecommand[Declare LATEX commands, which are executed on each sheet of paper.]:TEX: '
+		'--pagecommand\*[Declare LATEX commands, which are executed on the very first page only.]:TEX: '
+		'--picturecommand[Similar to pagecommand, but executed within a picture environment with base point at the lower left page corner.]:TEX: '
+		'--picturecommand\*[Similar to picturecommand, but for very first page only.]:TEX: '
+		'--turn[Tell PDF viewer to display landscape pages in lanscape orientation. On by default.]:bool:(true false)'
+		'--noautoscale[Suppress automatic scaling of pages.]:bool:(true false)'
+		'--fitpaper[Adjust the paper size to the one of the inserted document.]:bool:(true false)'
+		'--reflect[Reflect included pages.]:bool:(true false)'
+		'(--templatesize)--pagetemplate[Declare page to be used as a template. All other pages are scaled such that they match within its size.]:page number: '
+		'(--pagetemplate)--templatesize[Specify size of page template. All pages are scaled such that they match within this size.]:{Xdim}{Ydim}:_templatesize'
+		'--rotateoversize[Rotate oversized pages.]:bool:(true false)'
+		'--link[Each inserted page becomes the target of the hyperlink ⟨filename⟩.⟨page number⟩.]:bool:(true false)'
+		'--linkname[For link option only: Change the linkname base from ⟨filname⟩ to name.]:name: '
+		'--thread[Combine inserted pages to an article thread.]:bool:(true false)'
+		'--threadname[For thread option only: Change the thread name from ⟨filename⟩ to name.]:name: '
+		'--linkfit[For link option only: Specify, how the viewer displays a linked page.]:destination:_linkfit'
+		'--addtotoc[Add an entry to the table of contents.]:{page number, section, level, heading, label}:_addtotoc'
+		'--addtolist[Add an entry to the list of figures, the list of tables, or any other list.]:{page number, type, heading, label}:_addtolist'
+		'--pagebox[Specify which PDF bounding box specification to read.]:bounding box:(mediabox cropbox bleedbox trimbox artbox)'
+		# \includegraphicx options
+		'--viewport[Consider image to consist of given rectangle only.]:left bottom right top:_dimens "\\ " left,bottom,right,top'
+		'--trim[Similar to viewport, but here the four lengths specify the amount to remove or add to each side.]:left bottom right top:_dimens "\\ " left,bottom,right,top'
+		"--angle[Rotation angle.]:angle:($(seq 0 15 345))"
+		'--origin[Origin for rotation.]:origin:(c l r b t bl br tl tr)'
+		'--width[Required width. The graphic is scaled to this width.]:width:_dimen width'
+		'--height[Required height. The graphic is scaled to this height.]:height:_dimen height'
+		'--totalheight[Required height+depth. Differs from height if rotation has occured.]:height:_dimen height'
+		'--keepaspectratio[Do not distort figure if both width and height are given.]:bool:(true false)'
+		'--scale[Scale factor.]:float: '
+		'--clip[Clip the graphic to the viewport.]:bool:(true false)'
+		'--draft[Switch to draft mode.]:bool:(true false)'
+		'--interpolate[Enable interpolation of bitmap images by the viewer.]:bool:(true false)'
+		# \includepdfmerge groups
+		+ '(booklet)'
+			'--signature[Create booklets by rearranging pages into signatures of 2 pages each.]:multiple of 4:_signature'
+			'--signature\*[Similar to signature, but for right-edge binding.]:multiple of 4:_signature'
+			'--booklet[Same as signature with signature size chosen such that all pages fit into one signature.]:bool:(true false)'
+			'--booklet\*[Similar to booklet, but for right-edge binding.]:bool:(true false)'
+		+ '(duplicatepages)'
+			'--doublepages[Insert every page twice.]:bool:(true false)'
+			'--doublepagestwist[Insert every page twice: once upside down and once normally.]:bool:(true false)'
+			'--doublepagestwistodd[Insert every page twice: once normally and once upside down.]:bool:(true false)'
+			'--doublepagestwist\*[Insert every page twice: for odd pages, the first copy is upside down; for even pages, the second copy.]:bool:(true false)'
+			'--doublepagestwistodd\*[Insert every page twice: for odd pages, the second copy is upside down; for even pages, the first copy.]:bool:(true false)'
+			'--duplicatepages[Insert every page multiple times.]:number: '
+		# pdfjam paper group
+		+ '(paper)'
+			"--paper[Paper size.]:paper name:($paperformats)"
+			"--papersize[Specify a paper size as 'WIDTH,HEIGHT'.]:width,height:_dimens , width,height"
+			--${^paperformats:#b?j}paper
+			--${(M)^paperformats:#b?j}
+	)
+	_arguments -S $options
 }
 
 _output() {
-  _alternative 'file:pdf:_files -g \*.pdf' 'directory:path:_files -/'
+	_alternative 'file:pdf:_files -g \*.pdf' 'directory:path:_files -/'
 }
 
 _dimen() {
-  local units=(
-    ':bp:point (1/72 in)'
-    'pt:point (1/72.27 in)'
-    mm:millimeter
-    cm:centimeter
-    'in:inch (2.54 cm)'
-    'sp:scaled point (1/65536 pt)'
-    'pc:pica (12 pt)'
-    'dd:Didot point (1.07 pt)'
-    'cc:Cicero (12 dd)'
-    'ex:x-height (height of lowercase x)'
-    'em:font size (height of capital M)'
-  )
-  _numbers -f -u bp "$@" $units
+	local units=(
+		':bp:point (1/72 in)'
+		'pt:point (1/72.27 in)'
+		mm:millimeter
+		cm:centimeter
+		'in:inch (2.54 cm)'
+		'sp:scaled point (1/65536 pt)'
+		'pc:pica (12 pt)'
+		'dd:Didot point (1.07 pt)'
+		'cc:Cicero (12 dd)'
+		'ex:x-height (height of lowercase x)'
+		'em:font size (height of capital M)'
+	)
+	_numbers -f -u bp "$@" $units
 }
 
 _dimens() {
-  local sep="$argv[-2]"
-  typeset -a names=("${(s:,:)argv[-1]}")
-  typeset -i i=$#names
-  shift -p 2
-  while ((--i)); do compset -P $i "*$sep" && break; done
-  ((++i))
-  [[ $i = $#names ]] || argv+=(-S "$sep")
-  _dimen "$@" "$names[$i]"
+	local sep="$argv[-2]"
+	typeset -a names=("${(s:,:)argv[-1]}")
+	typeset -i i=$#names
+	shift -p 2
+	while ((--i)); do compset -P $i "*$sep" && break; done
+	((++i))
+	[[ $i = $#names ]] || argv+=(-S "$sep")
+	_dimen "$@" "$names[$i]"
 }
 
 _nup() {
-  setopt extendedglob
-  case "$PREFIX" in
-    [0-9]##x[0-9]#) compset -P '*x'; _numbers -l 1 "$@" vertical ;;
-    [0-9]##) compset -P '*'; _numbers -l 1 "$@" horizontal; compadd "$@" -S '' x ;;
-    [0-9]#) _numbers -l 1 "$@" horizontal ;;
-    *) return 1 ;;
-  esac
+	setopt extendedglob
+	case "$PREFIX" in
+		[0-9]##x[0-9]#) compset -P '*x'; _numbers -l 1 "$@" vertical ;;
+		[0-9]##) compset -P '*'; _numbers -l 1 "$@" horizontal; compadd "$@" -S '' x ;;
+		[0-9]#) _numbers -l 1 "$@" horizontal ;;
+		*) return 1 ;;
+	esac
 }
 
 _signature() {
-  _description -x multiple expl 'signature size'
-  compadd "$expl[@]" -o nosort $(seq 4 4 96)
+	_description -x multiple expl 'signature size'
+	compadd "$expl[@]" -o nosort $(seq 4 4 96)
 }
 
 _pagecolor() {
-  if compset -P 3 '*,'; then return 1
-  elif compset -P 2 '*,'; then
-    _numbers -l 0 -m 255 "$@" blue
-  elif compset -P 1 '*,'; then
-    _numbers -l 0 -m 255 "$@" green
-  else
-    _numbers -l 0 -m 255 "$@" red
-  fi
+	if compset -P 3 '*,'; then return 1
+	elif compset -P 2 '*,'; then
+		_numbers -l 0 -m 255 "$@" blue
+	elif compset -P 1 '*,'; then
+		_numbers -l 0 -m 255 "$@" green
+	else
+		_numbers -l 0 -m 255 "$@" red
+	fi
 }
 
 _linkfit() {
-  local expl tag
-  if compset -P 1 '*\ '; then
-    _numbers 'distance in points (1/72 in)'
-  else
-    compadd "$@" Fit FitB Region
-    compadd -S '\ ' "$@" FotV FotBH FitBV
-  fi
+	local expl tag
+	if compset -P 1 '*\ '; then
+		_numbers 'distance in points (1/72 in)'
+	else
+		compadd "$@" Fit FitB Region
+		compadd -S '\ ' "$@" FotV FotBH FitBV
+	fi
 }
 
 _templatesize() {
-  if compset -P 1 '*}\{'; then
-    _dimen -t -S '\}'
-  elif compset -P 1 '*}{'; then
-    _dimen -S '}'
-  elif compset -P 1 '*\{'; then
-    _dimen -S '\}\{'
-  elif compset -P 1 '*{'; then
-    _dimen -S '}\{'
-  else
-    compadd -S '\{' ''
-  fi
+	if compset -P 1 '*}\{'; then
+		_dimen -t -S '\}'
+	elif compset -P 1 '*}{'; then
+		_dimen -S '}'
+	elif compset -P 1 '*\{'; then
+		_dimen -S '\}\{'
+	elif compset -P 1 '*{'; then
+		_dimen -S '}\{'
+	else
+		compadd -S '\{' ''
+	fi
 }
 
 _addtotoc() { # {page number, section, level, heading, label}
-  local close expl
-  if compset -P '*\{'; then close='\}'
-  elif compset -P '*{'; then close='}'
-  else compadd -S '\{' ''; return
-  fi
-  if ! compset -P 1 '*,'; then
-    compset -P '*'
-    _description -x string expl 'page number' && compadd "$expl[@]"
-    _description -x separator expl comma && compadd "$expl[@]" ,
-  elif ! compset -P 2 '*,'; then
-    _alternative 'level:level:(part,0, section,1, subsection,2, subsubsection,3,)'
-  elif ! compset -P 1 '*,'; then
-    compset -P '*'
-    _description -x string expl heading && compadd "$expl[@]"
-    _description -x separator expl comma && compadd "$expl[@]" ,
-  elif ! compset -P 1 '*,' && ! compset -P "*$close"; then
-    _description -x string expl 'LaTeX label' && compadd "$expl[@]"
-    _description -x delimiter expl brace && compadd -Q "$expl[@]" - "$close"
-  fi
+	local close expl
+	if compset -P '*\{'; then close='\}'
+	elif compset -P '*{'; then close='}'
+	else compadd -S '\{' ''; return
+	fi
+	if ! compset -P 1 '*,'; then
+		compset -P '*'
+		_description -x string expl 'page number' && compadd "$expl[@]"
+		_description -x separator expl comma && compadd "$expl[@]" ,
+	elif ! compset -P 2 '*,'; then
+		_alternative 'level:level:(part,0, section,1, subsection,2, subsubsection,3,)'
+	elif ! compset -P 1 '*,'; then
+		compset -P '*'
+		_description -x string expl heading && compadd "$expl[@]"
+		_description -x separator expl comma && compadd "$expl[@]" ,
+	elif ! compset -P 1 '*,' && ! compset -P "*$close"; then
+		_description -x string expl 'LaTeX label' && compadd "$expl[@]"
+		_description -x delimiter expl brace && compadd -Q "$expl[@]" - "$close"
+	fi
 }
 
 _addtolist() { # {page number, type, heading, label}
-  local close
-  if compset -P '*\{'; then close='\}'
-  elif compset -P '*{'; then close='}'
-  else compadd -S '\{' ''; return
-  fi
-  if ! compset -P 1 '*,'; then
-    compset -P '*'
-    _description -x string expl 'page number' && compadd "$expl[@]"
-    _description -x separator expl comma && compadd "$expl[@]" ,
-  elif ! compset -P 1 '*,'; then
-    _alternative 'type:type:(figure, table,)'
-  elif ! compset -P 1 '*,'; then
-    compset -P '*'
-    _description -x string expl heading && compadd "$expl[@]"
-    _description -x separator expl comma && compadd "$expl[@]" ,
-  elif ! compset -P 1 '*,' && ! compset -P "*$close"; then
-    _description -x string expl 'LaTeX label' && compadd "$expl[@]"
-    _description -x delimiter expl brace && compadd -Q "$expl[@]" - "$close"
-  fi
+	local close
+	if compset -P '*\{'; then close='\}'
+	elif compset -P '*{'; then close='}'
+	else compadd -S '\{' ''; return
+	fi
+	if ! compset -P 1 '*,'; then
+		compset -P '*'
+		_description -x string expl 'page number' && compadd "$expl[@]"
+		_description -x separator expl comma && compadd "$expl[@]" ,
+	elif ! compset -P 1 '*,'; then
+		_alternative 'type:type:(figure, table,)'
+	elif ! compset -P 1 '*,'; then
+		compset -P '*'
+		_description -x string expl heading && compadd "$expl[@]"
+		_description -x separator expl comma && compadd "$expl[@]" ,
+	elif ! compset -P 1 '*,' && ! compset -P "*$close"; then
+		_description -x string expl 'LaTeX label' && compadd "$expl[@]"
+		_description -x delimiter expl brace && compadd -Q "$expl[@]" - "$close"
+	fi
 }
 
 _enc() {
-  local enc=$(iconv -l)
-  enc=${(@q)${(ou)${${(f)enc}%//}}}
-  _alternative "encoding:code set:($enc)"
+	local enc=$(iconv -l)
+	enc=${(@q)${(ou)${${(f)enc}%//}}}
+	_alternative "encoding:code set:($enc)"
 }
 
 if [[ $zsh_eval_context[-1] == loadautofunc ]]; then
-  _pdfjam "$@"
+	_pdfjam "$@"
 else
-  compdef _pdfjam pdfjam
+	compdef _pdfjam pdfjam
 fi
