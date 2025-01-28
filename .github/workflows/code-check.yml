@@ -12,8 +12,8 @@ jobs:
     - name: Unpack
       run: utils/build.sh N.NN
     - name: Shellcheck
-      run: shellcheck build/unpacked/pdfjam
+      run: shellcheck build/pdfjam/bin/pdfjam
     - name: Check Bash-isms
-      run: checkbashisms -xp build/unpacked/pdfjam
+      run: checkbashisms -xp build/pdfjam/bin/pdfjam
     - name: Check man page
-      run: groff -mandoc -t -K utf8 -rF0 -rHY=0 -rCHECKSTYLE=10 -ww -z pdfjam.1
+      run: groff -mandoc -t -K utf8 -rF0 -rHY=0 -rCHECKSTYLE=10 -ww -z build/pdfjam/man/pdfjam.1
