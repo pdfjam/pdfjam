@@ -514,18 +514,15 @@ while test -n "$1$2"; do
 		*) ##  All other args should be PDF (or JPG/PNG)
 			##  source files and page selections; if not, we'll quit
 			if test -n "$checkfiles"; then ## not always available
-				case $(file -Lb -- "$1") in
-				"PDF document"* | "JPEG image data"* | "PNG image"*)
-					##  it's a PDF file (or JPG/PNG) as expected
+				case "$(file -Lb -- "$1")" in
+				"PDF document"* | "JPEG image data"* | "PNG image"* | "Postscript document"*)
 					fileSpec="$fileSpec$newline$1|awaited"
 					pageSpecAwaited=true
 					;;
 				*)
-					case ${1} in
-					*.[pP][dD][fF] | *.[jJ][pP][eE][gG] | \
-						*.[jJ][pP][gG] | *.[pP][nN][gG])
-						## should be PDF/JPG/PNG file, but isn't
-						error_exit "no PDF/JPG/PNG file found at ${1}" \
+					case "$1" in
+					*.*)
+						error_exit "no proper PDF/PS/EPS/JPG/PNG file found at ${1}" \
 							$E_NOINPUT
 						;;
 					*) ##  if page spec needed, assume this is it;
@@ -536,22 +533,27 @@ while test -n "$1$2"; do
 								| sed "s/|awaited/|${escapedFilePath}/g")
 							pageSpecAwaited=false
 						else
-							error_exit "no PDF/JPG/PNG file found at ${1}" \
+							error_exit "no PDF/PS/EPS/JPG/PNG file found at ${1}" \
 								$E_NOINPUT
 						fi
 						;;
 					esac
 					;;
 				esac
-			else ## no checking of file contents; rely on .pdf extension
-				case ${1} in
-				*.[pP][dD][fF] | *.[jJ][pP][eE][gG] | \
-					*.[jJ][pP][gG] | *.[pP][nN][gG])
-					## assume it's a PDF/JPG/PNG file
-					test -f "${1}" || error_exit \
-						"${1} not found" $E_NOINPUT
-					fileSpec="$fileSpec"$newline${1}"|"awaited
-					pageSpecAwaited=true
+			else ## no checking of file contents; rely on file extension
+				case "$1" in
+				*.*)
+					case "$(printf %s "${1##*.}" | tr A-Z a-z)" in
+					pdf|jpg|jpeg|png|ps|eps)
+						test -f "$1" && test -r "$1" || error_exit \
+							"Cannot find and read '$1'." $E_NOINPUT
+						fileSpec="$fileSpec"$newline${1}"|"awaited
+						pageSpecAwaited=true
+						;;
+					*) error_exit "no PDF/PS/EPS/JPG/PNG file found at $1" \
+						$E_NOINPUT
+						;;
+					esac
 					;;
 				*) ##  if page spec needed, assume this is it;
 					##  otherwise something is wrong

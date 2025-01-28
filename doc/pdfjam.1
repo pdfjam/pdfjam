@@ -5,7 +5,7 @@ pdfjam \- A shell script for manipulating PDF files
 .B pdfjam
 [\fI\,options\/\fR] [\fI\,--\/\fR] [\fI\,file\/\fR[\fI\,pages\/\fR]]...
 .SH "DESCRIPTION"
-pdfjam assembles a list of documents (pdf, jpg or png) into a single pdf.
+pdfjam assembles a list of documents (pdf, ps, jpg or png) into a single pdf.
 It allows to rotate, scale, reorder and combine pages freely
 using the power of the 'pdfpages' and 'graphicx' LaTeX packages.
 .PP
@@ -74,7 +74,7 @@ If the Unix 'file' utility is available, the output of 'file \fB\-Lb\fR FILE1'
 should be 'PDF document...' where '...' gives version information.  If this is
 the case on your system you should use \fB\-\-checkfiles\fR; otherwise use
 \fB\-\-no\-checkfiles\fR, in which case all input files must have the correct
-extensions (.pdf, .PDF, .jpg, .JPG, .png or .PNG).
+extensions (.pdf, .ps, .eps .jpg, .jpeg, .png, or their uppercase variants).
 .TP
 \fB\-\-latex\fR pathtolatex
 Specify the LaTeX engine to be used (one of pdflatex,
