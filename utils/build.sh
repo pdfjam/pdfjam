@@ -8,7 +8,7 @@ version="$1"
 
 rm -fr build/unpacked "$target"
 mkdir -p build/local "$target/bin" "$target/man" build/unpacked build/release
-cp COPYING pdfjam.conf README.md "$target"
+cp COPYING doc/pdfjam.conf README.md "$target"
 <doc/pdfjam.1 sed "1s/N\\.NN/${version}/"'
 s+$repository+https://github.com/pdfjam/pdfjam+' >"$target/man/pdfjam.1"
 
