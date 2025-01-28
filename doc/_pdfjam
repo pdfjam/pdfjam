@@ -34,7 +34,7 @@ _pdfjam() {
 		'(--builddir --no-tidy)--tidy[Clean temporary build directory.]'
 		'(--tidy --no-tidy)--builddir[Build directory.]:directory:_files -/'
 		'--latex[LaTeX engine to be used.]:engine:_absolute_command_paths:'
-		'--runs[Run latex N times, for each output document made.]:N: '
+		'--runs[Run latex N times, for each output document made.]:number of runs:_numbers -l 1 "number of runs"'
 		'--vanilla[Suppress the reading of any pdfjam configuration files.]'
 		'--enc[Command-line encoding.]:encoding:_enc'
 		# \includepdfmerge options
@@ -57,20 +57,20 @@ _pdfjam() {
 		'--fitpaper[Adjust the paper size to the one of the inserted document.]:bool:(true false)'
 		'--reflect[Reflect included pages.]:bool:(true false)'
 		'(--templatesize)--pagetemplate[Declare page to be used as a template. All other pages are scaled such that they match within its size.]:page number: '
-		'(--pagetemplate)--templatesize[Specify size of page template. All pages are scaled such that they match within this size.]:{Xdim}{Ydim}:_templatesize'
+		'(--pagetemplate)--templatesize[Specify size of page template. All pages are scaled such that they match within this size.]:{Xdim}{Ydim}:_dimens , width,height'
 		'--rotateoversize[Rotate oversized pages.]:bool:(true false)'
 		'--link[Each inserted page becomes the target of the hyperlink ⟨filename⟩.⟨page number⟩.]:bool:(true false)'
 		'--linkname[For link option only: Change the linkname base from ⟨filname⟩ to name.]:name: '
 		'--thread[Combine inserted pages to an article thread.]:bool:(true false)'
 		'--threadname[For thread option only: Change the thread name from ⟨filename⟩ to name.]:name: '
 		'--linkfit[For link option only: Specify, how the viewer displays a linked page.]:destination:_linkfit'
-		'--addtotoc[Add an entry to the table of contents.]:{page number, section, level, heading, label}:_addtotoc'
-		'--addtolist[Add an entry to the list of figures, the list of tables, or any other list.]:{page number, type, heading, label}:_addtolist'
+		'--addtotoc[Add an entry to the table of contents.]:page number, section, level, heading, label:_addtotoc'
+		'--addtolist[Add an entry to the list of figures, the list of tables, or any other list.]:page number, type, heading, label:_addtolist'
 		'--pagebox[Specify which PDF bounding box specification to read.]:bounding box:(mediabox cropbox bleedbox trimbox artbox)'
 		# \includegraphicx options
 		'--viewport[Consider image to consist of given rectangle only.]:left bottom right top:_dimens "\\ " left,bottom,right,top'
 		'--trim[Similar to viewport, but here the four lengths specify the amount to remove or add to each side.]:left bottom right top:_dimens "\\ " left,bottom,right,top'
-		"--angle[Rotation angle.]:angle:($(seq 0 15 345))"
+		'--angle[Rotation angle.]:angle:compadd -o nosort $(seq 0 15 345)'
 		'--origin[Origin for rotation.]:origin:(c l r b t bl br tl tr)'
 		'--width[Required width. The graphic is scaled to this width.]:width:_dimen width'
 		'--height[Required height. The graphic is scaled to this height.]:height:_dimen height'
@@ -82,8 +82,8 @@ _pdfjam() {
 		'--interpolate[Enable interpolation of bitmap images by the viewer.]:bool:(true false)'
 		# \includepdfmerge groups
 		+ '(booklet)'
-			'--signature[Create booklets by rearranging pages into signatures of 2 pages each.]:multiple of 4:_signature'
-			'--signature\*[Similar to signature, but for right-edge binding.]:multiple of 4:_signature'
+			'--signature[Create booklets by rearranging pages into signatures of 2 pages each.]:signature size:compadd -o nosort $(seq 4 4 96)'
+			'--signature\*[Similar to signature, but for right-edge binding.]:signature size:compadd -o nosort $(seq 4 4 96)'
 			'--booklet[Same as signature with signature size chosen such that all pages fit into one signature.]:bool:(true false)'
 			'--booklet\*[Similar to booklet, but for right-edge binding.]:bool:(true false)'
 		+ '(duplicatepages)'
@@ -145,11 +145,6 @@ _nup() {
 	esac
 }
 
-_signature() {
-	_description -x multiple expl 'signature size'
-	compadd "$expl[@]" -o nosort $(seq 4 4 96)
-}
-
 _pagecolor() {
 	if compset -P 3 '*,'; then return 1
 	elif compset -P 2 '*,'; then
@@ -171,25 +166,10 @@ _linkfit() {
 	fi
 }
 
-_templatesize() {
-	if compset -P 1 '*}\{'; then
-		_dimen -t -S '\}'
-	elif compset -P 1 '*}{'; then
-		_dimen -S '}'
-	elif compset -P 1 '*\{'; then
-		_dimen -S '\}\{'
-	elif compset -P 1 '*{'; then
-		_dimen -S '}\{'
-	else
-		compadd -S '\{' ''
-	fi
-}
-
 _addtotoc() { # {page number, section, level, heading, label}
 	local close expl
 	if compset -P '*\{'; then close='\}'
 	elif compset -P '*{'; then close='}'
-	else compadd -S '\{' ''; return
 	fi
 	if ! compset -P 1 '*,'; then
 		compset -P '*'
@@ -203,7 +183,7 @@ _addtotoc() { # {page number, section, level, heading, label}
 		_description -x separator expl comma && compadd "$expl[@]" ,
 	elif ! compset -P 1 '*,' && ! compset -P "*$close"; then
 		_description -x string expl 'LaTeX label' && compadd "$expl[@]"
-		_description -x delimiter expl brace && compadd -Q "$expl[@]" - "$close"
+		[[ -n "$close" ]] && _description -x delimiter expl brace && compadd -Q "$expl[@]" - "$close"
 	fi
 }
 
@@ -211,7 +191,6 @@ _addtolist() { # {page number, type, heading, label}
 	local close
 	if compset -P '*\{'; then close='\}'
 	elif compset -P '*{'; then close='}'
-	else compadd -S '\{' ''; return
 	fi
 	if ! compset -P 1 '*,'; then
 		compset -P '*'
@@ -225,7 +204,7 @@ _addtolist() { # {page number, type, heading, label}
 		_description -x separator expl comma && compadd "$expl[@]" ,
 	elif ! compset -P 1 '*,' && ! compset -P "*$close"; then
 		_description -x string expl 'LaTeX label' && compadd "$expl[@]"
-		_description -x delimiter expl brace && compadd -Q "$expl[@]" - "$close"
+		[[ -n "$close" ]] && _description -x delimiter expl brace && compadd -Q "$expl[@]" - "$close"
 	fi
 }
 
