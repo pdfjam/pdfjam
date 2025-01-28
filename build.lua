@@ -24,7 +24,7 @@ testdir = builddir .. "/test"
 -- used for l3build install
 installfiles = {"pdfjam"} -- also used by l3build check
 scriptfiles = {"pdfjam"}
-scriptmanfiles = {"pdfjam.1"}
+scriptmanfiles = {"doc/pdfjam.1"}
 textfiles = {"COPYING", "README.md"}
 
 ---- Test setup

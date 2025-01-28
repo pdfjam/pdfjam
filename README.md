@@ -122,7 +122,7 @@ that might change, so users are referred to the current
 
 In case you want to look at the `pdfjam --help` text template online, for example
 before you decide whether to install **pdfjam**, the source is available at
-<https://github.com/pdfjam/pdfjam/blob/master/pdfjam-help.txt>.
+<https://github.com/pdfjam/pdfjam/blob/master/doc/pdfjam-help.txt>.
 
 There is also a (very basic) `man` page, accessed in the usual way
 (after installation) by
@@ -174,13 +174,12 @@ temporary files, or a specific paper size for output PDFs ---
 or some other reason.
 
 The file
-[pdfjam.conf](https://github.com/pdfjam/pdfjam/raw/master/pdfjam.conf)
+[pdfjam.conf](https://github.com/pdfjam/pdfjam/raw/master/doc/pdfjam.conf)
 is a sample configuration file which can be edited as needed.  After editing,
-either install the file for site-wide use (at `/etc/pdfjam.conf`,
-`/usr/share/etc/pdfjam.conf`, `/usr/local/share/pdfjam.conf`, or
-`/usr/local/etc/pdfjam.conf`) or as a user-defaults file at `~/.pdfjam.conf`.
-User settings made at `~/.pdfjam.conf` override corresponding settings made
-in a site-wide configuration file.
+either install the file for site-wide use (e.g. at `/etc/pdfjam.conf`) or as a
+user-defaults file at `~/.pdfjam.conf` or `~/.config/pdfjam.conf`.  User
+settings override corresponding settings made in a site-wide configuration
+file.
 
 For example, if you prefer to use `/usr/bin/xelatex` as your default LaTeX engine
 (in place of the standard `pdflatex`), and you want your output page size to be
@@ -205,10 +204,10 @@ pdfjam --help
 ```
 
 On some systems it might even be necessary to change the list of places
-(i.e., `/etc/pdfjam.conf` and others as listed above) that is searched for
-site-wide configuration files.  This can only be done by editing the
-`pdfjam` script itself.  To see which directories on _your_ system are
-searched for a file named `pdfjam.conf`, look at the output of
+(i.e., `/etc/pdfjam.conf` and others) that is searched for site-wide
+configuration files.  This can only be done by editing the `pdfjam` script
+itself.  To see which directories on _your_ system are searched for a file
+named `pdfjam.conf`, look at the output of
 
 ```
 pdfjam --configpath

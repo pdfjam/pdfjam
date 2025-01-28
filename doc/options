@@ -1,0 +1,92 @@
+PDFPAGES
+!page PAGESPEC; Alias for pages.
+pages PAGESPEC; Select pages to insert.
+nup XxY; Put multiple logical pages onto each sheet of paper.
+landscape BOOL; Rotate output sheet format by 90 degrees.
+!deltax DIM; Set X part of delta.
+!deltay DIM; Set Y part of delta.
+delta Xdim Ydim; Put some horizontal and vertical space between the logical pages.
+offset Xdim Ydim; Displace the origin of the inserted pages.
+frame BOOL; Put a frame around each logical page.
+column BOOL; Use column-major layout, where successive pages are arranged in columns down the paper.
+columnstrict BOOL; For column-major layout only: Do not balance the columns on the last page.
+openright BOOL; Put an empty page before the first logical page.
+openrighteach BOOL; Put an empty page before the first logical page of each file.
+pagecommand TEX; Declare LATEX commands, which are executed on each sheet of paper.
+pagecommand* TEX; Declare LATEX commands, which are executed on the very first page only.
+picturecommand TEX; Similar to pagecommand, but executed within a picture environment with base point at the lower left page corner.
+picturecommand* TEX; Similar to picturecommand, but for very first page only.
+turn BOOL; Tell PDF viewer to display landscape pages in lanscape orientation. On by default.
+noautoscale BOOL; Suppress automatic scaling of pages.
+fitpaper BOOL; Adjust the paper size to the one of the inserted document.
+reflect BOOL; Reflect included pages.
+!reflect* BOOL; ?
+signature NUM4; Create booklets by rearranging pages into signatures of 2 pages each.
+signature* NUM4; Similar to signature, but for right-edge binding.
+booklet BOOL; Same as signature with signature size chosen such that all pages fit into one signature.
+booklet* BOOL; Similar to booklet, but for right-edge binding.
+flip-other-edge BOOL; Only for signature[*] and booklet[*]: Flip paper for duplex printing on the other edge.
+pagetemplate PAGENUMBER; Declare page to be used as a template. All other pages are scaled such that they match within its size.
+templatesize {Xdim}{Ydim}; Specify size of page template. All pages are scaled such that they match within this size.
+rotateoversize BOOL; Rotate oversized pages.
+doublepages BOOL; Insert every page twice.
+doublepagestwist BOOL; Insert every page twice: once upside down and once normally.
+doublepagestwistodd BOOL; Insert every page twice: once normally and once upside down.
+doublepagestwist* BOOL; Insert every page twice: for odd pages, the first copy is upside down; for even pages, the second copy.
+doublepagestwistodd* BOOL; Insert every page twice: for odd pages, the second copy is upside down; for even pages, the first copy.
+duplicatepages NUM; Insert every page NUM times.
+!lastpage NUM; DVI mode only: Specify the number of pages.
+link BOOL; Each inserted page becomes the target of the hyperlink ⟨filename⟩.⟨page number⟩.
+linkname NAME; For link option only: Change the linkname base from ⟨filname⟩ to NAME.
+thread BOOL; Combine inserted pages to an article thread.
+threadname NAME; For thread option only: Change the thread name from ⟨filename⟩ to NAME.
+linkfit (Fit|FitH ⟨top⟩|FitV ⟨left⟩|FitB|FitBH ⟨top⟩|FitBV ⟨left⟩|Region); For link option only: Specify, how the viewer displays a linked page.
+!linktodoc BOOL; Turn the inserted pages into hyperlinks to the document from which they were extracted.
+!linktodocfit (/Fit|/FitH ⟨top⟩|/FitV ⟨left⟩|/FitB|/FitBH ⟨top⟩|/FitBV ⟨left⟩|/FitR ⟨...⟩|/XYZ ⟨...⟩); For linktodoc option only: Specify, how the viewer displays a linked page.
+!newwindow BOOL; For linktodoc option only: Open linked files in new window. On by default.
+!linkfilename PATH; Set the name of the file to be linked to by the option linktodoc.
+addtotoc {PAGE NUMBER, SECTION, LEVEL, HEADING, LABEL}; Add an entry to the table of contents.
+addtolist {PAGE NUMBER, TYPE, HEADING, LABEL}; Add an entry to the list of figures, the list of tables, or any other list.
+!survey BOOL; See doc, would need extra support by pdfjam.
+!survey-nolink BOOL; Similar to survey.
+!xr-prefix NAME; Used by survey.
+
+GRAPHICX
+!bb 'LEFT BOTTOM RIGHT TOP'; Correct the 'Bounding Box' of the printed region within the eps file.
+!bbllx LEFT
+!bblly BOTTOM
+!bburx RIGHT
+!bbury TOP
+!natwidth RIGHT
+!natheight TOP
+!hiresbb BOOL; Look for %%HiResBoundingBox instead of %%BoundingBox in eps files.
+pagebox (mediabox|cropbox|bleedbox|trimbox|artbox); Specify which PDF bounding box specification to read.
+viewport 'LEFT BOTTOM RIGHT TOP'; Consider image to consist of given rectangle only.
+trim 'LEFT BOTTOM RIGHT TOP'; Similar to viewport, but here the four lengths specify the amount to remove or add to each side.
+angle ANGLE; Rotation angle.
+origin ORIGIN; Origin for rotation. [lrc][ctb]
+width WIDTH; Required width. The graphic is scaled to this width.
+height HEIGHT; Required height. The graphic is scaled to this height.
+totalheight HEIGHT; Required height+depth. Differs from height if rotation has occured.
+keepaspectratio BOOL; Do not distort figure if both width and height are given.
+scale FLOAT; Scale factor.
+clip BOOL; Clip the graphic to the viewport.
+draft BOOL; Switch to draft mode.
+!type TYPE; Specify the graphics type.
+!ext EXTENSION; To be used with type.
+!read EXTENSION; To be used with type.
+!command TEX; To be used with type.
+!decodearray ?; Why does this even appear in this list?
+!quiet; Skip writing information to the log.
+!page PAGENUMBER; Page of a multi-page PDF file. Overwritten by pdfpages’s page.
+interpolate BOOL; Enable interpolation of bitmap images by the viewer.
+!alt TEXT; Alternative text for accessibility uses. Used for tagged PDF.
+
+BOOL: true|false
+NUM: [1,2,...]
+NUM4: [4,8,12,...]
+DIM: FLOAT|FLOAT UNIT
+TOP, RIGHT, LEFT, BOTTOM, WIDTH, HEIGHT, Xdim, Ydim: DIM
+ANGLE: [0,90,180,270,...]
+ORIGIN: c l r t b [bt][lr]
+SECTION,LEVEL ∈ (part,0), (section,1), (subsection,2), (subsubsection,3), (paragraph,4), (subparagraph,5)
