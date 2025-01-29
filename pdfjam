@@ -188,7 +188,12 @@ pdfinfo=$(command -v pdfinfo)
 if [ -z "$pdfinfo" ]; then pdfinfo="not found"; fi
 iconv=$(command -v iconv)
 if [ -z "$iconv" ]; then iconv="not found"; fi
-##
+##  Sanity check the 'file -Lb' utility to identify files if it works;
+##  rely on the file extension otherwise.
+case "$(file -Lb "$0" 2>/dev/null)" in
+	'POSIX shell script'*) checkfiles=checkfiles ;;
+	*) checkfiles=
+esac
 ##
 ##  Defaults
 ##
@@ -196,9 +201,6 @@ outFile="$pwd"      ##  Output to the current working directory
 suffix=pdfjam       ##  Default filename suffix to be used when
 ##                      --outfile is either (a) a directory, or (b)
 ##                      not specified in a --batch call.
-checkfiles=         ##  Don't use the Unix 'file -Lb' utility to
-##                      identify PDF files from their contents;
-##                      rely on the .pdf or .PDF extension instead.
 keepinfo=           ##  Don't try to preserve "pdfinfo" data
 landscape=          ##  Use portrait./Do not switch width and height.
 twoside=            ##  No "twoside" option to documentclass

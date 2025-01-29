@@ -1,5 +1,5 @@
 suffix=pdfjam
-checkfiles=
+checkfiles=checkfiles
 keepinfo=
 landscape=
 twoside=
