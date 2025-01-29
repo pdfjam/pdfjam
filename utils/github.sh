@@ -11,4 +11,5 @@ rm -fr pdfjam-$version pdfjam-$version.zip pdfjam-$version.tar.gz
 ln -Ts ../pdfjam pdfjam-$version
 zip -r pdfjam-$version.zip pdfjam-$version
 tar -cvhzf pdfjam-$version.tar.gz pdfjam-$version
+git push "$(git config branch.master.remote)" "v$version"
 gh release create v$version --title "Release v$version" --notes-from-tag pdfjam-$version.zip pdfjam-$version.tar.gz
