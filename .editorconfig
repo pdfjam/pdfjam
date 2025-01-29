@@ -13,7 +13,7 @@ trim_trailing_whitespace = false
 insert_final_newline = true
 
 [*.1]
-textwidth=80
+max_line_length = 80
 
 [*.{yml,txt}]
 indent_style = spaces
