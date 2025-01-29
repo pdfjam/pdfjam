@@ -5,7 +5,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[nup=2x1]{source-1.pdf,-}
+\includepdfmerge[nup=2x1]{file1.pdf,-}
 \end{document}
 
 %%% call.txt
@@ -18,7 +18,7 @@ cd <TESTDIR>
   pdfjam: Called with '--vanilla': no user or site configuration
           files will be read.
   pdfjam: --
-  pdfjam: Processing file 1, 'file1.pdf'...
+  pdfjam: Processing file 1: file1.pdf ...
   pdfjam: Page spec is '-'.
               ----
   pdfjam:     This is pdfjam version N.NN.
@@ -27,7 +27,7 @@ cd <TESTDIR>
   pdfjam:     Calling <TESTDIR>/engine...
   pdfjam:     Finished.  Output was written to '<TESTDIR>/file1-2up.pdf'.
   pdfjam: --
-  pdfjam: Processing file 2, 'file2.pdf'...
+  pdfjam: Processing file 2: file2.pdf ...
   pdfjam: Page spec is '-'.
               ----
   pdfjam:     This is pdfjam version N.NN.

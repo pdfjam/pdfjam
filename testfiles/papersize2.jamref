@@ -5,7 +5,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[]{source-1.pdf,{},1-4}
+\includepdfmerge[]{beamer.pdf,{},1-4}
 \end{document}
 
 %%% call.txt

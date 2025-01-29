@@ -5,7 +5,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[signature=8]{source-1.pdf,-,source-2.pdf,-}
+\includepdfmerge[signature=8]{a4numbers.pdf,-,a4.pdf,-}
 \end{document}
 
 %%% call.txt

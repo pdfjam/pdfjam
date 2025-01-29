@@ -17,7 +17,7 @@ cd <TESTDIR>
   pdfjam: This is pdfjam version N.NN.
   pdfjam: Called with '--vanilla': no user or site configuration
           files will be read.
-  pdfjam: No PDF/JPG/PNG source specified: input is from stdin.
+  pdfjam: No PDF/EPS/JPG/PNG source specified: input is from stdin.
   pdfjam: Effective call for this run of pdfjam:
           ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example6.sh.d/dryrun --outfile example6.sh.pdf --nup 2x1 --frame true -- /dev/stdin - 
   pdfjam: Calling <TESTDIR>/engine...

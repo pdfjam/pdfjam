@@ -8,7 +8,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[signature=4]{source-1.pdf,1-6,source-2.pdf,1-3}
+\includepdfmerge[signature=4]{beamer.pdf,1-6,a4.pdf,1-3}
 \end{document}
 
 %%% call.txt

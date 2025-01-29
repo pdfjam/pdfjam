@@ -17,7 +17,7 @@
 \fi
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[]{source-1.pdf,-}
+\includepdfmerge[]{a4.pdf,-}
 \end{document}
 
 %%% call.txt

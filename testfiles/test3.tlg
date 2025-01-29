@@ -1,36 +1,36 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-<source-1.pdf, id=00, 421.575pt x 597.231pt>
-File: source-1.pdf Graphic file (type pdf)
-<use source-1.pdf>
-Package pdftex.def Info: source-1.pdf  used on input line ....
+<test.pdf, id=00, 421.575pt x 597.231pt>
+File: test.pdf Graphic file (type pdf)
+<use test.pdf>
+Package pdftex.def Info: test.pdf  used on input line ....
 (pdftex.def)             Requested size: 421.573pt x 597.229pt.
-File: source-1.pdf Graphic file (type pdf)
-<use source-1.pdf>
-Package pdftex.def Info: source-1.pdf  used on input line ....
+File: test.pdf Graphic file (type pdf)
+<use test.pdf>
+Package pdftex.def Info: test.pdf  used on input line ....
 (pdftex.def)             Requested size: 421.573pt x 597.229pt.
-<source-1.pdf, id=00, page=1, 421.575pt x 597.231pt>
-File: source-1.pdf Graphic file (type pdf)
-<use source-1.pdf, page 1>
-Package pdftex.def Info: source-1.pdf , page1 used on input line ....
+<test.pdf, id=00, page=1, 421.575pt x 597.231pt>
+File: test.pdf Graphic file (type pdf)
+<use test.pdf, page 1>
+Package pdftex.def Info: test.pdf , page1 used on input line ....
 (pdftex.def)             Requested size: 421.573pt x 597.229pt.
-File: source-1.pdf Graphic file (type pdf)
-<use source-1.pdf, page 1>
-Package pdftex.def Info: source-1.pdf , page1 used on input line ....
+File: test.pdf Graphic file (type pdf)
+<use test.pdf, page 1>
+Package pdftex.def Info: test.pdf , page1 used on input line ....
 (pdftex.def)             Requested size: 421.670pt x 597.366pt.
-File: source-1.pdf Graphic file (type pdf)
-<use source-1.pdf, page 1>
-Package pdftex.def Info: source-1.pdf , page1 used on input line ....
+File: test.pdf Graphic file (type pdf)
+<use test.pdf, page 1>
+Package pdftex.def Info: test.pdf , page1 used on input line ....
 (pdftex.def)             Requested size: 421.670pt x 597.366pt.
-File: source-1.pdf Graphic file (type pdf)
-<use source-1.pdf, page 1>
-Package pdftex.def Info: source-1.pdf , page1 used on input line ....
+File: test.pdf Graphic file (type pdf)
+<use test.pdf, page 1>
+Package pdftex.def Info: test.pdf , page1 used on input line ....
 (pdftex.def)             Requested size: 421.670pt x 597.366pt.
-File: source-1.pdf Graphic file (type pdf)
-<use source-1.pdf, page 1>
-Package pdftex.def Info: source-1.pdf , page1 used on input line ....
+File: test.pdf Graphic file (type pdf)
+<use test.pdf, page 1>
+Package pdftex.def Info: test.pdf , page1 used on input line ....
 (pdftex.def)             Requested size: 421.670pt x 597.366pt.
-[1<./source-1.pdf>](a.aux)
+[1<./test.pdf>](a.aux)
 Creator:         TeX
 Producer:        TeXengine
 Custom Metadata: no

@@ -17,7 +17,7 @@
 \fi
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[]{source-1.pdf,3-1}
+\includepdfmerge[]{beamer.pdf,3-1}
 \end{document}
 
 %%% call.txt

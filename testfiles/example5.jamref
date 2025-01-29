@@ -5,7 +5,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[nup=2x3,frame=true,noautoscale=false,delta=0.2cm 0.3cm,scale=0.95]{source-1.pdf,-}
+\includepdfmerge[nup=2x3,frame=true,noautoscale=false,delta=0.2cm 0.3cm,scale=0.95]{beamer.pdf,-}
 \end{document}
 
 %%% call.txt

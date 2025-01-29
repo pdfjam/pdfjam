@@ -5,7 +5,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[picturecommand={\put(20,20){Letters.\quad What's $9\cdot6$?}}]{source-1.pdf,-}
+\includepdfmerge[picturecommand={\put(20,20){Letters.\quad What's $9\cdot6$?}}]{a4.pdf,-}
 \end{document}
 
 %%% call.txt
@@ -18,7 +18,7 @@ cd <TESTDIR>
   pdfjam: Called with '--vanilla': no user or site configuration
           files will be read.
   pdfjam: --
-  pdfjam: Processing file 1, 'a4.pdf'...
+  pdfjam: Processing file 1: a4.pdf ...
   pdfjam: Page spec is '-'.
               ----
   pdfjam:     This is pdfjam version N.NN.

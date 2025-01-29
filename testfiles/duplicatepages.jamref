@@ -5,7 +5,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[nup=2x1,duplicatepages=2]{source-1.pdf,-}
+\includepdfmerge[nup=2x1,duplicatepages=2]{a4numbers.pdf,-}
 \end{document}
 
 %%% call.txt

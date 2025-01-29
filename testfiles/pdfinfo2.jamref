@@ -30,7 +30,7 @@ cd <TESTDIR>
   pdfjam: This is pdfjam version N.NN.
   pdfjam: Called with '--vanilla': no user or site configuration
           files will be read.
-  pdfjam: No PDF/JPG/PNG source specified: input is from stdin.
+  pdfjam: No PDF/EPS/JPG/PNG source specified: input is from stdin.
   pdfjam: Effective call for this run of pdfjam:
           ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir pdfinfo2.d/dryrun --outfile pdfinfo2.pdf --keepinfo --enc UTF-8 --pdftitle  --pdfkeywords ' tab	nl
           "!@$^&,}]{[\|:~`crash?ሴ🙄🏳️‍🌈finally ☺️' --keepinfo -- /dev/stdin - 

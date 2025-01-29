@@ -5,7 +5,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[frame=true,nup=2x2]{source-1.pdf,-,source-2.pdf,-,source-3.pdf,-}
+\includepdfmerge[frame=true,nup=2x2]{file1.pdf,-,file2.pdf,-,file3.pdf,-}
 \end{document}
 
 %%% call.txt
