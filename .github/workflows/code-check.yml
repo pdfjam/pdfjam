@@ -21,3 +21,5 @@ jobs:
       run: nroff -mandoc -t -K utf8 -b -rCHECKSTYLE=10 -ww -z build/pdfjam/man/pdfjam.1
     - name: Lint man page (mandoc)
       run: mandoc -T lint build/pdfjam/man/pdfjam.1
+    - name: Lint man page (full stops in text shall match '\.$' or '\.\\&' not '\. ')
+      run: ! grep '\. ' build/pdfjam/man/pdfjam.1
