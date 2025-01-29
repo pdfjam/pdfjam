@@ -10,12 +10,15 @@ It allows to rotate, scale, reorder and combine pages freely
 using the power of the 'pdfpages' and 'graphicx' LaTeX packages.
 .PP
 Output is written to a generated name (unless specified via \fB\-\-outfile\fR).
-The input files are embedded as graphics in the output. Especially jpg files
-are kept as is without transcoding. Input from stdin is supported by specifying
-\fI\,/dev/stdin\/\fP as a file and is the default if no file is given.
+The input files are embedded as graphics in the output.
+Especially jpg files are kept as is without transcoding.
+Input from stdin is supported by specifying \fI\,/dev/stdin\/\fP as a file and
+is the default if no file is given.
 .PP
-By specifying \fI\,pages\/\fP it is possible to specfiy which pages to include
-in which order.  The default '\-' selects all pages.  An example:
+By specifying \fI\,pages\/\fP it is possible to specfiy
+which pages to include in which order.
+The default '\-' selects all pages.
+An example:
 .IP
 pdfjam file1 '{},2,4\-6,9\-' ...
 .PP
@@ -45,12 +48,12 @@ Key value options to 'pdfpages' and 'graphicx' can be specified as
 Output this text only; no processing of PDF files.
 .TP
 \fB\-\-configpath\fR
-Output the 'configpath' variable and exit immediately; no processing of
-PDF files.
+Output the 'configpath' variable and exit immediately;
+no processing of PDF files.
 .TP
 \fB\-V\fR, \fB\-\-version\fR
-Output the version number of pdfjam and exit immediately; no
-processing of PDF files.
+Output the version number of pdfjam and exit immediately;
+no processing of PDF files.
 .TP
 \fB\-q\fR, \fB\-\-quiet\fR
 Suppress verbose commentary on progress.
@@ -58,40 +61,43 @@ Suppress verbose commentary on progress.
 .TP
 \fB\-\-batch\fR
 Run pdfjam sequentially on each input file in turn, and produce a separate
-output file for each input, rather than the default coalescing behaviour.  For
-the location of output files, see \fB\-\-outfile\fR.  The \fB\-\-batch\fR option
-cannot be used in the case of input from stdin.
+output file for each input, rather than the default coalescing behaviour.
+For the location of output files, see \fB\-\-outfile\fR.
+The \fB\-\-batch\fR option cannot be used in the case of input from stdin.
 .TP
 \fB\-o\fR, \fB\-\-outfile\fR name
-Specifies where the output file(s) will go. If 'name' is an existing directory,
-pdfjam will attempt to write its output PDF file(s) there, with name(s) derived
-from the input file name(s) and the \fB\-\-suffix\fR option (see below).
+Specifies where the output file(s) will go.
+If 'name' is an existing directory, pdfjam will attempt to write its output PDF
+file(s) there, with name(s) derived from the input file name(s) and the
+\fB\-\-suffix\fR option (see below).
 Otherwise the output pdf will be written at 'name'.
 .TP
 \fB\-\-suffix\fR string
 Specifies a suffix for output file names, to be used when \fB\-\-outfile\fR is
-unspecified or a directory.  The STRING must not have zero length.
+unspecified or a directory.
+The STRING must not have zero length.
 .TP
 \fB\-\-checkfiles\fR, \fB\-\-no\-checkfiles\fR
 If the Unix 'file' utility is available, the output of 'file \fB\-Lb\fR FILE1'
-should be 'PDF document...' where '...' gives version information.  If this is
-the case on your system you should use \fB\-\-checkfiles\fR; otherwise use
-\fB\-\-no\-checkfiles\fR, in which case all input files must have the correct
-extensions (.pdf, .ps, .eps .jpg, .jpeg, .png, or their uppercase variants).
+should be 'PDF document...' where '...' gives version information.
+If this is the case on your system you should use \fB\-\-checkfiles\fR;
+otherwise use \fB\-\-no\-checkfiles\fR, in which case all input files must have
+the correct extensions (.pdf, .ps, .eps .jpg, .jpeg, .png, or their uppercase
+variants).
 .TP
 \fB\-\-latex\fR pathtolatex
-Specify the LaTeX engine to be used (one of pdflatex,
-xelatex, lualatex).  The pathtolatex string must be
-the full path to a suitable LaTeX executable (for example
-\fI\,/usr/bin/xelatex\/\fP on many unix systems).
+Specify the LaTeX engine to be used (one of pdflatex, xelatex, lualatex).
+The pathtolatex string must be the full path to a suitable LaTeX executable (for
+example \fI\,/usr/bin/xelatex\/\fP on many unix systems).
 .TP
 \fB\-\-tidy\fR, \fB\-\-no\-tidy\fR
 Specify whether the temporary directory created by pdfjam should be deleted.
 Use '\-\-no\-tidy' or '\-\-builddir' (see below) to help debug most errors.
 .TP
 \fB\-\-builddir\fR path
-Specifies a build directory to be used in place of a temporary one. Existing
-files inside will be overwritten. Overrides \fB\-\-tidy\fR.
+Specifies a build directory to be used in place of a temporary one.
+Existing files inside will be overwritten.
+Overrides \fB\-\-tidy\fR.
 .TP
 \fB\-\-runs\fR N
 Run latex N times, for each output document made.
@@ -106,10 +112,11 @@ Specify a command\-line encoding
 \fB\-\-paper\fR papername, \fB\-\-papername\fR
 .IP
 Specify a LaTeX paper size, for example '\-\-paper a4' or simply '\-\-a4paper'
-for ISO A4 paper.  A wide range of paper sizes is available thanks to the
-LaTeX 'geometry' package.  For details see documentation
-for LaTeX and/or the 'geometry' package.  If no default value is set, obtain
-the system’s default paper via libpaper, falling back to A4.
+for ISO A4 paper.
+A wide range of paper sizes is available thanks to the LaTeX 'geometry' package.
+For details see documentation for LaTeX and/or the 'geometry' package.
+If no default value is set, obtain the system’s default paper
+via libpaper, falling back to A4.
 .TP
 \fB\-\-papersize\fR width,height
 Specify a custom paper size in points = 1/72 inch (known as bp in LaTeX and as
@@ -127,36 +134,39 @@ Rotate every odd page by 180 degrees (or not).
 Thus changes along which edge the pages are flipped in duplex printing.
 .TP
 \fB\-\-pagecolor\fR rgbspec
-Specify a background colour for the output pages.  The RGBSPEC must be a
-comma\-separated triple of integers between 0 and 255.  An example:
+Specify a background colour for the output pages.
+The RGBSPEC must be a comma\-separated triple of integers between 0 and 255.
+An example:
 \fB\-\-pagecolor\fR 150,200,150.
 Default is no background colour.
 .SH "PDFINFO OPTIONS"
 .TP
 \fB\-\-keepinfo\fR, \fB\-\-no\-keepinfo\fR
 Preserve (or not) Title, Author, Subject and Keywords
-(from the last input PDF file, if more than one) in the
-output PDF file.  This requires the pdfinfo utility, from
-the poppler-utils package, and the LaTeX 'hyperref' package; if
-either of those is not available, '\-\-keepinfo' is ignored.
+(from the last input PDF file, if more than one) in the output PDF file.
+This requires the pdfinfo utility, from the poppler-utils package, and the
+LaTeX 'hyperref' package; if either of those is not available, '\-\-keepinfo' is
+ignored.
 .TP
 \fB\-\-pdftitle\fR string, \fB\-\-pdfauthor\fR string,
 \fB\-\-pdfsubject\fR string, \fB\-\-pdfkeywords\fR string
-Provide text for the Title, Author, Subject and Keywords in the output PDF
-file.  Requires the LaTeX 'hyperref' package.  These options, individually,
-override \fB\-\-keepinfo\fR.
+Provide text for the Title, Author, Subject and Keywords in the output PDF file.
+Requires the LaTeX 'hyperref' package.
+These options, individually, override \fB\-\-keepinfo\fR.
 .SH "ADVANCED OPTIONS"
 .TP
 \fB\-\-preamble\fR string
 Append the supplied STRING to the preamble of the LaTeX
 source file(s), immediately before the '\ebegin{document}'
-line to load LaTeX packages or set global options.  An example:
+line to load LaTeX packages or set global options.
+An example:
 .IP
 pdfjam \fB\-\-nup\fR 2x2 myfile.pdf \fB\-o\fR myfile\-4up.pdf
 \fB\-\-preamble\fR '\eusepackage{fancyhdr} \epagestyle{fancy}'
 .PP
-If '\-\-preamble' is used more than once in the call, the supplied preamble
-strings are concatenated.  For a note on avoiding clashes, see the README file,
+If '\-\-preamble' is used more than once in the call,
+the supplied preamble strings are concatenated.
+For a note on avoiding clashes, see the README file,
 also available at $repository.
 .TP
 \fB\-\-\fR
@@ -164,10 +174,11 @@ Signals end of options processing.
 .SH "PDFPAGES AND GRAPHICX OPTIONS"
 .TP
 \fB\-\-KEY\fR VALUE
-Specify options to '\eincludepdfmerge', in the LaTeX 'pdfpages' package.  See
-the the pdfpages documentation (usually 'texdoc pdfpages') for more
-information.  Here KEY is the name of any of the many options
-for '\eincludepdfmerge', and VALUE is a corresponding value.
+Specify options to '\eincludepdfmerge', in the LaTeX 'pdfpages' package.
+See the the pdfpages documentation (usually 'texdoc pdfpages') for more
+information.
+Here KEY is the name of any of the many options for '\eincludepdfmerge',
+and VALUE is a corresponding value.
 Examples:
 .IP
 \fB\-\-nup\fR 2x1
@@ -182,20 +193,22 @@ Examples:
 \fB\-\-frame\fR true
 (to put a frame round each input page)
 .IP
-\fB\-\-booklet\fR true (to reorder the pages in signatures,
-generally useful with \fB\-\-nup\fR)
+\fB\-\-booklet\fR true
+(to reorder the pages in signatures, generally useful with \fB\-\-nup\fR)
 .IP
 \fB\-\-signature\fR N (specify the signature size, as the number of original
-pages in a signature in the final document. Caveat: booklet is a short form for
-signature, so if you use booklet true, signature will be ignored)
+pages in a signature in the final document.
+Caveat: booklet is a short form for signature, so if you use
+\fB\-\-booklet true\fR, signature will be ignored)
 .IP
 \fB\-\-trim\fR '1cm 2cm 1cm 2cm' \fB\-\-clip\fR true
 (to trim those amounts from left, bottom, right and top, respectively, of input
 pages)
 .IP
-\fB\-\-angle\fR NNN (The angle of rotation in degrees. Angles that are not
-either 90, 180 or 270 will still create straight rectangular pages, only the
-content will be rotated.)
+\fB\-\-angle\fR NNN
+(The angle of rotation in degrees.
+Angles that are not either 0, 90, 180 or 270 will still create straight
+rectangular pages, only the content will be rotated.)
 .SH "CONFIGURATION FILES"
 Defaults for the options
 \fB\-\-suffix\fR,
