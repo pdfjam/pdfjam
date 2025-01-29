@@ -431,4 +431,4 @@ want to take on the task of improving and maintaining some of them,
 who knows?  The wrapper scripts (**no longer maintained**) can now be found at
 <https://github.com/pdfjam/pdfjam-extras>.
 
-_Releases up to version 2.08 are still available at <https://davidfirth.github.io/pdfjam>._
+_Releases up to version 2.08 are still available at <https://pdfjam.github.io/pdfjam>._
