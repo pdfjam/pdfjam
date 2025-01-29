@@ -113,6 +113,40 @@ to_papersize() {
 	esac
 	printf %s "$value" | sed -E 's/([0-9]{1,}\.{0,1}[0-9]*)(,|$)/\1bp\2/g'
 }
+## Check whether string contains only harmless characters
+is_harmless() {
+	printf %s "$1" | grep -q '^[A-Za-z0-9_.-]\+$'
+}
+##  Validate pagespec syntax
+is_valid_pagespec() {
+	# P = [0-9]*|last  is any or no page
+	# P(-P)?  is any or no page range (the latter being an implicit empty page)
+	# (P(-P)?|\{\})  is any page range or an implicit or explicit empty page
+	# (,(P(-P)?|\{\}))*  is any list of page ranges and empty pages separated by and beginning with a comma
+	printf %s ",$1" | grep -qE '^(,(([0-9]*|last)(-([0-9]*|last))?)|\{\})*$'
+}
+##  Get appropriate file extension if input is supported
+get_extension() {
+	extension=
+	if test -n "$checkfiles"; then
+		case "$(file -Lb -- "$1")" in
+			'PDF document'*) extension=pdf ;;
+			'PostScript document'*) extension=eps ;;
+			'JPEG image data'*) extension=jpg ;;
+			'PNG image data'*) extension=png ;;
+		esac
+	elif test -f "$1" && test -r "$1"; then
+		case "$1" in *.*)
+			case "$(printf %s "${1##*.}" | tr A-Z a-z)" in
+				pdf) extension=pdf ;;
+				jpg|jpeg) extension=jpg ;;
+				png) extension=png ;;
+				ps|eps) extension=eps ;;
+			esac
+		esac
+	fi
+	[ -n "$extension" ] && echo "$extension"
+}
 ##
 ##  Define a function to output verbose comments:
 ##
@@ -371,7 +405,7 @@ optionsFinished=""
 ##  First note any '--checkfiles' or '--no-checkfiles' option
 ##
 for arg; do
-	case $arg in
+	case "$arg" in
 	--checkfiles)
 		checkfiles=checkfiles
 		callOptions="$callOptions $1";;
@@ -509,78 +543,35 @@ while test -n "$1$2"; do
 	if test "$optionsFinished" = true || test "$argUnmatched" = true; then
 		case "$1" in
 		"" | /dev/stdin)
-			fileSpec="$fileSpec$newline/dev/stdin|awaited"
+			fileSpec="$fileSpec$newline/dev/stdin|unknown|awaited"
 			pageSpecAwaited=true
 			inputFromStdin=true
 			;;
-		-)
-			if test "$pageSpecAwaited" = true; then
-				fileSpec=$(printf %s "$fileSpec" | sed 's/|awaited/|-/g')
-				pageSpecAwaited=false
+		*) ##  All other args should be source files or page selections; if not, we'll quit
+			if ! [ -e "$1" ]; then
+				valid_input=
+			elif extension="$(get_extension "$1")"; then
+				valid_input=input
 			else
-				error_exit "no PDF/JPG/PNG file found at ${1}" \
-					$E_NOINPUT
+				valid_input=path
 			fi
-			;;
-		*) ##  All other args should be PDF (or JPG/PNG)
-			##  source files and page selections; if not, we'll quit
-			if test -n "$checkfiles"; then ## not always available
-				case "$(file -Lb -- "$1")" in
-				"PDF document"* | "JPEG image data"* | "PNG image"* | "Postscript document"*)
-					fileSpec="$fileSpec$newline$1|awaited"
-					pageSpecAwaited=true
-					;;
-				*)
-					case "$1" in
-					*.*)
-						error_exit "no proper PDF/PS/EPS/JPG/PNG file found at ${1}" \
-							$E_NOINPUT
-						;;
-					*) ##  if page spec needed, assume this is it;
-						##  otherwise something is wrong
-						if test "$pageSpecAwaited" = true; then
-							escapedFilePath=$(printf '%s' "$1" | sed -e 's#/#\\/#g')
-							fileSpec=$(printf "%s" "$fileSpec" \
-								| sed "s/|awaited/|${escapedFilePath}/g")
-							pageSpecAwaited=false
-						else
-							error_exit "no PDF/PS/EPS/JPG/PNG file found at ${1}" \
-								$E_NOINPUT
-						fi
-						;;
-					esac
-					;;
-				esac
-			else ## no checking of file contents; rely on file extension
-				case "$1" in
-				*.*)
-					case "$(printf %s "${1##*.}" | tr A-Z a-z)" in
-					pdf|jpg|jpeg|png|ps|eps)
-						test -f "$1" && test -r "$1" || error_exit \
-							"Cannot find and read '$1'." $E_NOINPUT
-						fileSpec="$fileSpec"$newline${1}"|"awaited
-						pageSpecAwaited=true
-						;;
-					*) error_exit "no PDF/PS/EPS/JPG/PNG file found at $1" \
-						$E_NOINPUT
-						;;
-					esac
-					;;
-				*) ##  if page spec needed, assume this is it;
-					##  otherwise something is wrong
-					if test "$pageSpecAwaited" = true; then
-						escapedFilePath=$(printf '%s' "$1" | sed -e 's#/#\\/#g')
-						fileSpec=$(printf "%s" "$fileSpec" \
-							| sed "s/|awaited/|${escapedFilePath}/g")
-						pageSpecAwaited=false
-					else
-						error_exit "no PDF/JPG/PNG file found at ${1}" \
-							$E_NOINPUT
-					fi
-					;;
-				esac
-			fi
-			;;
+			if is_valid_pagespec "$1"; then valid_pagespec=pagespec; else valid_pagespec=; fi
+			case "$valid_input-$valid_pagespec-$pageSpecAwaited" in
+				##  12 combinations: 6 erroneous and 6 working.
+				##  Of the working combinations 1 is ambiguous and 1 dubious.
+				input-pagespec-true) prattle "Ambiguous argument '$1' interpreted as pagespec. If you meant the file, please write './$1' instead." ;;
+				input-pagespec-false) prattle "Dubious argument '$1' interpreted as file due to its position. (Write './$1' for extra clarity.)" ;;
+				path-pagespec-false) error_exit "The argument '$1' is both a valid path and a pagespec but a valid PDF/EPS/JPG/PNG file was expected." $E_NOINPUT ;;
+				path--false) error_exit "The argument '$1' is a valid path but not a valid PDF/EPS/JPG/PNG file." $E_NOINPUT ;;
+				path--true) error_exit "The argument '$1' is a valid path but not a valid PDF/EPS/JPG/PNG file or pagespec." $E_USAGE ;;
+				-pagespec-false) error_exit "The argument '$1' is a valid pagespec but not a valid PDF/EPS/JPG/PNG file." $E_NOINPUT ;;
+				--true) error_exit "Input file or pagespec expected, but '$1' neither exists in your file system nor is it a pagespec." $E_USAGE ;;
+				--false) error_exit "Input file expected, but '$1' not even exists in your file system." $E_NOINPUT ;;
+			esac
+			case "$valid_input-$valid_pagespec-$pageSpecAwaited" in  ##  The 6=3+3 working combinations
+				*-pagespec-true) fileSpec="${fileSpec%|awaited}|$1"; pageSpecAwaited=false ;;
+				input-*-*) fileSpec="$fileSpec$newline$1|$extension|awaited"; pageSpecAwaited=true ;;
+			esac
 		esac
 	fi
 	shift
@@ -596,8 +587,8 @@ if test "$PDFJAM_CALL_NUMBER" -eq 0 && test "$inputFromStdin" != true; then
 	if test -z "$fileSpec"; then
 		## no argument specifying a PDF source was given
 		inputFromStdin=true
-		fileSpec="/dev/stdin|-"
-		prattle "No PDF/JPG/PNG source specified: input is from stdin."
+		fileSpec="/dev/stdin|unknown|-"
+		prattle "No PDF/EPS/JPG/PNG source specified: input is from stdin."
 	fi
 fi
 ## Massage options
@@ -790,7 +781,7 @@ fi
 ##
 if test "$batch" = true; then
 	if test "$fileSpec" = ""; then
-		error_exit "--batch was used, but no PDF/JPG/PNG source file(s) specified" \
+		error_exit "--batch was used, but no PDF/EPS/JPG/PNG source file(s) specified" \
 			$E_USAGE
 	fi
 	if test "$inputFromStdin" = true; then
@@ -798,14 +789,13 @@ if test "$batch" = true; then
 			$E_USAGE
 	fi
 	IFS="$newline"
-	for k in $fileSpec; do
-		sourcePath=$(printf "%s" "$k" | sed 's/|[^|]*$//')
-		pageSpec=$(printf "%s" "$k" | sed 's/.*|//')
+	for k in $fileSpec; do # TODO
+		sourcePath=$(enquote "${k%|*|*}")
+		pageSpec=${k##*|}
 		callNumber=$((PDFJAM_CALL_NUMBER + 1))
 		prattle "--"
-		prattle "Processing file ${callNumber}, '$sourcePath'..."
+		prattle "Processing file ${callNumber}: $sourcePath ..."
 		prattle "Page spec is '$pageSpec'."
-		sourcePath=$(enquote "$sourcePath")
 		PDFJAM_EFFECTIVE_CALL="$0 $callOptions -- $sourcePath $pageSpec"
 		export PDFJAM_EFFECTIVE_CALL
 		PDFJAM_CALL_NUMBER=$callNumber
@@ -836,11 +826,8 @@ else
 	filePageSpec=""
 	IFS="$newline"
 	for k in $fileSpec; do
-		##  Last substitution on next line is needed for silly characters in
-		##  file names...
-		sourcePath=$(printf "%s" "$k" | sed 's/|[^|]*$//')
-		sourcePath=$(enquote "$sourcePath")
-		pageSpec=$(printf "%s" "$k" | sed 's/.*|//')
+		sourcePath=$(enquote "${k%|*|*}")
+		pageSpec=${k##*|}
 		filePageSpec="$filePageSpec$sourcePath $pageSpec "
 	done
 	IFS="$OIFS"
@@ -854,8 +841,9 @@ prattle "$theCall" 1
 ##
 ##  NOW MAKE THE INPUT FILE ETC., READY FOR LATEX
 ##
-filePageList=""  ## initialize a string to supply to \includepdfmerge
-counter=0
+## initialize a string to supply to \includepdfmerge, forbid basename 'a'.
+filePageList=",a.,"
+counter=0  ## for name generation for non-harmless names
 ##
 ##  Make symbolic link(s) to the source file(s) in the temporary dir,
 ##  and make the $filePageList string for input to \includepdfmerge
@@ -863,22 +851,14 @@ counter=0
 stdinUnread=true
 IFS="$newline"
 for k in ${fileSpec}; do
-	counter=$((counter + 1))
-	sourcePath=$(printf "%s" "$k" | sed 's/|[^|]*$//')
-	pageSpec=$(printf "%s" "$k" | sed 's/.*|//')
-	##  Check, though not exhaustively, for problems with the
-	##  page spec: leading or trailing comma, double comma or
-	##  double dash, alphabetic characters other than the word "last",
-	##  braces not paired as {} with nothing inbetween.  A fully
-	##  specified pattern for valid \includepdfmerge page spec would
-	##  be better here; but life is too short...
-	if printf "%s" "$pageSpec" | sed 's/last/99/g' \
-		| grep '^,.*\|,$\|,,\|--\|[A-Za-z]\|{[^}]\|[^{]}' 1>/dev/null; then
-		error_exit "invalid page spec $pageSpec" $E_USAGE
+	sourcePath="${k%|*|*}"
+	pageSpec=${k##*|}
+	if ! is_valid_pagespec "$pageSpec"; then
+		error_exit "Bug: Somehow an invalid page spec got here: $pageSpec" $E_SOFTWARE
 	fi
-	case $sourcePath in
+	case "$sourcePath" in
 	/dev/stdin)
-		uniqueName=stdin.pdf
+		uniqueName=stdin
 		if test "$stdinUnread" = true; then
 			if tty -s; then
 				error_exit \
@@ -886,17 +866,32 @@ for k in ${fileSpec}; do
 					$E_NOINPUT
 			fi
 			cat >"$PDFJAM_TEMP_DIR/$uniqueName"
+			# Figure out the correct extension right now.
+			if extension="$(get_extension "$PDFJAM_TEMP_DIR/$uniqueName")"; then
+				mv "$PDFJAM_TEMP_DIR/$uniqueName" "$PDFJAM_TEMP_DIR/$uniqueName.$extension"
+				uniqueName="$uniqueName.$extension"
+			else
+				error_exit "Input from stdin is no legid PDF/EPS/JPG/PNG file." $E_NOINPUT
+			fi
 			stdinUnread=false
 		fi
 		;;
 	*)
-		pdfName=$(basename -- "$sourcePath")
-		sourceDir=$(dirname -- "$sourcePath") ## zsh on Mac OS 10.5 chokes here
-		cd "$sourceDir" || exit 1  ##  just to get the full path
-		sourceDir=$(pwd)
-		cd "$pwd" || exit 1
-		sourceFullPath="$sourceDir/$pdfName"
-		uniqueName="source-$counter.pdf"
+		extension="${k%|*}"
+		extension="${extension##*|}"
+		case "$extension" in
+			pdf|eps|jpg|png) ;;
+			*) error_exit "Bug: Somehow an invalid extension got here." $E_SOFTWARE
+		esac
+		sourceFullPath="$(realpath -- "$sourcePath")"
+		tmpName="$(basename -- "$sourcePath")"
+		tmpName="${tmpName%.*}"
+		if is_harmless "$tmpName" && [ -n "${filePageList#*,$tmpName.,*}" ]; then
+			uniqueName="$tmpName.$extension"
+		else
+			counter=$((counter + 1))
+			uniqueName="source-$counter.$extension"
+		fi
 		if using_non_cygwin_latex_from_cygwin; then
 			cp -f "$sourceFullPath" "$PDFJAM_TEMP_DIR/$uniqueName"
 		else
@@ -907,7 +902,7 @@ for k in ${fileSpec}; do
 	filePageList="$filePageList,$uniqueName,$pageSpec"
 done
 IFS="$OIFS"
-filePageList="${filePageList#,}"
+filePageList="${filePageList#,a.,,}"
 if using_non_cygwin_latex_from_cygwin; then
 	filePageList=$(printf %s "$filePageList" | tr \\\\ /)
 fi
