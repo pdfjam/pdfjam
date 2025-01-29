@@ -1,4 +1,4 @@
-.TH PDFJAM "1" "November 2024" "pdfjam N.NN" "User Commands"
+.TH PDFJAM "1" "YYYY-MM-DD" "pdfjam N.NN" "User Commands"
 .SH "NAME"
 pdfjam \- A shell script for manipulating PDF files
 .SH "SYNOPSIS"
@@ -26,7 +26,8 @@ A page selection can be applied to more than one file, e.g.,
 .IP
 pdfjam file1 file2 file3 last\-1 ...
 .PP
-applies page selection 'last\-1' (reverting the page order) to all three files; but for example
+applies page selection 'last\-1' (reverting the page order) to all three files;
+but for example
 .IP
 pdfjam file1 file2 2\- file3 1\-7 ...
 .PP
@@ -36,14 +37,16 @@ argument list.
 .PP
 See the pdfpages manual for more details on pagespec syntax.
 .SH "OPTIONS TO PDFPAGES AND GRAHPICX"
-Key value options to 'pdfpages' and 'graphicx' can be specified as \fI\,\-\-key value\,\fP.
+Key value options to 'pdfpages' and 'graphicx' can be specified as
+\fI\,\-\-key value\,\fP.
 .SH "META OPTIONS"
 .TP
 \fB\-h\fR, \fB\-\-help\fR
 Output this text only; no processing of PDF files.
 .TP
 \fB\-\-configpath\fR
-Output the 'configpath' variable and exit immediately; no processing of PDF files.
+Output the 'configpath' variable and exit immediately; no processing of
+PDF files.
 .TP
 \fB\-V\fR, \fB\-\-version\fR
 Output the version number of pdfjam and exit immediately; no
@@ -110,8 +113,8 @@ the system’s default paper via libpaper, falling back to A4.
 .TP
 \fB\-\-papersize\fR width,height
 Specify a custom paper size in points = 1/72 inch (known as bp in LaTeX and as
-pt in other software), e.g. \fB\-\-papersize\fR 612,792.
-Units may also be specified explicitly, e.g. \fB\-\-papersize\fR 10in,18cm.
+pt in other software), e.g.\& \fB\-\-papersize\fR 612,792.
+Units may also be specified explicitly, e.g.\& \fB\-\-papersize\fR 10in,18cm.
 .TP
 \fB\-\-landscape\fR, \fB\-\-no\-landscape\fR
 Specify landscape page orientation (or not) in the output PDF file.
@@ -137,7 +140,8 @@ output PDF file.  This requires the pdfinfo utility, from
 the poppler-utils package, and the LaTeX 'hyperref' package; if
 either of those is not available, '\-\-keepinfo' is ignored.
 .TP
-\fB\-\-pdftitle\fR string, \fB\-\-pdfauthor\fR string, \fB\-\-pdfsubject\fR string, \fB\-\-pdfkeywords\fR string
+\fB\-\-pdftitle\fR string, \fB\-\-pdfauthor\fR string,
+\fB\-\-pdfsubject\fR string, \fB\-\-pdfkeywords\fR string
 Provide text for the Title, Author, Subject and Keywords in the output PDF
 file.  Requires the LaTeX 'hyperref' package.  These options, individually,
 override \fB\-\-keepinfo\fR.
@@ -154,7 +158,6 @@ pdfjam \fB\-\-nup\fR 2x2 myfile.pdf \fB\-o\fR myfile\-4up.pdf
 If '\-\-preamble' is used more than once in the call, the supplied preamble
 strings are concatenated.  For a note on avoiding clashes, see the README file,
 also available at $repository.
-.TP
 .TP
 \fB\-\-\fR
 Signals end of options processing.
@@ -216,12 +219,15 @@ The files searched are
 $XDG_CONFIG_HOME/pdfjam.conf
 $HOME/.pdfjam.conf
 .PP
-This list can be changed by editing 'configpath' in the pdfjam script if necessary.
+This list can be changed by editing 'configpath' in the pdfjam script.
 All of these files are ignored if the \fB\-\-vanilla\fR argument is used.
 .SH "AUTHORS"
-David Firth (2002 to 2019), Reuben Thomas (2020 to 2024), Markus Kurtz (since 2024)
+David Firth (2002 to 2019),
+Reuben Thomas (2020 to 2024),
+Markus Kurtz (since 2024)
 .SH "SEE ALSO"
-The LaTeX packages graphicx (https://ctan.org/pkg/graphicx) and pdfpages (https://ctan.org/pkg/pdfpages).
+The LaTeX packages graphicx (https://ctan.org/pkg/graphicx)
+and pdfpages (https://ctan.org/pkg/pdfpages).
 .PP
 For more information, including a sample configuration file, see
 $repository.
