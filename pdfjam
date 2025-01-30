@@ -408,10 +408,10 @@ for arg; do
 	case "$arg" in
 	--checkfiles)
 		checkfiles=checkfiles
-		callOptions="$callOptions $1";;
+		callOptions="$callOptions $arg";;
 	--no-checkfiles)
 		checkfiles=
-		callOptions="$callOptions $1";;
+		callOptions="$callOptions $arg";;
 	esac
 done
 while test -n "$1$2"; do
@@ -842,7 +842,7 @@ prattle "$theCall" 1
 ##  NOW MAKE THE INPUT FILE ETC., READY FOR LATEX
 ##
 ## initialize a string to supply to \includepdfmerge, forbid basename 'a'.
-filePageList=",a.,"
+filePageList=",a."
 counter=0  ## for name generation for non-harmless names
 ##
 ##  Make symbolic link(s) to the source file(s) in the temporary dir,
@@ -886,7 +886,7 @@ for k in ${fileSpec}; do
 		sourceFullPath="$(realpath -- "$sourcePath")"
 		tmpName="$(basename -- "$sourcePath")"
 		tmpName="${tmpName%.*}"
-		if is_harmless "$tmpName" && [ -n "${filePageList#*,$tmpName.,*}" ]; then
+		if is_harmless "$tmpName" && [ -n "${filePageList##*,$tmpName.*}" ]; then
 			uniqueName="$tmpName.$extension"
 		else
 			counter=$((counter + 1))
@@ -902,7 +902,7 @@ for k in ${fileSpec}; do
 	filePageList="$filePageList,$uniqueName,$pageSpec"
 done
 IFS="$OIFS"
-filePageList="${filePageList#,a.,,}"
+filePageList="${filePageList#,a.,}"
 if using_non_cygwin_latex_from_cygwin; then
 	filePageList=$(printf %s "$filePageList" | tr \\\\ /)
 fi
