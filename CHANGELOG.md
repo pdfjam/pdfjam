@@ -1,3 +1,9 @@
+* Man page now contains actual information.
+* Add zsh completion file with completions for all relevant options.
+* Improve support for non-pdf input files (eps, jpg, png).
+* Keep original filenames if they consist of [A-Za-z0-9.-] only and are unique.
+
+# Version 4.0
 * Major version bumped to 4.00 to reflect major refactoring, and some minor
   backwards-incompatible changes.
 * New co-maintainer.
