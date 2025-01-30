@@ -129,7 +129,7 @@ is_valid_pagespec() {
 get_extension() {
 	extension=
 	if test -n "$checkfiles"; then
-		case "$(file -Lb "$(realpath -- $1)")" in
+		case "$(file -Lb "$(realpath -- "$1")")" in
 			'PDF document'*) extension=pdf ;;
 			'PostScript document'*) extension=eps ;;
 			'JPEG image data'*) extension=jpg ;;
