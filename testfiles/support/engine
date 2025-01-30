@@ -66,7 +66,7 @@ esac
 		s/luatex\.def/pdftex.def/
 		/^<[A-Za-z0-9_-]\+\.pdf,/s/id=[0-9]*/id=00/
 		s/^\((epstopdf) *date: \)....-..-.. ..:..:..$/\1....-..-.. ..:..:../
-		s/^\((epstopdf) *size: \|File size:       \)[0-9]\{4,\} bytes$/\10000 bytes/
+		s/^\((epstopdf) *size: \|File size:       \)[0-9]\{4,\} bytes\(\.\?\)$/\10000 bytes\2/
 		s/^\(Producer:        \).*$/\1TeXengine/
 		' \
 	>"$job.log"
