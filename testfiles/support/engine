@@ -65,6 +65,7 @@ esac
 		s/\.\([0-9]\{3\}\)[0-9]*pt/.\1pt/g
 		s/luatex\.def/pdftex.def/
 		/^<[A-Za-z0-9_-]\+\.pdf,/s/id=[0-9]*/id=00/
+		s/^\((epstopdf) *date: \)....-..-.. ..:..:..$/\1....-..-.. ..:..:../
 		s/^\(Producer:        \).*$/\1TeXengine/
 		s/^\(File size:       \)[0-9]\{4,\} bytes/\10000 bytes/
 		' \

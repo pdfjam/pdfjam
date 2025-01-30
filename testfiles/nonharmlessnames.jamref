@@ -1,0 +1,23 @@
+%%% a.tex
+\batchmode
+\documentclass[a4paper,]{article}
+\usepackage[]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{pdfpages}
+\begin{document}
+\includepdfmerge[]{source-1.jpg,-,a4.pdf,-,source-2.pdf,-,source-3.png,-}
+\end{document}
+
+%%% call.txt
+cd <TESTDIR>
+./pdfjam --latex <TESTDIR>/engine --vanilla --builddir nonharmlessnames.d/dryrun --outfile nonharmlessnames.pdf -- a.jpg - sub\ dir/a4.pdf - a4.pdf - löwe.png - 
+
+%%% messages.txt
+          ----
+  pdfjam: This is pdfjam version N.NN.
+  pdfjam: Called with '--vanilla': no user or site configuration
+          files will be read.
+  pdfjam: Effective call for this run of pdfjam:
+          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir nonharmlessnames.d/dryrun --outfile nonharmlessnames.pdf -- a.jpg - sub\ dir/a4.pdf - a4.pdf - löwe.png - 
+  pdfjam: Calling <TESTDIR>/engine...
+  pdfjam: Finished.  Output was written to 'nonharmlessnames.pdf'.
