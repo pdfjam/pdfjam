@@ -8,7 +8,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get -y --no-install-recommends install texlive-latex-extra texlive-xetex texlive-luatex ghostscript poppler-utils
+      run: sudo apt-get update && sudo apt-get -y --no-install-recommends install texlive-latex-extra texlive-xetex texlive-luatex texlive-font-utils ghostscript poppler-utils
     - name: Check TeX inputs
       run: l3build check || { cat build/test/*.diff; false; }
     - name: Check TeX outputs
