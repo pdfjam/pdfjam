@@ -886,7 +886,7 @@ for k in ${fileSpec}; do
 		sourceFullPath="$(realpath -- "$sourcePath")"
 		tmpName="$(basename -- "$sourcePath")"
 		tmpName="${tmpName%.*}"
-		if is_harmless "$tmpName" && [ -n "${filePageList##*,$tmpName.*}" ]; then
+		if is_harmless "$tmpName" && [ -n "${filePageList##*,"$tmpName".*}" ]; then
 			uniqueName="$tmpName.$extension"
 		else
 			counter=$((counter + 1))
