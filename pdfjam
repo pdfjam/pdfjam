@@ -115,7 +115,7 @@ to_papersize() {
 }
 ## Check whether string contains only harmless characters
 is_harmless() {
-	printf %s "$1" | grep -q '^[A-Za-z0-9_.-]\+$'
+	printf %s "$1" | grep -q '^[A-Za-z0-9.-]\+$'
 }
 ##  Validate pagespec syntax
 is_valid_pagespec() {
@@ -129,7 +129,7 @@ is_valid_pagespec() {
 get_extension() {
 	extension=
 	if test -n "$checkfiles"; then
-		case "$(file -Lb -- "$1")" in
+		case "$(file -Lb "$(realpath -- $1)")" in
 			'PDF document'*) extension=pdf ;;
 			'PostScript document'*) extension=eps ;;
 			'JPEG image data'*) extension=jpg ;;
