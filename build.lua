@@ -130,7 +130,7 @@ end }
 target_list.tag = { func = function(a)
 	if not make_next_version(a) then return 1 end
 	if not isprerelease then print("Already tagged") return 1 end
-	if io.popen('git status --porcelain --untracked-files=no') ~= '' then
+	if io.popen('git status --porcelain --untracked-files=no'):read() then
 		print('Uncommited files found. Using dry-run.')
 		options["dry-run"] = true
 	end
@@ -145,7 +145,9 @@ target_list.tag = { func = function(a)
 		local c = io.open("CHANGELOG.md", 'w')
 		c:write("# " .. s)
 		c:close()
-		-- options["dry-run"] or os.execute("git commit --message='Version " .. next_version .. "' CHANGELOG.md")
+		if not options["dry-run"] then
+			os.execute("git commit --message='Version " .. next_version .. "' CHANGELOG.md")
+		end
 	end
 	f:write(string.sub(s, 1, string.find(s, "\n# Version ")-1))
 	f:close()
