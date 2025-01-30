@@ -5,7 +5,7 @@ pdfjam \- A shell script for manipulating PDF files
 .B pdfjam
 [\fI\,options\/\fR] [\fI\,--\/\fR] [\fI\,file\/\fR[\fI\,pages\/\fR]]...
 .SH "DESCRIPTION"
-pdfjam assembles a list of documents (pdf, ps, jpg or png) into a single pdf.
+pdfjam assembles a list of documents (pdf, ps, eps, jpg or png) into a single pdf.
 It allows to rotate, scale, reorder and combine pages freely
 using the power of the 'pdfpages' and 'graphicx' LaTeX packages.
 .PP
@@ -240,7 +240,8 @@ Reuben Thomas (2020 to 2024),
 Markus Kurtz (since 2024)
 .SH "SEE ALSO"
 The LaTeX packages graphicx (https://ctan.org/pkg/graphicx)
-and pdfpages (https://ctan.org/pkg/pdfpages).
+and pdfpages (https://ctan.org/pkg/pdfpages). For including eps files, see the
+epstopdf package (https://ctan.org/pkg/epstopdf).
 .PP
 For more information, including a sample configuration file, see
 $repository.

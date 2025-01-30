@@ -2,7 +2,7 @@ This is a generated file for the l3build validation system.
 Don't change this file in any respect.
 Package epstopdf Info: Source file: <example-image.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 51916 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <example-image-eps-converted-to.pdf>
 (epstopdf)             Command: <repstopdf --outfile=example-image-eps-converted-to.pdf example-image.eps>
 (epstopdf)             \includegraphics on input line ....
@@ -17,10 +17,10 @@ Package pdftex.def Info: example-image-eps-converted-to.pdf  used on input line 
 (pdftex.def)             Requested size: 321.199pt x 240.899pt.
 Package epstopdf Info: Source file: <example-image.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 51916 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <example-image-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 4065 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=example-image-eps-converted-to.pdf example-image.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -30,7 +30,7 @@ Package pdftex.def Info: example-image-eps-converted-to.pdf  used on input line 
 (pdftex.def)             Requested size: 321.199pt x 240.899pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
@@ -45,10 +45,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf  used on input line ....
 (pdftex.def)             Requested size: 598.233pt x 845.155pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -58,10 +58,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf  used on input line ....
 (pdftex.def)             Requested size: 598.233pt x 845.155pt.
 Package epstopdf Info: Source file: <example-image.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 51916 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <example-image-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 4065 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=example-image-eps-converted-to.pdf example-image.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -72,10 +72,10 @@ Package pdftex.def Info: example-image-eps-converted-to.pdf , page1 used on inpu
 (pdftex.def)             Requested size: 321.199pt x 240.899pt.
 Package epstopdf Info: Source file: <example-image.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 51916 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <example-image-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 4065 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=example-image-eps-converted-to.pdf example-image.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -85,10 +85,10 @@ Package pdftex.def Info: example-image-eps-converted-to.pdf , page1 used on inpu
 (pdftex.def)             Requested size: 597.876pt x 448.407pt.
 Package epstopdf Info: Source file: <example-image.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 51916 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <example-image-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 4065 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=example-image-eps-converted-to.pdf example-image.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -98,10 +98,10 @@ Package pdftex.def Info: example-image-eps-converted-to.pdf , page1 used on inpu
 (pdftex.def)             Requested size: 597.876pt x 448.407pt.
 Package epstopdf Info: Source file: <example-image.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 51916 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <example-image-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 4065 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=example-image-eps-converted-to.pdf example-image.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -111,10 +111,10 @@ Package pdftex.def Info: example-image-eps-converted-to.pdf , page1 used on inpu
 (pdftex.def)             Requested size: 597.876pt x 448.407pt.
 Package epstopdf Info: Source file: <example-image.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 51916 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <example-image-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 4065 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=example-image-eps-converted-to.pdf example-image.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -125,10 +125,10 @@ Package pdftex.def Info: example-image-eps-converted-to.pdf , page1 used on inpu
 [1<./example-image-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -139,10 +139,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page1 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -152,10 +152,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page1 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -166,10 +166,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page1 used on input lin
 [2<./diagrams-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -180,10 +180,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page2 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -193,10 +193,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page2 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -207,10 +207,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page2 used on input lin
 [3<./diagrams-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -221,10 +221,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page3 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -234,10 +234,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page3 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -248,10 +248,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page3 used on input lin
 [4<./diagrams-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -262,10 +262,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page4 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -275,10 +275,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page4 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -289,10 +289,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page4 used on input lin
 [5<./diagrams-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -303,10 +303,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page5 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -316,10 +316,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page5 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -330,10 +330,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page5 used on input lin
 [6<./diagrams-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -344,10 +344,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page6 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -357,10 +357,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page6 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -371,10 +371,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page6 used on input lin
 [7<./diagrams-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -385,10 +385,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page7 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -398,10 +398,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page7 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -412,10 +412,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page7 used on input lin
 [8<./diagrams-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -426,10 +426,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page8 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -439,10 +439,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page8 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -453,10 +453,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page8 used on input lin
 [9<./diagrams-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -467,10 +467,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page9 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
@@ -480,10 +480,10 @@ Package pdftex.def Info: diagrams-eps-converted-to.pdf , page9 used on input lin
 (pdftex.def)             Requested size: 1113.545pt x 1573.163pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 228234 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 37128 bytes
+(epstopdf)                    size: 0000 bytes
 (epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
 (epstopdf)             \includegraphics on input line ....
 Package epstopdf Info: Output file is already uptodate.
