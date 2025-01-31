@@ -123,6 +123,7 @@ target_list.release = { func = function(a)
 		return 0
 	else
 		os.execute("utils/github.sh " .. next_version)
+		uploadconfig.version = next_version
 		return target_list.upload.func()
 	end
 end }
@@ -159,10 +160,6 @@ target_list.tag = { func = function(a)
 	else
 		return os.execute("git tag --sign --file="..builddir.."/release/ANNOUNCEMENT.md v" .. next_version) and 0 or 1
 	end
-end }
-
-target_list.upload = { pre = function()
-	uploadconfig.version = next_version
 end }
 
 ---- Information for `l3build upload`
