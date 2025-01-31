@@ -1,3 +1,4 @@
+# Version 4.1
 * Man page now contains actual information.
 * Add zsh completion file with completions for all relevant options.
 * Improve support for non-pdf input files (eps, jpg, png).
