@@ -27,7 +27,11 @@ step_version = function(version, part)
 end
 make_next_version = function(a)
 	if version == 'N.NN' then print('Version information unavailable') return end
-	if not isprerelease then print("Already tagged") return end
+	if not isprerelease then
+		print("Already tagged")
+		next_version = version
+		return version
+	end
 	local part = 'minor'
 	if a then part = a[1] end
 	next_version = step_version(version, part)
@@ -136,20 +140,19 @@ target_list.tag = { func = function(a)
 		options["dry-run"] = true
 	end
 	mkdir(builddir .. "/release")
-	local f = io.open(builddir .. "/release/ANNOUNCEMENT.md", "w")
 	local s = read_file("CHANGELOG.md")
-	local i = string.find(s, '# Version ' .. next_version)
+	local _, i = string.find(s, '# Version ' .. next_version .. "\n")
 	if i then
-		s = string.sub(s, i+2)
+		s = string.sub(s, i+1)
 	else
-		s = "Version " .. next_version .. "\n" .. s
 		local c = io.open("CHANGELOG.md", 'w')
-		c:write("# " .. s)
+		c:write("# Version " .. next_version .. "\n" .. s)
 		c:close()
 		if not options["dry-run"] then
 			os.execute("git commit --message='Version " .. next_version .. "' CHANGELOG.md")
 		end
 	end
+	local f = io.open(builddir .. "/release/ANNOUNCEMENT.md", "w")
 	f:write(string.sub(s, 1, string.find(s, "\n# Version ")-1))
 	f:close()
 	if options["dry-run"] then
@@ -170,7 +173,7 @@ uploadconfig = {
 	author = "David Firth; Reuben Thomas; Markus Kurtz",
 	uploader = "Markus Kurtz",
 	note = "Please note, that this package contains no PDF documentation, but a comprehensive man page and --help output instead.", -- Note necessary for automatic validation to accept package without PDF documentation.
-	license = "lppl",
+	license = "gpl2+",
 	summary = "Shell script interface to pdfpages",
 	ctanPath = "/support/pdfjam",
 	repository = "https://github.com/pdfjam/pdfjam",
