@@ -111,7 +111,7 @@ ctanzip = "build/release/pdfjam-ctan"
 target_list.ctan.func = function(a)
 	if not make_next_version(a) then return 1 end
 	os.execute("utils/build.sh " .. next_version)
-	os.remove("release", "pdfjam-ctan.zip")
+	os.remove(ctanzip .. '.zip')
 	return runcmd("zip -r release/pdfjam-ctan.zip pdfjam", builddir)
 end
 
