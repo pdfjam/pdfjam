@@ -5,14 +5,12 @@ set -e
 cd "$(dirname "$0")/.."
 target=build/pdfjam
 version="$1"
-mandate="$(git log -1 --format=%as doc/pdfjam.1)"
 
 rm -fr build/unpacked "$target"
 mkdir -p build/local "$target/bin" "$target/man" "$target/shell-completion/zsh" build/unpacked build/release
 cp COPYING doc/pdfjam.conf README.md "$target"
 cp doc/shell-completion/zsh/_pdfjam "$target/shell-completion/zsh/"
 <doc/pdfjam.1 sed "1s/N\\.NN/${version}/"'
-1s/"YYYY-MM-DD"/"'"${mandate}"'"/
 s+\$repository+https://github.com/pdfjam/pdfjam+' >"$target/man/pdfjam.1"
 
 echo "This is pdfjam $version" >"$target/VERSION-$version"

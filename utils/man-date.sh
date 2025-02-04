@@ -7,5 +7,5 @@ if [ -n "$(git status --porcelain "$man")" ]; then
 	else
 		date=$(git log --format=%as "$man"|sort|tail -n1)
 	fi
+	sed -Ei "1s/\"[0-9]{4}-[0-9]{2}-[0-9]{2}\"/\"$date\"/" "$man"
 fi
-sed -Ei "1s/\"[0-9]{4}-[0-9]{2}-[0-9]{2}\"/\"$date\"/" "$man"
