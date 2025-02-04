@@ -61,7 +61,51 @@ local rewrite_version = function(s)
 end
 
 read_file = function(name)
-	return io.open(name):read("a")
+	f = io.open(name)
+	s = f:read("a")
+	f:close()
+	return s
+end
+
+function compare_completions(difffile, reffile, genfile, cleanup, name, engine)
+	s = read_file(reffile)
+	ref = io.open(reffile .. ".multi", "w")
+	gen = io.open(genfile)
+	for l in gen:lines() do
+		if string.match(l, "^>>> .*%.%.%.$") then
+			ref:write(l .. "\n" .. s)
+		end
+	end
+	gen:close()
+	ref:close()
+	local errorlevel = os.execute(os_diffexe .. " "
+		.. normalize_path(reffile .. ".multi " .. genfile .. " > " .. difffile))
+	if errorlevel == 0 or cleanup then
+		os.remove(difffile)
+	end
+	return errorlevel
+end
+
+target_list.save.func = function(a)
+	if stdengine == "zsh" then
+		save(a)
+		for i,name in ipairs(a) do
+			reffile = testfiledir .. "/" .. name .. ".ref"
+			s = read_file(reffile)
+			_, begin_first_ref = string.find(s, "^>>> .*%.%.%.\n")
+			if not begin_first_ref then
+				print("Reference file " .. reffile .. " must start with >>> before rewriting.")
+				return 1
+			end
+			header_second_ref = string.find(s, "\n>>> .*%.%.%.\n") or -1
+			mref = io.open(reffile, "w")
+			mref:write(string.sub(s, begin_first_ref+1, header_second_ref))
+			mref:close()
+		end
+		return 0
+	else
+		save(a)
+	end
 end
 
 test_types = {
@@ -84,7 +128,14 @@ test_types = {
 		reference = ".shref",
 		generated = ".log",
 		rewrite = function(source, normalized) cp(source, ".", normalized) end
-	}
+	},
+	zsh = { -- for completion tests
+		test = ".in",
+		reference = ".ref",
+		generated = ".out",
+		rewrite = function(source, normalized) cp(source, ".", normalized) end,
+		compare = compare_completions
+	},
 }
 
 specialformats = { latex = {
@@ -92,11 +143,12 @@ specialformats = { latex = {
 	pdftex = { binary = "./engine pdftex" },
 	xetex = { binary = "./engine xetex" },
 	luatex = { binary = "./engine luatex" },
+	zsh = { binary = "./complete zsh" },
 } }
 
 checkengines = {"dryrun"}
 checkconfigs = {"build"}
-lvtext = ".jam" -- Used in check_tex; cannot be overridden there (for whatever reason)
+lvtext = ".jam" -- Used in check-tex; cannot be overridden there (for whatever reason)
 test_order = {"jam", "sh"}
 
 -- Symlink all binaries needed by pdfjam to allow resetting PATH

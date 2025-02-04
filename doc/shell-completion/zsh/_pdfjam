@@ -24,7 +24,7 @@ _pdfjam() {
 		--${(M)^paperformats:#b?j}
 	)
 	local options=($flags
-		'(- :)'{-h,--help}'[Print help message.]'
+		'(- :)'{-h,-u,--help}'[Print help message.]'
 		'(- :)'{-V,--version}'[Print the version number.]'
 		"(- :)--configpath[Print the 'configpath' variable.]"
 		{-o,--outfile}'[File or directory name for output(s).]:output:_output'
@@ -103,19 +103,27 @@ _pdfjam() {
 
 	_file_or_pagespec() {
 		_files -g '*.(pdf|ps|eps|jpg|png)'
-		# If the previous word is a pdf or ps file ...
-		[[ $words[$CURRENT-1] = *.(pdf|ps) ]] && {
-			# ... and not an argument to the word before ...
-			w=$words[$CURRENT-2]
-			! [[ "$w" = -* ]] ||
-			[[ "$w" = -- ]] ||
-			[[ "${(M)#flags:#"$w"\[*}" = 1 ]] ||
-			[[ "${(M)#paperflags:#"$w"}" = 1 ]]
-			# ... then it may be a pagespec.
-		} && _pagespec
+		# If the previous word is a pdf or ps file and a normal argument then it may be a pagespec.
+		[[ $words[$CURRENT-1] = *.(pdf|ps) ]] && _normal_argument_follows "$words[1,$CURRENT-2]" && _pagespec
 	}
 
 	_arguments -S '*:file or pagespec:_file_or_pagespec' $options
+}
+
+_normal_argument_follows() {
+	while shift; do
+		if [[ "$1" = -- ]]; then
+			return
+		elif _option_expects_argument "$1"; then
+			shift || return
+		fi
+	done
+}
+
+_option_expects_argument() {
+	[[ "$1" = -* ]] &&
+	! [[ "${(M)#flags:#"$1"\[*}" = 1 ]] &&
+	! [[ "${(M)#paperflags:#"$1"}" = 1 ]]
 }
 
 _pagespec() {

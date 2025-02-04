@@ -1,0 +1,7 @@
+#!/bin/bash
+in=${!##\\input } # ${!#} is the last argument
+out="${in%.in}.out"
+echo Completing "$in"
+case "$1" in
+	zsh) ./zsh.sh -p 'pdfjam ' -s '_pdfjam' "$(< "$in")" >"$out";;
+esac
