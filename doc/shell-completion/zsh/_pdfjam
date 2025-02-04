@@ -111,11 +111,11 @@ _pdfjam() {
 }
 
 _normal_argument_follows() {
-	while shift; do
+	while shift 2>/dev/null; do
 		if [[ "$1" = -- ]]; then
 			return
 		elif _option_expects_argument "$1"; then
-			shift || return
+			shift 2>/dev/null || return
 		fi
 	done
 }

@@ -1,7 +1,14 @@
 #!/bin/bash
 in=${!##\\input } # ${!#} is the last argument
 out="${in%.in}.out"
-echo Completing "$in"
 case "$1" in
-	zsh) ./zsh.sh -p 'pdfjam ' -s '_pdfjam' "$(< "$in")" >"$out";;
+	zsh) ;;
+	*) exit 1 ;;
 esac
+
+mapfile -t <"$in"
+{
+	for i in "${MAPFILE[@]}"; do
+		./zsh.sh -p 'pdfjam ' -s '_pdfjam' "$i"
+	done
+} >"$out"

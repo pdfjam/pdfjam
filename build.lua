@@ -78,7 +78,7 @@ function compare_completions(difffile, reffile, genfile, cleanup, name, engine)
 	end
 	gen:close()
 	ref:close()
-	local errorlevel = os.execute(os_diffexe .. " "
+	local errorlevel = os.execute("diff --unified=0 --show-function-line='^>>> .*\\.\\.\\.$' "
 		.. normalize_path(reffile .. ".multi " .. genfile .. " > " .. difffile))
 	if errorlevel == 0 or cleanup then
 		os.remove(difffile)
@@ -86,23 +86,30 @@ function compare_completions(difffile, reffile, genfile, cleanup, name, engine)
 	return errorlevel
 end
 
+function rewrite_multi_to_single_ref(reffile)
+	s = read_file(reffile)
+	_, begin_first_ref = string.find(s, "^>>> .*%.%.%.\n")
+	if not begin_first_ref then
+		print("Reference file " .. reffile .. " must start with >>> before rewriting.")
+		return 1
+	end
+	header_second_ref = string.find(s, "\n>>> .*%.%.%.\n", begin_first_ref) or -1
+	mref = io.open(reffile, "w")
+	mref:write(string.sub(s, begin_first_ref+1, header_second_ref))
+	mref:close()
+end
+
 target_list.save.func = function(a)
 	if stdengine == "zsh" then
-		save(a)
+		local errorlevel = 0
+		errorlevel = save(a)
 		for i,name in ipairs(a) do
 			reffile = testfiledir .. "/" .. name .. ".ref"
-			s = read_file(reffile)
-			_, begin_first_ref = string.find(s, "^>>> .*%.%.%.\n")
-			if not begin_first_ref then
-				print("Reference file " .. reffile .. " must start with >>> before rewriting.")
-				return 1
+			if fileexists(reffile) then
+				rewrite_multi_to_single_ref(reffile)
 			end
-			header_second_ref = string.find(s, "\n>>> .*%.%.%.\n") or -1
-			mref = io.open(reffile, "w")
-			mref:write(string.sub(s, begin_first_ref+1, header_second_ref))
-			mref:close()
 		end
-		return 0
+		return errorlevel
 	else
 		save(a)
 	end

@@ -1,0 +1,9 @@
+a.pdf 
+a.PDF 
+a.ps 
+a.PS 
+a.pdf a.pdf 
+a a.pdf 
+--batch a.pdf 
+-- --nup a.pdf 
+--nup 1 -- --nup a.pdf 
