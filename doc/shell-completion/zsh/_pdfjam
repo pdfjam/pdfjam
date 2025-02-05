@@ -104,7 +104,7 @@ _pdfjam() {
 	_file_or_pagespec() {
 		_files -g '*.(pdf|ps|eps|jpg|png)'
 		# If the previous word is a pdf or ps file and a normal argument then it may be a pagespec.
-		[[ $words[$CURRENT-1] = *.(pdf|ps) ]] && _normal_argument_follows "$words[1,$CURRENT-2]" && _pagespec
+		[[ "${(L)words[$CURRENT-1]}" = *.(pdf|ps) ]] && _normal_argument_follows "$words[1,$CURRENT-2]" && _pagespec
 	}
 
 	_arguments -S '*:file or pagespec:_file_or_pagespec' $options
