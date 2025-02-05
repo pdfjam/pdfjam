@@ -38,7 +38,9 @@ comptest() {
 	zmodload zsh/zpty  # Load the pseudo terminal module.
 	zpty pty compfake   # Create a new pty and run our function in it.
 	zpty -w pty "$@"$'\v'  # Write into vared
-	(zpty -r pty) | grep -E $'\CA|\CF|<HEADER>' | sed -E $'
+	(zpty -r pty) | # Read from pty using a subshell, ...
+		grep -E $'\CA|\CF|<HEADER>' | # ... filter for relevant lines ...
+		sed -E $' # ... and parse into a format of our liking.
 	s/\e\\[J//g
 	s/(\CB? +\CD)?\r$//
 	s/\CA<DESCRIPTION>/:/
