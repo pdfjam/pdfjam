@@ -1,0 +1,86 @@
+<HEADER>option</HEADER>
+--addtolist: Add an entry to the list of figures, the list of tables, or any other list.
+--addtotoc: Add an entry to the table of contents.
+--angle: Rotation angle.
+--batch: Run pdfjam sequentially on each input file in turn, and produce a separate output file for each input.
+--booklet: Same as signature with signature size chosen such that all pages fit into one signature.
+--booklet*: Similar to booklet, but for right-edge binding.
+--builddir: Build directory.
+--checkfiles: Use `file` utility to determine file type.
+--clip: Clip the graphic to the viewport.
+--column: Use column-major layout, where successive pages are arranged in columns down the paper.
+--columnstrict: For column-major layout only: Do not balance the columns on the last page.
+--configpath: Print the 'configpath' variable.
+--delta: Put some horizontal and vertical space between the logical pages.
+--doublepages: Insert every page twice.
+--doublepagestwist: Insert every page twice: once upside down and once normally.
+--doublepagestwist*: Insert every page twice: for odd pages, the first copy is upside down; for even pages, the second copy.
+--doublepagestwistodd: Insert every page twice: once normally and once upside down.
+--doublepagestwistodd*: Insert every page twice: for odd pages, the second copy is upside down; for even pages, the first copy.
+--draft: Switch to draft mode.
+--duplicatepages: Insert every page multiple times.
+--enc: Command-line encoding.
+--fitpaper: Adjust the paper size to the one of the inserted document.
+--flip-other-edge: For signatures/booklets: flip paper for duplex printing on the other edge.
+--frame: Put a frame around each logical page.
+--height: Required height. The graphic is scaled to this height.
+--help -u -h: Print help message.
+--interpolate: Enable interpolation of bitmap images by the viewer.
+--keepaspectratio: Do not distort figure if both width and height are given.
+--keepinfo: Preserve Title, Author, Subject and Keywords (from the last input PDF) in the output PDF file.
+--landscape: Exchange width and height of paper, usually resulting in landscape.
+--landscape: Rotate output sheet format by 90 degrees.
+--latex: LaTeX engine to be used.
+--link: Each inserted page becomes the target of the hyperlink \M-b\M-^_\M-(filename\M-b\M-^_\M-).\M-b\M-^_\M-(page number\M-b\M-^_\M-).
+--linkfit: For link option only: Specify, how the viewer displays a linked page.
+--linkname: For link option only: Change the linkname base from \M-b\M-^_\M-(filname\M-b\M-^_\M-) to name.
+--no-checkfiles: Rely on file extension to determine file type.
+--no-keepinfo: Do not preserve Title, Author, Subject and Keywords in the output PDF file.
+--no-landscape: Keep specified orientation of paper, usually resulting in portrait.
+--no-otheredge: Do not rotate every odd page by 180 degrees.
+--no-tidy: Preserve temporary build directory.
+--no-twoside: Do not specify 'twoside' document class option.
+--noautoscale: Suppress automatic scaling of pages.
+--nup: Put multiple logical pages onto each sheet of paper.
+--offset: Displace the origin of the inserted pages.
+--openright: Put an empty page before the first logical page.
+--openrighteach: Put an empty page before the first logical page of each file.
+--origin: Origin for rotation.
+--otheredge: Rotate every odd page by 180 degrees.
+--outfile -o: File or directory name for output(s).
+--pagebox: Specify which PDF bounding box specification to read.
+--pagecolor: Background color.
+--pagecommand: Declare LATEX commands, which are executed on each sheet of paper.
+--pagecommand*: Declare LATEX commands, which are executed on the very first page only.
+--pages: Select pages to insert.
+--pagetemplate: Declare page to be used as a template. All other pages are scaled such that they match within its size.
+--paper: Paper size.
+--papersize: Specify a paper size as 'WIDTH,HEIGHT'.
+--pdfauthor: Set Author of the output PDF file.
+--pdfkeywords: Set Keywords of the output PDF file.
+--pdfsubject: Set Subject of the output PDF file.
+--pdftitle: Set Title of the output PDF file.
+--picturecommand: Similar to pagecommand, but executed within a picture environment with base point at the lower left page corner.
+--picturecommand*: Similar to picturecommand, but for very first page only.
+--preamble: Append code to the LaTeX preamble.
+--quiet -q: Suppress verbose commentary on progress.
+--reflect: Reflect included pages.
+--rotateoversize: Rotate oversized pages.
+--runs: Run latex N times, for each output document made.
+--scale: Scale factor.
+--signature: Create booklets by rearranging pages into signatures of 2 pages each.
+--signature*: Similar to signature, but for right-edge binding.
+--suffix: Suffix for output, when file name is not given explicitely.
+--templatesize: Specify size of page template. All pages are scaled such that they match within this size.
+--thread: Combine inserted pages to an article thread.
+--threadname: For thread option only: Change the thread name from \M-b\M-^_\M-(filename\M-b\M-^_\M-) to name.
+--tidy: Clean temporary build directory.
+--totalheight: Required height+depth. Differs from height if rotation has occured.
+--trim: Similar to viewport, but here the four lengths specify the amount to remove or add to each side.
+--turn: Tell PDF viewer to display landscape pages in lanscape orientation. On by default.
+--twoside: Specify 'twoside' document class option.
+--vanilla: Suppress the reading of any pdfjam configuration files.
+--version -V: Print the version number.
+--viewport: Consider image to consist of given rectangle only.
+--width: Required width. The graphic is scaled to this width.
+--a0paper --a1paper --a2paper --a3paper --a4paper --a5paper --a6paper --ansiapaper --ansibpaper --ansicpaper --ansidpaper --ansiepaper --b0j --b0paper --b1j --b1paper --b2j --b2paper --b3j --b3paper --b4j --b4paper --b5j --b5paper --b6j --b6paper --c0paper --c1paper --c2paper --c3paper --c4paper --c5paper --c6paper --executivepaper --legalpaper --letterpaper

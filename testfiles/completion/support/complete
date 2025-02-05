@@ -1,0 +1,14 @@
+#!/bin/bash
+in=${!##\\input } # ${!#} is the last argument
+out="${in%.in}.out"
+case "$1" in
+	zsh) ;;
+	*) exit 1 ;;
+esac
+
+mapfile -t <"$in"
+{
+	for i in "${MAPFILE[@]}"; do
+		./zsh.sh -p 'pdfjam ' -s '_pdfjam' "$i"
+	done
+} >"$out"
