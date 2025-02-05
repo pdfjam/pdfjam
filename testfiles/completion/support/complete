@@ -7,8 +7,4 @@ case "$1" in
 esac
 
 mapfile -t <"$in"
-{
-	for i in "${MAPFILE[@]}"; do
-		./zsh.sh -p 'pdfjam ' -s '_pdfjam' "$i"
-	done
-} >"$out"
+./zsh.sh -p 'pdfjam ' -s '_pdfjam' "${MAPFILE[@]}" >"$out"

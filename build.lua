@@ -88,7 +88,7 @@ end
 
 function rewrite_multi_to_single_ref(reffile)
 	s = read_file(reffile)
-	_, begin_first_ref = string.find(s, "^>>> .*%.%.%.\n")
+	_, begin_first_ref = string.find(s, "^>>> [^\n]*%.%.%.\n")
 	if not begin_first_ref then
 		print("Reference file " .. reffile .. " must start with >>> before rewriting.")
 		return 1
