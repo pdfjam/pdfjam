@@ -1,0 +1,8 @@
+--papersize 1
+--papersize 1,1
+--height 1
+--offset 1
+--offset 1\ 1
+--offset '1 1
+--viewport 1\ 1\ 1
+--viewport '1 1 1 1
