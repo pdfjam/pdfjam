@@ -19,7 +19,7 @@ done
 
 compfake () {
 	zstyle ':completion:*' list-prompt '<irrelevant>'
-	zstyle ':completion:*' list-colors $'no=\CA' lc= rc= $'ec=\CD' $'sp=' $'fi=\CF'
+	zstyle ':completion:*' list-colors $'no=\CA' lc= rc= $'ec=\CD' $'sp=\CB' $'fi=\CF'
 	zstyle ':completion:*' list-separator '<DESCRIPTION>'
 	zstyle ':completion:*:descriptions' format '<HEADER>%d</HEADER>'
 	zstyle ':completion:*' force-list always
@@ -38,13 +38,13 @@ comptest() {
 	zmodload zsh/zpty  # Load the pseudo terminal module.
 	zpty pty compfake   # Create a new pty and run our function in it.
 	zpty -w pty "$@"$'\v'  # Write into vared
-	(zpty -r pty) | grep '\|\|<HEADER>' | sed -E '
-	s/\[J//g
-	s/(? +)?$//
-	s/<DESCRIPTION>/:/
-	s/(^|( )())[]([^]+)/\3\2\4/g
-	s/ *//g
-	s///g
+	(zpty -r pty) | grep -E $'\CA|\CF|<HEADER>' | sed -E $'
+	s/\e\\[J//g
+	s/(\CB? +\CD)?\r$//
+	s/\CA<DESCRIPTION>/:/
+	s/(^|( )(\CD))[\CA\CF]([^\CD]+)\CD/\\3\\2\\4/g
+	s/\CB *\CD//g
+	s/\CA\CD//g
 	'
 	zpty -d pty  # Delete the pty.
 }
