@@ -12,6 +12,12 @@ function coalesce(...) -- return first non-nil
 	end
 end
 
+function replace(s, a, b)
+	i, j = string.find(s, a, 1, true)
+	assert(i~=nil)
+	return string.sub(s, 1, i-1) .. b .. string.sub(s, j+1)
+end
+
 --function rmdir(t) os.spawn({"rm", "-rf", t[1]}) end
 function rmdir(t) end
 function tmpdir()
@@ -280,12 +286,12 @@ function with_pagespec(l, ps)
 end
 
 template = [[
-\documentclass[%s]{article}
-\usepackage[%s]{geometry}
-\usepackage[utf8]{inputenc}
-\usepackage{pdfpages}
+\documentclass[~documentoptions~]{article}~colorcode~
+\usepackage[~geometryoptions~]{geometry}
+\usepackage[utf8]{inputenc}~raw_pdfinfo~
+\usepackage{pdfpages}~otheredge~~preamble~
 \begin{document}
-\includepdfmerge[%s]{%s}
+\includepdfmerge[~options~]{~filepagelist~}
 \end{document}]]
 
 -- main
@@ -296,11 +302,11 @@ function main()
 	local dd = tmpdir()
 	local d = dd[1]
 
-	local list = {}
+	local filepagelist = {}
 	local l = {}
 	for i, x in ipairs(as) do
 		if l and is_valid_pagespec(x) then
-			table.append(list, with_pagespec(l, x))
+			table.append(filepagelist, with_pagespec(l, x))
 			l = {}
 		else
 			if not io.exists(x) then error("File '"..x.."' does not exist.") end
@@ -309,13 +315,26 @@ function main()
 			table.insert(l, y)
 		end
 	end
-	table.append(list, with_pagespec(l, "-"))
+	table.append(filepagelist, with_pagespec(l, "-"))
 
 	local pwd = lfs.currentdir()
 	local outfile = file.join(pwd, "out.pdf")
 	lfs.chdir(d)
 
-	local content = string.format(template, "", "", "", table.concat(list, ","))
+	local t = {
+		documentoptions = "",
+		geometryoptions = "a4paper",
+		colorcode = "",
+		raw_pdfinfo = "",
+		otheredge = "",
+		preamble = "",
+		options = "scale=.8",
+		filepagelist = table.concat(filepagelist, ",")
+	}
+	local content = template
+	for k, v in pairs(t) do
+		content = replace(content, "~"..k.."~", v)
+	end
 
 	local f = io.open("a.tex", "w")
 	f:write(content)
@@ -324,7 +343,6 @@ function main()
 	file.copy("a.pdf", outfile)
 end
 
---success, msg = pcall(main)
 success, msg = pcall(main)
 collectgarbage()
 if not success then
