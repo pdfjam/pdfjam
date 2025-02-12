@@ -37,7 +37,6 @@ function Parser:new(obj)
 	local obj = obj or {}
 	obj.options = obj.options or {}
 	obj.short_options = obj.short_options or {}
-	obj.no_options = obj.no_options or ""
 	self.__index = self
 	setmetatable(obj, self)
 	return obj
@@ -76,15 +75,13 @@ end
 function Parser:parse_short_options(word)
 	self.j = 2
 	local s = string.sub(word, 2, 2)
-	if string.find(self.no_options, s, 1, true) then return false end
+	if not self.short_options[s] then return false end
 	while s ~= "" do
-		a = self.short_options[s]
+		local a = self.short_options[s]
 		if a then
 			self:set_option(a)
-		elseif string.find(self.no_options, s, 1, true) then
-			self:error("invalid short option -" .. s)
 		else
-			self:warn("unknown option -" .. s)
+			self:error("unknown option -" .. s)
 		end
 		self.j = self.j + 1
 		s = string.sub(word, self.j, self.j)
@@ -94,7 +91,6 @@ function Parser:parse_short_options(word)
 end
 
 function Parser:set_option(a, v)
-	self.positional_argument_read = nil
 	if string.sub(a, 1, 3) == "no-" then
 		self:unset(string.sub(a, 4))
 		if v then self:error("unsetting expects no value") end
@@ -241,9 +237,8 @@ function define_options()
 	return options
 end
 
+-- Used: [Vhoq]. Used in pagespec: [-,0-9l].
 short_options = {h="help", V="version", q="quiet", o="outfile"}
-no_options = ",-0123456789l" -- explicitely no short options
--- all other chars may be used in future pdfjam versions
 
 function exit(code) collectgarbage() os.exit(code, true) end
 function show_help() print("This is how to use it.") exit() end
@@ -254,7 +249,6 @@ function getopt()
 	parser = Parser:new({
 		options = define_options(),
 		short_options = short_options,
-		no_options = no_options
 	})
 	return parser:parse(arg)
 end
@@ -346,7 +340,6 @@ end
 success, msg = pcall(main)
 collectgarbage()
 if not success then
-	print("pdfjam run unsuccessfull.")
 	print(msg)
 	exit(1)
 end
