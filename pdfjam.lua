@@ -6,6 +6,8 @@ version="N.NN"
 
 require "lualibs"
 
+function identity(x) return x end
+
 function coalesce(...) -- return first non-nil
 	for i = 1, select("#", ...) do
 		if select(i, ...) ~= nil then return (select(i, ...)) end
@@ -18,21 +20,62 @@ function replace(s, a, b)
 	return string.sub(s, 1, i-1) .. b .. string.sub(s, j+1)
 end
 
---function rmdir(t) os.spawn({"rm", "-rf", t[1]}) end
-function rmdir(t) end
-function tmpdir()
-	local x = os.tmpname()
-	os.remove(x)
-	if not lfs.mkdir(x) then error("Could not create tmpdir") end
-	local t = {x}
+function rmdir(t) os.spawn({"rm", "-rf", t[1]}) end
+function mkdir(d)
+	d, success = dir.makedirs(d)
+	if not success then error("Could not create directory " .. d .. ".") end
+	local t = {d}
 	setmetatable(t, {__gc = rmdir})
 	return t
+end
+function providedir(d)
+	if not d then
+		d = os.tmpname()
+		os.remove(d)
+	end
+	return d, mkdir(d)
+end
+
+function embrace(s)
+	if string.find(s, "[],=]") and not
+		(string.sub(s, 1, 1) == "{" and string.sub(s, #s) == "}") then
+		return "{" .. s .. "}"
+	else return s
+	end
+end
+
+function unbrace(s)
+	if string.sub(s, 1, 1) == "{" and string.sub(s, #s) == "}" then
+		return string.sub(s, 2, #s-1)
+	else return s
+	end
 end
 
 -- option parser
 
-Parser = {}
+function getopt()
+	for _, w in ipairs(arg) do
+		if w == "--" then break
+		elseif w == "--vanilla" then local vanilla = true break
+		end
+	end
+	local options = define_options()
+	local a, t
+	if not vanilla then
+		local p = ConfigParser:new({options = options})
+		t = p:parse("")
+	end
+	parser = Parser:new({
+		options = options,
+		short_options = short_options,
+		t = t,
+	})
+	a, t = parser:parse(arg)
+	return Interpreter:new({a=a, t=t, options=options})
+end
 
+
+Parser = {}
 function Parser:new(obj)
 	local obj = obj or {}
 	obj.options = obj.options or {}
@@ -44,14 +87,14 @@ end
 
 function Parser:parse(args)
 	self._args = args
-	self.as = {}
-	self.t = {}
+	self.a = {}
+	self.t = self.t or {}
 	self.i = 1
 	while self.i <= #args do
 		self:parse_word(args[self.i])
 		self.i = self.i + 1
 	end
-	return self.as, self.t
+	return self.a, self.t
 end
 
 function Parser:parse_word(word)
@@ -101,14 +144,10 @@ function Parser:set_option(a, v)
 		return self:set_option(o, v)
 	end
 	assert(type(o) == "table")
-	if o.argument == "required" then
-		v = v or self:argument()
-	elseif o.argument == "forbidden" then
+	if o.argument == false then
 		if v then self:error("no argument allowed") end
-	elseif not v and self:word(1) then
-		local value = o.func(self:word(1), a, self.t)
-		self:set(a, coalesce(value, o.argument))
-		return
+	else
+		v = v or self:argument(o.argument)
 	end
 	local value, err = o.func(v, a, self.t)
 	self:error(err)
@@ -116,27 +155,37 @@ function Parser:set_option(a, v)
 end
 
 function Parser:parse_positional_argument(word)
-	table.insert(self.as, word)
+	table.insert(self.a, word)
 end
 
+function Parser:get(a) return self.t[a] end
 function Parser:set(a, value) if value ~= nil then self.t[a] = value end end
 function Parser:unset(a) self.t[a] = nil end
 function Parser:word(n) return self._args[self.i + (n or 0)] end
 
-function Parser:argument()
+-- Read argument `w`.
+-- If `options` is given, only read `w` if `options[w]` exists.
+-- If `w` could be an option (starts with -), throw error.
+function Parser:argument(options)
+	assert(options==nil or type(options) == "table")
 	local w
 	if self.j then
 		w = string.sub(self:word(), self.j+1)
+		if options and not options[w] then return end
 		if w ~= "" then self.j = #self:word() return w end
 	end
 	w = self:word(1)
+	if options and not options[w] then return end
 	if not w then
 		self:error("argument required, but end of command line reached")
-	elseif string.sub(w, 1, 1) == "-" then
-		self:error("argument required, but the following word '" .. w ..
-			"' starts with '-'. Use --option=value syntax for values starting with '-'")
+	elseif string.sub(w, 1, 2) == "--"
+		or string.sub(w, 1, 1) == "-" and self.short_options[string.sub(w, 2, 2)] then
+		self:error("argument required, but the following word '" .. w
+			.. "' seems to be an option.\n\n\z
+			Tip: For supplying an argument starting with '-' use " .. self.word()
+			.. (string.sub(self.word(), 2, 2) == "-" and "=" or "") .. w .. " instead.")
 	end
-	self.i = self.i+1
+	self.i = self.i + 1
 	return w
 end
 
@@ -151,31 +200,74 @@ function Parser:warn(s, ...)
 	print(string.format("Warning while parsing %s: " .. s .. ".", self:word(), ...))
 end
 
+ConfigParser = Parser:new()
+
+Interpreter = {}
+function Interpreter:new(obj)
+	local obj = obj or {}
+	obj.t = obj.t or {}
+	obj.options = obj.options or {}
+	self.__index = self
+	setmetatable(obj, self)
+	return obj
+end
+
+function Interpreter:pop(a)
+	local v = self.t[a]
+	if v ~= nil then self.t[a] = nil return v end
+end
+function Interpreter:retrieve(a)
+	local v = self:pop(a)
+	if v then
+		local f = self.options[a] and self.options[a].retrieve
+		if f then return f(v, self.t) end
+		return v == true and a or a .. "=" .. embrace(v)
+	else return ""
+	end
+end
+
+function Interpreter:list(...)
+	local r
+	for _, a in ipairs({...}) do
+		local x = self:retrieve(a)
+		if x and x ~= "" then
+			r = r and r .. "," .. x or x
+		end
+	end
+	return r or ""
+end
+
+function Interpreter:listall()
+	local r = ""
+	for a in pairs(self.t) do
+		r = r .. "," .. self:retrieve(a)
+	end
+	return string.sub(r, 2)
+end
+
 -- pdfjam options
 
-normalopt = {
-	argument = "required",
-	func = function(v) return v end
-}
+normalopt = {func = identity}
 
 flagopt = {
-	argument = "forbidden",
-	func = function(_, a) return a end
+	argument = false,
+	func = function() return true end
 }
 
 paperopt = {
-	argument = "forbidden",
+	argument = false,
 	func = function(_, a, t) t.paper = a end
 }
 
-bool_prose = { ["true"]=true, yes=true, on=true, ["false"]=false, no=false, off=false }
-
+bool_prose = {["true"]="true", yes="true", on="true", ["false"]="false", no="false", off="false"}
 boolopt = {
-	argument = true,
+	argument = bool_prose,
 	func = function(v)
-		b = bool_prose[string.lower(v)]
+		if not v then return true end
+		local b = bool_prose[v]
 		if b == nil then
-			return nil, "Cannot interpret '" .. v .. "' as boolean value."
+			return nil, "Cannot interpret '" .. v .. "' as boolean value.\n\n\z
+			Tip: Accepted values are 'true', 'yes' and 'on', respectively 'false', 'no' and 'off'"
 		else
 			return b
 		end
@@ -184,18 +276,18 @@ boolopt = {
 
 function define_options()
 	local options = {}
-	bool_options = {
-		"flip-other-edge", "landscape", "frame", "column", "columnstrict",
+	local bool_options = {
+		"flip-other-edge", "frame", "column", "columnstrict",
 		"openright", "openrighteach", "turn", "noautoscale", "fitpaper",
 		"reflect", "booklet", "booklet*", "rotateoversize",
 		"link", "thread", "keepaspectratio", "clip", "draft", "interpolate",
 		"doublepages", "doublepagestwist", "doublepagestwistodd",
 		"doublepagestwist*", "doublepagestwistodd*"
 	}
-	flag_options = {"vanilla", "quiet", "tidy", "keepinfo",
+	local flag_options = {"vanilla", "quiet", "tidy", "keepinfo",
 		"landscape", "twoside", "otheredge"
 	}
-	paper_options = {
+	local paper_options = {
 		"a0paper","a1paper","a2paper","a3paper","a4paper","a5paper","a6paper",
 		"b0paper","b1paper","b2paper","b3paper","b4paper","b5paper","b6paper",
 		"c0paper","c1paper","c2paper","c3paper","c4paper","c5paper","c6paper",
@@ -203,35 +295,62 @@ function define_options()
 		"letterpaper","legalpaper","executivepaper",
 		"b0j","b1j","b2j","b3j","b4j","b5j","b6j"
 	}
-	mode_options = {help = show_help, version = show_version,
+	local paper_hash = table.tohash(paper_options)
+	local mode_options = {help = show_help, version = show_version,
 		configpath = show_configpath
 	}
 	for _, o in ipairs(bool_options) do options[o] = boolopt end
 	for _, o in ipairs(flag_options) do options[o] = flagopt end
 	for _, o in ipairs(paper_options) do options[o] = paperopt end
 	for o, f in pairs(mode_options) do options[o] = {argument = "forbidden", func = f} end
-	options.paper = {argument = "required", func = function(v)
-		v = string.lower(v)
-		if paper_options[v] then
-			return v
-		elseif paper_options[v .. "paper"] then
-			return v .. "paper"
-		else
-			return nil, "Unknown paper format '" .. v .. "'."
+	options.paper = {
+		func = function(v, _, t)
+			t.papersize = nil
+			v = string.lower(v)
+			if paper_hash[v] then
+				return v
+			elseif paper_hash[v .. "paper"] then
+				return v .. "paper"
+			else
+				return nil, "Unknown paper format '" .. v .. "'."
+			end
+		end,
+		retrieve = identity
+	}
+	options.papersize = {
+		func = function(v, _, t)
+			t.paper = nil
+			v = unbrace(v)
+			h, h_unit, w, w_unit = string.match(v, "^(%d+)(%l*),(%d+)(%l*)$")
+			if not h then return nil, "wrong syntax for papersize" end
+			h_unit = h_unit ~= "" and h_unit or "bp"
+			w_unit = w_unit ~= "" and w_unit or "bp"
+			return {h .. h_unit, w .. w_unit}
+		end,
+		retrieve = function(v, t)
+			if t.landscape then v = {v[2], v[1]} end
+			return "papersize={" .. v[1] .. "," .. v[2] .. "}"
 		end
-	end}
-	options.papersize = {argument = "required", func = function(v, _, t)
-		v = unbrace(v)
-		h, h_unit, w, w_unit = string.match(v, "^(%d+)(%l*),(%d+)(%l*)$")
-		if not h then return nil, "wrong syntax for papersize" end
-		h_unit = h_unit ~= "" and h_unit or "bp"
-		w_unit = w_unit ~= "" and w_unit or "bp"
-		t.paper = {h .. h_unit, w .. w_unit}
-	end}
-	options.preamble = {argument = "required", func = function(v, _, t)
-		t.preamble = t.preamble or {}
-		table.insert(t.preamble, v)
-	end}
+	}
+	options.preamble = {
+		func = function(v, _, t)
+			t.preamble = (t.preamble or "") .. "\n" .. v
+		end,
+		retrieve = identity
+	}
+	options.pagecolor = {
+		func = identity,
+		retrieve = function(v)
+			return "\n\z
+				\\usepackage{color}\n\z
+				\\definecolor{bgclr}{RGB}{"..v.."}\n\z
+				\\pagecolor{bgclr}"
+		end
+	}
+	options.otheredge = table.fastcopy(flagopt)
+	options.otheredge.retrieve = function(v)
+		return "\n"..[[{\makeatletter\AddToHook{shipout/before}{\ifodd\c@page\pdfpageattr{/Rotate 180}\fi}}]]
+	end
 	options.longedge = "otheredge"
 	options.shortedge = "no-otheredge"
 	return options
@@ -245,15 +364,7 @@ function show_help() print("This is how to use it.") exit() end
 function show_version() print("pdfjam version "..version) exit() end
 function show_configpath() print("configpath is ...") exit() end
 
-function getopt()
-	parser = Parser:new({
-		options = define_options(),
-		short_options = short_options,
-	})
-	return parser:parse(arg)
-end
-
--- pdfjam
+-- pdfjam --
 
 function is_valid_pagespec(word)
 	for _, r in ipairs(string.split(word, ",", true)) do
@@ -291,22 +402,23 @@ template = [[
 -- main
 
 function main()
-	local as, opts = getopt()
+	local x = getopt()
+	table.print(x.a)
+	table.print(x.t)
 
-	local dd = tmpdir()
-	local d = dd[1]
+	local d, gc_dummy = providedir(x:pop("builddir"))
 
 	local filepagelist = {}
 	local l = {}
-	for i, x in ipairs(as) do
-		if l and is_valid_pagespec(x) then
-			table.append(filepagelist, with_pagespec(l, x))
+	for i, a in ipairs(x.a) do
+		if l and is_valid_pagespec(a) then
+			table.append(filepagelist, with_pagespec(l, a))
 			l = {}
 		else
-			if not io.exists(x) then error("File '"..x.."' does not exist.") end
-			local y = file.join(d, "source-"..i..".pdf")
-			file.copy(x, y)
-			table.insert(l, y)
+			if not io.exists(a) then error("File '"..a.."' does not exist.") end
+			local s = file.join(d, "source-"..i..".pdf")
+			file.copy(a, s)
+			table.insert(l, s)
 		end
 	end
 	table.append(filepagelist, with_pagespec(l, "-"))
@@ -316,20 +428,21 @@ function main()
 	lfs.chdir(d)
 
 	local t = {
-		documentoptions = "",
-		geometryoptions = "a4paper",
-		colorcode = "",
-		raw_pdfinfo = "",
-		otheredge = "",
-		preamble = "",
-		options = "scale=.8",
-		filepagelist = table.concat(filepagelist, ",")
+		geometryoptions = x:retrieve("papersize"),
+		documentoptions = x:list("paper", "landscape", "twoside"),
+		colorcode = x:retrieve("pagecolor"),
+		raw_pdfinfo = "", -- TODO
+		otheredge = x:retrieve("otheredge"),
+		preamble = x:retrieve("preamble"),
+		options = x:listall(),
+		filepagelist = table.concat(filepagelist, ","),
 	}
 	local content = template
 	for k, v in pairs(t) do
 		content = replace(content, "~"..k.."~", v)
 	end
 
+	print(content)
 	local f = io.open("a.tex", "w")
 	f:write(content)
 	f:close()
@@ -337,7 +450,7 @@ function main()
 	file.copy("a.pdf", outfile)
 end
 
-success, msg = pcall(main)
+success, msg = xpcall(main, debug.traceback)
 collectgarbage()
 if not success then
 	print(msg)
