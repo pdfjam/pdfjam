@@ -43,7 +43,6 @@ _pdfjam() {
 		# \includepdfmerge options
 		'--pages[Select pages to insert.]:pagespec: '
 		'--nup[Put multiple logical pages onto each sheet of paper.]:XxY:_nup'
-		'--landscape[Rotate output sheet format by 90 degrees.]:bool:(true false)'
 		'--delta[Put some horizontal and vertical space between the logical pages.]:Xdim Ydim:_dimens " " "horizontal space,vertical space"'
 		'--offset[Displace the origin of the inserted pages.]:Xdim Ydim:_dimens " " "horizontal displacement,vertical displacement"'
 		'--frame[Put a frame around each logical page.]:bool:(true false)'
