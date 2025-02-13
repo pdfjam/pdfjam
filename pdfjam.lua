@@ -15,15 +15,17 @@ function coalesce(...) -- return first non-nil
 end
 
 function replace(s, a, b)
-	i, j = string.find(s, a, 1, true)
+	local i, j = string.find(s, a, 1, true)
 	assert(i~=nil)
 	return string.sub(s, 1, i-1) .. b .. string.sub(s, j+1)
 end
 
+function startswith(s, a) return string.sub(s, 1, #a) == a end
+
 function rmdir(t) os.spawn({"rm", "-rf", t[1]}) end
 function mkdir(d)
 	d, success = dir.makedirs(d)
-	if not success then error("Could not create directory " .. d .. ".") end
+	if not success then err("Could not create directory " .. d) end
 	return d
 end
 function gcdir(d)
@@ -157,7 +159,11 @@ function Parser:set_option(a, v)
 end
 
 function Parser:parse_positional_argument(word)
+	if self.last_positional_argument and self.last_positional_argument < self.i - 1 then
+		table.insert(self.a, false)
+	end
 	table.insert(self.a, word)
+	self.last_positional_argument = self.i
 end
 
 function Parser:get(a) return self.t[a] end
@@ -197,9 +203,15 @@ function Parser:error(s, ...)
 	error(string.format("Error while parsing %s: " .. s .. ".", self:word(), ...))
 end
 
-function Parser:warn(s, ...)
+function err(s, ...)
 	if not s then return end
-	print(string.format("Warning while parsing %s: " .. s .. ".", self:word(), ...))
+	collectgarbage()
+	error(string.format("Error: " .. s .. ".", ...))
+end
+
+function warn(s, ...)
+	if not s then return end
+	print(string.format("Warning: " .. s, ...))
 end
 
 ConfigParser = Parser:new()
@@ -258,7 +270,7 @@ flagopt = {
 
 paperopt = {
 	argument = false,
-	func = function(_, a, t) t.paper = a end
+	func = function(_, a, t) t.paper = a t.papersize = nil end
 }
 
 bool_prose = {["true"]="true", yes="true", on="true", ["false"]="false", no="false", off="false"}
@@ -364,7 +376,7 @@ function define_options()
 		latex = "pdflatex",
 		pdfinfo = "pdfinfo",
 		iconv = "iconv",
-		checkfiles = true, -- TODO
+		checkfiles = magic_file(arg[0]) == "a texlua script",
 		pages = "-",
 	}
 	return options, initial
@@ -378,13 +390,50 @@ function show_help() print("This is how to use it.") exit() end
 function show_version() print("pdfjam version "..version) exit() end
 function show_configpath() print("configpath is ...") exit() end
 
--- pdfjam --
+-- pdfjam specific helper functions --
+
+function outfile(out, last_in, suffix)
+	out = out or "."
+	if lfs.isdir(out) then
+		local dir = file.collapsepath(out, true) -- bug when out contains :
+		local name = file.nameonly(last_in) .. (suffix and "-" .. suffix or "")
+		out = file.join(dir, name .. ".pdf")
+	end
+	return out
+end
+
+--- file utility ---
+
+function magic_file(f)
+	-- Note: 19 = #"PostScript document"
+	local ans = io.popen("file -Lb " .. file.collapsepath(f, true)):read(19)
+	return (string.split(ans, ","))
+end
+
+do
+	local magic_names = {
+		["PDF document"]="pdf", ["PostScript document"]="eps",
+		["JPEG image data"]="jpg", ["PNG image data"]="png"
+	}
+	local ext_names = {pdf="pdf", eps="eps", jpg="jpg", png="png",
+		ps="eps", jpeg="jpg"}
+
+	function get_extension(f, check)
+		if check then
+			return magic_names[magic_file(f)]
+		else
+			return ext_names[string.lower(file.extname(f))]
+		end
+	end
+end
+
+--- page specs ---
 
 do
 	local page = lpeg.R"09" ^ 0 + "last" -- any or no page
 	local range = page * ("-" * page) ^ -1 -- any or no page range (the latter being an implicit empty page)
 	local part = range + "{}" -- page range or implicit or explicit empty page
-	local spec = part * ("," * part) ^ 0
+	local spec = part * ("," * part) ^ 0 * -1 -- complete page spec
 	function is_valid_pagespec(word)
 		return lpeg.match(spec, word) ~= nil
 	end
@@ -399,15 +448,84 @@ function with_pagespec(l, ps)
 	return r
 end
 
-function outfile(out, last_in, suffix)
-	out = out or "."
-	if lfs.isdir(out) then
-		local dir = file.collapsepath(out, true) -- bug when out contains :
-		local name = file.nameonly(last_in) .. (suffix and "-" .. suffix or "")
-		out = file.join(dir, name .. ".pdf")
-	end
-	return out
+--- pdfinfo ---
+do
+local pdfkeys = {"Title", "Author", "Subject", "Keywords"}
+
+local labels = {}
+for _, a in ipairs(pdfkeys) do
+	labels[string.format("%-17s", a..":")] = a
 end
+
+local function get_pdfinfo(pdfinfo, f)
+	local info = {}
+	-- Note: There does not seem to be the choice of UTF-16BE.
+	for l in io.popen(pdfinfo .. " -enc UTF-8 -- " .. f):lines() do
+		local k = labels[string.sub(l, 1, 17)]
+		if k then info[k] = string.sub(l, 18) end
+	end
+	return info
+end
+
+-- In the generic case of utf8 input, use function from lualibs.
+-- Note: While there is a lua-iconv module, most people will not have it installed.
+-- Note: Saving in file spares us hassle witch io.popen.
+local function to_utf16_be(v, iconv, enc)
+	if not v then return end
+	if not enc then return utf.utf8_to_utf16_be(v) end
+	local f = io.open("iconv.txt", "w"):write(v)
+	local p = io.popen(iconv .. "iconv.txt")
+	local result = p:read("a")
+	p:close() f:close()
+	return result
+end
+
+local pdfinfo_template = "\n" .. [[
+\ifdefined\luatexversion
+	\protected\def\pdfinfo{\pdfextension info}
+\fi
+\ifdefined\XeTeXversion
+	\protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
+\fi
+\ifdefined\pdfinfo
+	\pdfinfo{]]
+local pdfinfo_template_end = "\n\t}\n\\fi"
+
+function make_pdfinfo(x, last_in)
+	local pdfinfo, iconv, enc = x:pop("pdfinfo"), x:pop("iconv"), x:pop("enc")
+	local info = x:pop("keepinfo") and get_pdfinfo(pdfinfo, last_in) or {}
+	local to_utf16_be = utf.utf8_to_utf16_be
+	if not to_utf16_be and not enc then enc = "UTF-8" end
+	if enc then
+		local iconv = iconv .. " -f " .. enc .. " -t UTF-16BE -- iconv.txt"
+		to_utf16_be = function(s)
+			local f = io.open("iconv.txt", "w"):write(s)
+			local p = io.popen(iconv)
+			local result = p:read("a")
+			p:close() f:close()
+			return result
+		end
+	end
+
+	for _, k in ipairs(pdfkeys) do
+		info[k] = x:pop("pdf" .. string.lower(k)) or info[k]
+	end
+
+	local r = ""
+	if next(info) then
+		r = pdfinfo_template
+		for _, k in ipairs(pdfkeys) do
+			if info[k] then
+				r = r .. "\n\t\t/" .. k .. " <feff" .. string.tohex(to_utf16_be(info[k])) .. ">"
+			end
+		end
+		r = r .. pdfinfo_template_end
+	end
+	return r
+end
+end -- /pdfinfo
+
+-- main --
 
 template = [[
 \documentclass[~documentoptions~]{article}~colorcode~
@@ -418,57 +536,88 @@ template = [[
 \includepdfmerge[~options~]{~filepagelist~}
 \end{document}]]
 
--- main
-
-function main()
-	local x = getopt()
-
-	local d, gc_dummy = providedir(x:pop("builddir"), x:pop("tidy"))
-
-	local checkfiles = x:pop("checkfiles")
+function make_filepagelist(args, d, checkfiles)
 	local filepagelist = {}
 	local l = {}
-	local last_in
-	for i, a in ipairs(x.a) do
-		if l[1] and is_valid_pagespec(a) then
-			table.append(filepagelist, with_pagespec(l, a))
-			l = {}
-		else
-			if not io.exists(a) then error("File '"..a.."' does not exist.") end
-			local s = "source-"..i..".pdf"
-			file.copy(a, file.join(d, s))
-			last_in = a
-			table.insert(l, s)
+	local last_in, last_in_renamed
+	local i = 0
+	local function add_pagespec(a)
+		table.append(filepagelist, with_pagespec(l, a))
+		l = {}
+	end
+	local function add_file(a)
+		i = i + 1
+		last_in = a
+		last_in_renamed = "source-"..i..".pdf"
+		file.copy(last_in, file.join(d, last_in_renamed))
+		table.insert(l, last_in_renamed)
+	end
+	local cases = { -- binary coded index
+		"Input file expected, but '%s' not even exists in your file system",
+		"Input file or pagespec expected, but '%s' neither exists in your file system nor is it a pagespec",
+		"The argument '%s' is a valid pagespec but a valid PDF/EPS/JPG/PNG file was expected",
+		add_pagespec,
+		"The argument '%s' is a valid path but not a valid PDF/EPS/JPG/PNG file",
+		"The argument '%s' is a valid path but not a valid PDF/EPS/JPG/PNG file or pagespec",
+		"The argument '%s' is both a valid path and a pagespec but a valid PDF/EPS/JPG/PNG file was expected",
+		add_pagespec,
+		nil,
+		nil,
+		"Dubious argument '%s' interpreted as file due to its position.\n\nTip: Write './%s' for extra clarity",
+		"Ambiguous argument '%s' interpreted as pagespec. If you meant the file, please write './%s' instead",
+	}
+	local function add_argument(a)
+		local valid = io.exists(a) and (get_extension(a, check, checkfiles) and 8 or 4) or 0
+		local pagespec = is_valid_pagespec(a) and 2 or 0
+		local awaited = l[1] ~= nil and 1 or 0
+		local c = cases[valid + pagespec + awaited + 1]
+		if valid == 8 then
+			add_file(a)
+			warn(c, a, a)
+		elseif type(c) == "function" then c(a)
+		else err(c, a)
+		end
+	end
+	for _, a in ipairs(args) do
+		if a == false then table.append(filepagelist, l) l = {}
+		else add_argument(a)
 		end
 	end
 	table.append(filepagelist, l)
+	if not last_in then err("No argument supplied.") end -- TODO use stdin
+	return filepagelist, last_in, last_in_renamed
+end
 
+function main()
+	local x = getopt()
+	local d, gc_dummy = providedir(x:pop("builddir"), x:pop("tidy"))
+	local filepagelist, last_in, last_in_renamed = make_filepagelist(x.a, d, x:pop("checkfiles"))
 	local outfile = outfile(x:pop("outfile"), last_in, x:pop("suffix"))
-
-	local latex, iconv, pdfinfo = x:pop("latex"), x:pop("iconv"), x:pop("pdfinfo")
+	local latex = x:pop("latex")
 	local runs = tonumber(x:pop("runs"))
-	if runs <= 0 then error("The number of runs must be at least 1.") end
+	if runs <= 0 then err("The number of runs must be at least 1") end
 
 	lfs.chdir(d)
 
-	local t = {
+	local opts = {
 		geometryoptions = x:retrieve("papersize"),
 		documentoptions = x:list("paper", "landscape", "twoside"),
 		colorcode = x:retrieve("pagecolor"),
-		raw_pdfinfo = "", -- TODO
+		raw_pdfinfo = make_pdfinfo(x, last_in_renamed),
 		otheredge = x:retrieve("otheredge"),
 		preamble = x:retrieve("preamble"),
 		options = x:listall(),
 		filepagelist = table.concat(filepagelist, ","),
 	}
 	local content = template
-	for k, v in pairs(t) do
+	for k, v in pairs(opts) do
 		content = replace(content, "~"..k.."~", v)
 	end
 
 	local f = io.open("a.tex", "w")
 	f:write(content)
 	f:close()
+	-- do return end -- for debugging
 	for _ = 1, runs do os.spawn({latex, "a.tex"}) end
 	file.copy("a.pdf", outfile)
 end
