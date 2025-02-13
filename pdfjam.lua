@@ -390,17 +390,68 @@ function show_help() print("This is how to use it.") exit() end
 function show_version() print("pdfjam version "..version) exit() end
 function show_configpath() print("configpath is ...") exit() end
 
--- pdfjam specific helper functions --
+--- pdfinfo ---
+do
+local pdfkeys = {"Title", "Author", "Subject", "Keywords"}
 
-function outfile(out, last_in, suffix)
-	out = out or "."
-	if lfs.isdir(out) then
-		local dir = file.collapsepath(out, true) -- bug when out contains :
-		local name = file.nameonly(last_in) .. (suffix and "-" .. suffix or "")
-		out = file.join(dir, name .. ".pdf")
-	end
-	return out
+local labels = {}
+for _, a in ipairs(pdfkeys) do
+	labels[string.format("%-17s", a..":")] = a
 end
+
+local function get_pdfinfo(pdfinfo, f)
+	local info = {}
+	-- Note: There does not seem to be the choice of UTF-16BE.
+	for l in io.popen(pdfinfo .. " -enc UTF-8 -- " .. f):lines() do
+		local k = labels[string.sub(l, 1, 17)]
+		if k then info[k] = string.sub(l, 18) end
+	end
+	return info
+end
+
+local pdfinfo_template = "\n" .. [[
+\ifdefined\luatexversion
+	\protected\def\pdfinfo{\pdfextension info}
+\fi
+\ifdefined\XeTeXversion
+	\protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
+\fi
+\ifdefined\pdfinfo
+	\pdfinfo{]]
+local pdfinfo_template_end = "\n\t}\n\\fi"
+
+function make_pdfinfo(x, last_in)
+	local pdfinfo, iconv, enc = x:pop("pdfinfo"), x:pop("iconv"), x:pop("enc")
+	local info = x:pop("keepinfo") and get_pdfinfo(pdfinfo, last_in) or {}
+	local to_utf16_be = utf.utf8_to_utf16_be
+	if not to_utf16_be and not enc then enc = "UTF-8" end
+	if enc then
+		local iconv = iconv .. " -f " .. enc .. " -t UTF-16BE -- iconv.txt"
+		to_utf16_be = function(s)
+			local f = io.savedata("iconv.txt", s)
+			local p = io.popen(iconv)
+			local result = p:read("a")
+			return result
+		end
+	end
+
+	for _, k in ipairs(pdfkeys) do
+		info[k] = x:pop("pdf" .. string.lower(k)) or info[k]
+	end
+
+	local r = ""
+	if next(info) then
+		r = pdfinfo_template
+		for _, k in ipairs(pdfkeys) do
+			if info[k] then
+				r = r .. "\n\t\t/" .. k .. " <feff" .. string.tohex(to_utf16_be(info[k])) .. ">"
+			end
+		end
+		r = r .. pdfinfo_template_end
+	end
+	return r
+end
+end -- /pdfinfo
 
 --- file utility ---
 
@@ -448,93 +499,17 @@ function with_pagespec(l, ps)
 	return r
 end
 
---- pdfinfo ---
-do
-local pdfkeys = {"Title", "Author", "Subject", "Keywords"}
+--- file and pagespec list ---
 
-local labels = {}
-for _, a in ipairs(pdfkeys) do
-	labels[string.format("%-17s", a..":")] = a
-end
-
-local function get_pdfinfo(pdfinfo, f)
-	local info = {}
-	-- Note: There does not seem to be the choice of UTF-16BE.
-	for l in io.popen(pdfinfo .. " -enc UTF-8 -- " .. f):lines() do
-		local k = labels[string.sub(l, 1, 17)]
-		if k then info[k] = string.sub(l, 18) end
+function outfile(out, last_in, suffix)
+	out = out or "."
+	if lfs.isdir(out) then
+		local dir = file.collapsepath(out, true) -- bug when out contains :
+		local name = file.nameonly(last_in) .. (suffix and "-" .. suffix or "")
+		out = file.join(dir, name .. ".pdf")
 	end
-	return info
+	return out
 end
-
--- In the generic case of utf8 input, use function from lualibs.
--- Note: While there is a lua-iconv module, most people will not have it installed.
--- Note: Saving in file spares us hassle witch io.popen.
-local function to_utf16_be(v, iconv, enc)
-	if not v then return end
-	if not enc then return utf.utf8_to_utf16_be(v) end
-	local f = io.open("iconv.txt", "w"):write(v)
-	local p = io.popen(iconv .. "iconv.txt")
-	local result = p:read("a")
-	p:close() f:close()
-	return result
-end
-
-local pdfinfo_template = "\n" .. [[
-\ifdefined\luatexversion
-	\protected\def\pdfinfo{\pdfextension info}
-\fi
-\ifdefined\XeTeXversion
-	\protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
-\fi
-\ifdefined\pdfinfo
-	\pdfinfo{]]
-local pdfinfo_template_end = "\n\t}\n\\fi"
-
-function make_pdfinfo(x, last_in)
-	local pdfinfo, iconv, enc = x:pop("pdfinfo"), x:pop("iconv"), x:pop("enc")
-	local info = x:pop("keepinfo") and get_pdfinfo(pdfinfo, last_in) or {}
-	local to_utf16_be = utf.utf8_to_utf16_be
-	if not to_utf16_be and not enc then enc = "UTF-8" end
-	if enc then
-		local iconv = iconv .. " -f " .. enc .. " -t UTF-16BE -- iconv.txt"
-		to_utf16_be = function(s)
-			local f = io.open("iconv.txt", "w"):write(s)
-			local p = io.popen(iconv)
-			local result = p:read("a")
-			p:close() f:close()
-			return result
-		end
-	end
-
-	for _, k in ipairs(pdfkeys) do
-		info[k] = x:pop("pdf" .. string.lower(k)) or info[k]
-	end
-
-	local r = ""
-	if next(info) then
-		r = pdfinfo_template
-		for _, k in ipairs(pdfkeys) do
-			if info[k] then
-				r = r .. "\n\t\t/" .. k .. " <feff" .. string.tohex(to_utf16_be(info[k])) .. ">"
-			end
-		end
-		r = r .. pdfinfo_template_end
-	end
-	return r
-end
-end -- /pdfinfo
-
--- main --
-
-template = [[
-\documentclass[~documentoptions~]{article}~colorcode~
-\usepackage[~geometryoptions~]{geometry}
-\usepackage[utf8]{inputenc}~raw_pdfinfo~
-\usepackage{pdfpages}~otheredge~~preamble~
-\begin{document}
-\includepdfmerge[~options~]{~filepagelist~}
-\end{document}]]
 
 function make_filepagelist(args, d, checkfiles)
 	local filepagelist = {}
@@ -584,9 +559,35 @@ function make_filepagelist(args, d, checkfiles)
 		end
 	end
 	table.append(filepagelist, l)
-	if not last_in then err("No argument supplied.") end -- TODO use stdin
+	if not last_in then
+		last_in_renamed = "stdin.pdf"
+		last_in = file.join(d, last_in_renamed)
+		local s = io.read("a")
+		if s and s ~= "" then
+			local f = io.savedata(last_in, s)
+		else err("Either an input file must be given or there must be input from stdin")
+		end
+		local ext = get_extension(last_in)
+		if not ext then err("No input file given and stdin is no valid input")
+		elseif ext ~= "pdf" then
+			last_in_renamed = "stdin." .. ext
+			file.copy(last_in, file.join(d, last_in_renamed))
+			last_in = file.join(d, last_in_renamed)
+		end
+	end
 	return filepagelist, last_in, last_in_renamed
 end
+
+--- main ---
+
+template = [[
+\documentclass[~documentoptions~]{article}~colorcode~
+\usepackage[~geometryoptions~]{geometry}
+\usepackage[utf8]{inputenc}~raw_pdfinfo~
+\usepackage{pdfpages}~otheredge~~preamble~
+\begin{document}
+\includepdfmerge[~options~]{~filepagelist~}
+\end{document}]]
 
 function main()
 	local x = getopt()
@@ -614,9 +615,7 @@ function main()
 		content = replace(content, "~"..k.."~", v)
 	end
 
-	local f = io.open("a.tex", "w")
-	f:write(content)
-	f:close()
+	local f = io.savedata("a.tex", content)
 	-- do return end -- for debugging
 	for _ = 1, runs do os.spawn({latex, "a.tex"}) end
 	file.copy("a.pdf", outfile)
