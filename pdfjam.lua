@@ -24,16 +24,21 @@ function rmdir(t) os.spawn({"rm", "-rf", t[1]}) end
 function mkdir(d)
 	d, success = dir.makedirs(d)
 	if not success then error("Could not create directory " .. d .. ".") end
+	return d
+end
+function gcdir(d)
 	local t = {d}
 	setmetatable(t, {__gc = rmdir})
 	return t
 end
-function providedir(d)
-	if not d then
+function providedir(d, tidy)
+	if d then
+		return mkdir(d)
+	else
 		d = os.tmpname()
 		os.remove(d)
+		return mkdir(d), tidy and gcdir(d) or nil
 	end
-	return d, mkdir(d)
 end
 
 function embrace(s)
@@ -59,11 +64,11 @@ function getopt()
 		elseif w == "--vanilla" then local vanilla = true break
 		end
 	end
-	local options = define_options()
-	local a, t
+	local options, t = define_options()
+	local a
 	if not vanilla then
-		local p = ConfigParser:new({options = options})
-		t = p:parse("")
+		local p = ConfigParser:new({options = options, t = t})
+		a, t = p:parse("")
 	end
 	parser = Parser:new({
 		options = options,
@@ -109,10 +114,7 @@ function Parser:parse_word(word)
 end
 
 function Parser:parse_long_option(a)
-	local v
-	local p = string.find(a, "=", 2, true)
-	if p then v = string.sub(a, p+1) a = string.sub(a, 1, p-1) end
-	self:set_option(a, v)
+	self:set_option(lpeg.match(lpeg.splitat("=", true), a))
 end
 
 function Parser:parse_short_options(word)
@@ -353,7 +355,19 @@ function define_options()
 	end
 	options.longedge = "otheredge"
 	options.shortedge = "no-otheredge"
-	return options
+
+	local initial = {
+		tidy = true,
+		outfile = ".",
+		suffix = "pdfjam",
+		runs = 1,
+		latex = "pdflatex",
+		pdfinfo = "pdfinfo",
+		iconv = "iconv",
+		checkfiles = true, -- TODO
+		pages = "-",
+	}
+	return options, initial
 end
 
 -- Used: [Vhoq]. Used in pagespec: [-,0-9l].
@@ -366,19 +380,14 @@ function show_configpath() print("configpath is ...") exit() end
 
 -- pdfjam --
 
-function is_valid_pagespec(word)
-	for _, r in ipairs(string.split(word, ",", true)) do
-		if r ~= "{}" then
-			local pages = string.split(r, "-", true)
-			if #pages > 2 then return false end
-			for _, p in ipairs(pages) do
-				if not (tonumber(p) or p == "" or p == "last") then
-					return false
-				end
-			end
-		end
+do
+	local page = lpeg.R"09" ^ 0 + "last" -- any or no page
+	local range = page * ("-" * page) ^ -1 -- any or no page range (the latter being an implicit empty page)
+	local part = range + "{}" -- page range or implicit or explicit empty page
+	local spec = part * ("," * part) ^ 0
+	function is_valid_pagespec(word)
+		return lpeg.match(spec, word) ~= nil
 	end
-	return true
 end
 
 function with_pagespec(l, ps)
@@ -388,6 +397,16 @@ function with_pagespec(l, ps)
 		table.insert(r, ps)
 	end
 	return r
+end
+
+function outfile(out, last_in, suffix)
+	out = out or "."
+	if lfs.isdir(out) then
+		local dir = file.collapsepath(out, true) -- bug when out contains :
+		local name = file.nameonly(last_in) .. (suffix and "-" .. suffix or "")
+		out = file.join(dir, name .. ".pdf")
+	end
+	return out
 end
 
 template = [[
@@ -403,28 +422,33 @@ template = [[
 
 function main()
 	local x = getopt()
-	table.print(x.a)
-	table.print(x.t)
 
-	local d, gc_dummy = providedir(x:pop("builddir"))
+	local d, gc_dummy = providedir(x:pop("builddir"), x:pop("tidy"))
 
+	local checkfiles = x:pop("checkfiles")
 	local filepagelist = {}
 	local l = {}
+	local last_in
 	for i, a in ipairs(x.a) do
-		if l and is_valid_pagespec(a) then
+		if l[1] and is_valid_pagespec(a) then
 			table.append(filepagelist, with_pagespec(l, a))
 			l = {}
 		else
 			if not io.exists(a) then error("File '"..a.."' does not exist.") end
-			local s = file.join(d, "source-"..i..".pdf")
-			file.copy(a, s)
+			local s = "source-"..i..".pdf"
+			file.copy(a, file.join(d, s))
+			last_in = a
 			table.insert(l, s)
 		end
 	end
-	table.append(filepagelist, with_pagespec(l, "-"))
+	table.append(filepagelist, l)
 
-	local pwd = lfs.currentdir()
-	local outfile = file.join(pwd, "out.pdf")
+	local outfile = outfile(x:pop("outfile"), last_in, x:pop("suffix"))
+
+	local latex, iconv, pdfinfo = x:pop("latex"), x:pop("iconv"), x:pop("pdfinfo")
+	local runs = tonumber(x:pop("runs"))
+	if runs <= 0 then error("The number of runs must be at least 1.") end
+
 	lfs.chdir(d)
 
 	local t = {
@@ -442,11 +466,10 @@ function main()
 		content = replace(content, "~"..k.."~", v)
 	end
 
-	print(content)
 	local f = io.open("a.tex", "w")
 	f:write(content)
 	f:close()
-	os.spawn({"pdflatex", "a.tex"})
+	for _ = 1, runs do os.spawn({latex, "a.tex"}) end
 	file.copy("a.pdf", outfile)
 end
 
