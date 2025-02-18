@@ -1,10 +1,19 @@
 #!/usr/bin/env texlua
-kpse.set_program_name("pdfjam")
 version="N.NN"
+kpse.set_program_name("kpsewhich")
+require "lualibs"
+
+configpath = {"/etc", "/usr/share/etc", "/usr/local/share", "/usr/local/etc"}
+home = os.getenv("HOME")
+
+do
+	local a = os.type == "windows" and os.getenv("AppData")
+		or os.getenv("XDG_CONFIG_HOME")
+		or home and file.join(home, ".config")
+	if a then table.insert(configpath, a) end
+end
 
 -- utility
-
-require "lualibs"
 
 function identity(x) return x end
 
@@ -70,7 +79,9 @@ function getopt()
 	local a
 	if not vanilla then
 		local p = ConfigParser:new({options = options, t = t})
-		a, t = p:parse("")
+		for _, d in ipairs(configpath) do p:parse(file.join(d, "pdfjam.conf")) end
+		if home then p:parse(file.join(home, ".pdfjam.conf")) end
+		t = p.t
 	end
 	parser = Parser:new({
 		options = options,
@@ -81,12 +92,12 @@ function getopt()
 	return Interpreter:new({a=a, t=t, options=options})
 end
 
-
 Parser = {}
 function Parser:new(obj)
 	local obj = obj or {}
 	obj.options = obj.options or {}
 	obj.short_options = obj.short_options or {}
+	obj.t = obj.t or {}
 	self.__index = self
 	setmetatable(obj, self)
 	return obj
@@ -95,7 +106,6 @@ end
 function Parser:parse(args)
 	self._args = args
 	self.a = {}
-	self.t = self.t or {}
 	self.i = 1
 	while self.i <= #args do
 		self:parse_word(args[self.i])
@@ -151,7 +161,7 @@ function Parser:set_option(a, v)
 	if o.argument == false then
 		if v then self:error("no argument allowed") end
 	else
-		v = v or self:argument(o.argument)
+		v = v or self:argument(o.argument) or self:error("argument required")
 	end
 	local value, err = o.func(v, a, self.t)
 	self:error(err)
@@ -208,13 +218,44 @@ function err(s, ...)
 	collectgarbage()
 	error(string.format("Error: " .. s .. ".", ...))
 end
-
 function warn(s, ...)
 	if not s then return end
 	print(string.format("Warning: " .. s, ...))
 end
 
 ConfigParser = Parser:new()
+do
+	local spaces = lpeg.patterns.spacer^0
+	local rest = lpeg.P(1)^0
+	local key = lpeg.C((1 - lpeg.S(" \t\f\v="))^1)
+	local value = lpeg.C(rest)
+	local entry = key * spaces * ("=" * spaces * value)^-1
+	local comment = "#" * rest * lpeg.Cc(false)
+	local line = spaces * (comment + entry) * -1
+	function ConfigParser:parse(file)
+		local f = io.open(file)
+		if f then
+			self.file = file -- for error messages
+			for l in f:lines() do
+				self.current = l -- for error messages
+				self:parse_word(lpeg.match(line, l))
+			end
+			f:close()
+		end
+		return self.t
+	end
+end
+function ConfigParser:parse_word(k, v)
+	if k == nil then self:error("illegal syntax")
+	elseif k then return self:set_option(k, v) end
+end
+function ConfigParser:argument(optional)
+	if optional then self:error("argument needed") end
+end
+function ConfigParser:error(s, ...)
+	if not s then return end
+	print(string.format("Problem while parsing %s in line '%s': " .. s .. ".", self.file, self.current, ...))
+end
 
 Interpreter = {}
 function Interpreter:new(obj)
@@ -316,7 +357,7 @@ function define_options()
 	for _, o in ipairs(bool_options) do options[o] = boolopt end
 	for _, o in ipairs(flag_options) do options[o] = flagopt end
 	for _, o in ipairs(paper_options) do options[o] = paperopt end
-	for o, f in pairs(mode_options) do options[o] = {argument = "forbidden", func = f} end
+	for o, f in pairs(mode_options) do options[o] = {argument = false, func = f} end
 	options.paper = {
 		func = function(v, _, t)
 			t.papersize = nil
@@ -326,7 +367,7 @@ function define_options()
 			elseif paper_hash[v .. "paper"] then
 				return v .. "paper"
 			else
-				return nil, "Unknown paper format '" .. v .. "'."
+				return nil, "Unknown paper format '" .. v .. "'"
 			end
 		end,
 		retrieve = identity
