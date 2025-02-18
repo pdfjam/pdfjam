@@ -67,6 +67,13 @@ function unbrace(s)
 	end
 end
 
+local lookup = os.type == "windows" and "where.exe" or "command -v"
+function popen(exe, ...)
+	if io.popen(lookup .. " " .. exe):read() then
+		return io.popen(exe .. table.concat({"", ...}, " "))
+	end
+end
+
 -- option parser
 
 function getopt()
@@ -358,16 +365,16 @@ function define_options()
 	for _, o in ipairs(flag_options) do options[o] = flagopt end
 	for _, o in ipairs(paper_options) do options[o] = paperopt end
 	for o, f in pairs(mode_options) do options[o] = {argument = false, func = f} end
+	function to_paper(a)
+		a = string.lower(a)
+		return paper_hash[a] and a or paper_hash[a .. "paper"] and a .. "paper"
+	end
 	options.paper = {
 		func = function(v, _, t)
 			t.papersize = nil
-			v = string.lower(v)
-			if paper_hash[v] then
-				return v
-			elseif paper_hash[v .. "paper"] then
-				return v .. "paper"
-			else
-				return nil, "Unknown paper format '" .. v .. "'"
+			local paper = to_paper(v)
+			if paper then return paper
+			else return nil, "Unknown paper format '" .. v .. "'"
 			end
 		end,
 		retrieve = identity
@@ -409,6 +416,33 @@ function define_options()
 	options.longedge = "otheredge"
 	options.shortedge = "no-otheredge"
 
+	local paper_pattern = lpeg.C((1 - lpeg.P":")^1) * ": "
+		* lpeg.C(lpeg.R"09"^1) * "x" * lpeg.C(lpeg.R"09"^1)
+		* " " * lpeg.C(lpeg.R"az"^1) * -1
+	local paperconf_pattern = lpeg.C(lpeg.patterns.number)
+		* " " * lpeg.C(lpeg.patterns.number)
+	local function default_paper()
+		local o = popen("paper")
+		if o then
+			local p, x, y, u = lpeg.match(paper_pattern, o:read())
+			if not u then
+				warn("The `paper` program seems not to be working; not using it")
+			else
+				local paper = to_paper(p)
+				if paper then return paper
+				else return nil, {x .. u, y .. u} end
+			end
+		end
+		o = popen("paperconf")
+		if not o then return "a4paper" end
+		local paper = to_paper(o:read())
+		if paper then return paper end
+		o = popen("paperconf", "-s")
+		if not o then return "a4paper" end
+		local x, y = lpeg.match(paperconf_pattern, o:read())
+		return nil, {x .. "bp", y .. "bp"}
+	end
+
 	local initial = {
 		tidy = true,
 		outfile = ".",
@@ -420,6 +454,7 @@ function define_options()
 		checkfiles = magic_file(arg[0]) == "a texlua script",
 		pages = "-",
 	}
+	initial.paper, initial.papersize = default_paper()
 	return options, initial
 end
 
@@ -427,7 +462,7 @@ end
 short_options = {h="help", V="version", q="quiet", o="outfile"}
 
 function exit(code) collectgarbage() os.exit(code, true) end
-function show_help() print("This is how to use it.") exit() end
+function show_help(_, _, t) print("This is how to use it.") table.print(t) exit() end
 function show_version() print("pdfjam version "..version) exit() end
 function show_configpath() print("configpath is ...") exit() end
 
@@ -443,7 +478,7 @@ end
 local function get_pdfinfo(pdfinfo, f)
 	local info = {}
 	-- Note: There does not seem to be the choice of UTF-16BE.
-	for l in io.popen(pdfinfo .. " -enc UTF-8 -- " .. f):lines() do
+	for l in popen(pdfinfo, "-enc UTF-8 --", f):lines() do
 		local k = labels[string.sub(l, 1, 17)]
 		if k then info[k] = string.sub(l, 18) end
 	end
@@ -470,7 +505,7 @@ function make_pdfinfo(x, last_in)
 		local iconv = iconv .. " -f " .. enc .. " -t UTF-16BE -- iconv.txt"
 		to_utf16_be = function(s)
 			local f = io.savedata("iconv.txt", s)
-			local p = io.popen(iconv)
+			local p = popen(iconv)
 			local result = p:read("a")
 			return result
 		end
@@ -498,7 +533,7 @@ end -- /pdfinfo
 
 function magic_file(f)
 	-- Note: 19 = #"PostScript document"
-	local ans = io.popen("file -Lb " .. file.collapsepath(f, true)):read(19)
+	local ans = popen("file", "-Lb", file.collapsepath(f, true)):read(19)
 	return (string.split(ans, ","))
 end
 
