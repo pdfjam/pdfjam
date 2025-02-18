@@ -61,7 +61,7 @@ local rewrite_version = function(s)
 end
 
 read_file = function(name)
-	f = io.open(name)
+	f = io.open(name) or error("Could not open " .. name)
 	s = f:read("a")
 	f:close()
 	return s
@@ -123,10 +123,7 @@ test_types = {
 		rewrite = function(source, normalized, engine)
 			local dir=source .. ".d/" .. engine .. "/"
 			local f = io.open(normalized, "w")
-			f:write("%%% a.tex\n", read_file(dir.."a.tex"),
-				"\n%%% call.txt\n", rewrite_test_dir(read_file(dir.."call.txt")),
-				"\n%%% messages.txt\n",
-				rewrite_version(rewrite_test_dir(read_file(dir.."messages.txt"))))
+			f:write("%%% a.tex\n", read_file(dir.."a.tex"))
 			f:close()
 		end
 	},
