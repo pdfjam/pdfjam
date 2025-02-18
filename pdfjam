@@ -77,9 +77,11 @@ end
 -- option parser
 
 function getopt()
+	local vanilla
 	for _, w in ipairs(arg) do
 		if w == "--" then break
-		elseif w == "--vanilla" then local vanilla = true break
+		elseif w == "--vanilla" then vanilla = true
+		elseif w == "--no-vanilla" then vanilla = nil
 		end
 	end
 	local options, t = define_options()
@@ -96,6 +98,7 @@ function getopt()
 		t = t,
 	})
 	a, t = parser:parse(arg)
+	t.vanilla = nil
 	return Interpreter:new({a=a, t=t, options=options})
 end
 
@@ -663,7 +666,8 @@ template = [[
 \usepackage{pdfpages}~otheredge~~preamble~
 \begin{document}
 \includepdfmerge[~options~]{~filepagelist~}
-\end{document}]]
+\end{document}
+]]
 
 function main()
 	local x = getopt()
