@@ -63,7 +63,7 @@ function rmdir(t) os.spawn({"rm", "-rf", t[1]}) end
 function mkdir(d)
 	d, success = dir.makedirs(d)
 	if not success then err("Could not create directory " .. d) end
-	return d
+	return file.collapsepath(d, true)
 end
 function gcdir(d)
 	local t = {d}
@@ -238,8 +238,8 @@ function Parser:argument(options)
 		or string.sub(w, 1, 1) == "-" and self.short_options[string.sub(w, 2, 2)] then
 		self:error("argument required, but the following word '" .. w
 			.. "' seems to be an option.\n\n\z
-			Tip: For supplying an argument starting with '-' use " .. self.word()
-			.. (string.sub(self.word(), 2, 2) == "-" and "=" or "") .. w .. " instead.")
+			Tip: For supplying an argument starting with '-' use " .. self:word()
+			.. (string.sub(self:word(), 2, 2) == "-" and "=" or "") .. w .. " instead.")
 	end
 	self.i = self.i + 1
 	return w
@@ -394,7 +394,7 @@ function define_options()
 		"enc", "pdftitle", "pdfauthor", "pdfsubject", "pdfkeywords", runs
 	}
 	local flag_options = {"vanilla", "quiet", "tidy", "keepinfo",
-		"landscape", "twoside", "checkfiles"
+		"landscape", "twoside", "checkfiles", "batch"
 	}
 	local paper_options = {
 		"a0paper","a1paper","a2paper","a3paper","a4paper","a5paper","a6paper",
@@ -497,6 +497,7 @@ function define_options()
 		suffix = "pdfjam",
 		runs = 1,
 		latex = "pdflatex",
+		latexopts = "-interaction batchmode",
 		pdfinfo = "pdfinfo",
 		iconv = "iconv",
 		checkfiles = magic_file(arg[0]) == "a texlua script",
@@ -646,11 +647,11 @@ end
 
 function out_names(out, files, suffix)
 	out = out or "."
-	if not ismkdir(out) then err("Output must go to directory in batch mode.") end
+	if not ismkdir(out) and files[2] then err("Output must go to directory in batch mode") end
 	suffix = suffix and "-"..suffix or ""
 	local dir = file.collapsepath(out, true) -- bug when out contains :
 	local r = {}
-	for _, name in files do
+	for _, name in ipairs(files) do
 		table.insert(r, file.join(dir, file.nameonly(name) .. suffix .. ".pdf"))
 	end
 	return r
@@ -669,6 +670,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		function add_file(a)
 			local b = new_name(a, checkfiles)
 			i = i + 1
+			mkdir(file.join(d, i))
 			file.copy(a, file.join(d, i, b))
 			table.insert(l, b)
 		end
@@ -746,13 +748,14 @@ template = [[
 \documentclass[$documentoptions]{article}$colorcode
 \usepackage[$geometryoptions]{geometry}
 \usepackage[utf8]{inputenc}
-\usepackage{pdfpages}$info$otheredge$preamble
+\usepackage{pdfpages}$rawinfo$otheredge$preamble
 \begin{document}
 \includepdf$merge[$pages$comma$options]{$filepagelist}
 \end{document}
 ]]
-function run(tab, outfile, infofile)
-	tab.info = pdfinfo_code(merge_pdfinfo(tab.info, tab.pdfinfo, infofile))
+function run(tab, d, outfile, infofile)
+	assert(lfs.chdir(d) or print(d))
+	tab.rawinfo = pdfinfo_code(merge_pdfinfo(tab.info, tab.pdfinfo, infofile))
 	tab.comma = tab.pages ~= "" and tab.options ~= "" and "," or ""
 	debugprint("Running %s in %s to produce %s using %T", tab.latex, lfs.currentdir(), outfile, tab)
 	local pattern = lpeg.Cs((lpeg.P"$" * lpeg.C(lpeg.R"az" ^ 1) / tab + 1) ^ 0)
@@ -765,12 +768,13 @@ end
 function main(args)
 	args = args or arg
 	local x = getopt(args)
-	local outfile, suffix = x:pop"outfile", x:pop"suffix"
+	local batch, outfile, suffix = x:pop"batch", x:pop"outfile", x:pop"suffix"
 
 	local tab = {
 		latex = x:pop"latex",
-		latexopts = "-interaction batchmode",
+		latexopts = x:pop"latexopts" or "",
 		pdfinfo = x:pop"pdfinfo",
+		info = pop_pdfinfo(x),
 		runs = tonumber(x:pop"runs"),
 		geometryoptions = x:retrieve"papersize", -- before `landscape`
 		documentoptions = x:list("paper", "landscape", "twoside"),
@@ -780,33 +784,29 @@ function main(args)
 		merge = "merge",
 		pages = x:retrieve"pages",
 		options = x:pdfpagesoptions(),
-		info = pop_pdfinfo(x), -- set to actual code later
-		-- `comma` and `filepagelist` set later
+		-- `rawinfo`, `comma` and `filepagelist` set later
 	}
 	if not x:pop"keepinfo" then tab.pdfinfo = nil end
 	if not (tab.runs and tab.runs > 0) then err("The number of runs must be at least 1") end
 
 	local d, gc_dummy = providedir(x:pop"builddir", x:pop"tidy")
 
-	local filepagelist, last_in, last_in_renamed = make_filepagelist(x.a, d, x:pop"batch", x:pop"checkfiles")
+	local filepagelist, last_in, last_in_renamed = make_filepagelist(x.a, d, batch, x:pop"checkfiles")
 
 	assert(not next(x.t) or table.print(x.t))
 
-	if last_in then --no-batch
+	if not batch then
 		local outfile = out_name(outfile, last_in, suffix)
-		lfs.chdir(d)
 		tab.merge = "merge"
 		tab.filepagelist = table.concat(filepagelist, ",")
-		run(tab, outfile, last_in_renamed)
-	else --batch
+		run(tab, d, outfile, last_in_renamed)
+	else
 		local outfiles = out_names(outfile, x.a, suffix)
-		lfs.chdir(file.join(d, 1))
 		for i, fp in ipairs(filepagelist) do
 			local f, pagespec = fp[1], fp[2]
 			tab.filepagelist = f
 			if pagespec then tab.pages = "pages=" .. embrace(pagespec) end
-			lfs.chdir(file.join("..", i))
-			run(tab, outfiles[i], f)
+			run(tab, file.join(d, i), outfiles[i], f)
 		end
 	end
 end

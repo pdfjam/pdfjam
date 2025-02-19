@@ -1,2 +1,2 @@
 eval "$pdfjam --batch a4.pdf --picturecommand '\\put(20,20){Letters.\\quad What'\\''s \$9\\cdot6\$?}'"
-cp -Tr "$dir/file1" "$dir"
+cp -Tr "$dir/1" "$dir"

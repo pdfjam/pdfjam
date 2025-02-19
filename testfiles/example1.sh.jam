@@ -5,6 +5,5 @@ mv file1-2up.pdf example1.sh.pdf
 mv file2-2up.pdf example1.zz.sh.pdf
 zz=${dir/example1.sh/example1.zz.sh}
 mkdir -p "$zz"
-cp -Tr "$dir/file1" "$dir"
-cp -Tr "$dir/file2" "$zz"
-: >"$zz/messages.txt"
+cp -Tr "$dir/2" "$zz"
+cp -Tr "$dir/1" "$dir"

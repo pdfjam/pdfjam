@@ -26,10 +26,11 @@ case "$1" in
 pdftex|xetex|luatex)
 	latex=$(command -v "${1%tex}latex") \
 		|| { echo Command "'${1%tex}latex'" not found; exit 1; }
-	preamble=" --preamble '"'\input{regression-test.tex}\AtBeginDocument{\START}'\'
+	opts="--preamble '"'\input{regression-test.tex}\AtBeginDocument{\START}'\'
 	;;
 dryrun)
 	latex=$(realpath "$0")
+	opts="--no-latexopts"
 	case "$in" in
 		*.sh) source "$in" | sed "s=$testdir=<TESTDIR>=g" >"$job.dryrun.log"; exit ;;
 		*.jam) ;;
@@ -42,7 +43,7 @@ dryrun)
 	;;
 *) echo "Unknown engine '$1'"; exit 1 ;;
 esac
-pdfjam="./pdfjam --latex '$latex' --vanilla --builddir '$dir' --outfile '$out'$preamble"
+pdfjam="./pdfjam --latex '$latex' --vanilla --builddir '$dir' --outfile '$out' $opts"
 
 # Evaluate .jam files
 case "$job" in
