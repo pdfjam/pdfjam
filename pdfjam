@@ -163,7 +163,7 @@ function Parser:set_option(a, v)
 		if v then self:error("unsetting expects no value") end
 		return
 	end
-	o = self.options[a] or normalopt
+	o = self.options[a] or pdfpagesopt
 	if type(o) == "string" then -- alias
 		return self:set_option(o, v)
 	end
@@ -304,21 +304,35 @@ end
 
 function Interpreter:listall()
 	local r = ""
-	for a in pairs(self.t) do
+	for i, a in recall_numbered do
 		r = r .. "," .. self:retrieve(a)
 	end
+	self.t = {}
 	return string.sub(r, 2)
 end
 
 -- pdfjam options
 
-normalopt = {func = identity}
+do
+	local pos = {}
+	function numbered(v, a, t)
+		if t and t[a] then table.remove(pos, table.contains(pos, a)) end
+		table.insert(pos, a)
+		return v
+	end
+	function recall_numbered(_, i)
+		i = (i or 0) + 1
+		if pos[i] then return i, pos[i]
+		else return nil end
+	end
+end
 
+normalopt = {func = identity}
+pdfpagesopt = {func = numbered}
 flagopt = {
 	argument = false,
 	func = function() return true end
 }
-
 paperopt = {
 	argument = false,
 	func = function(_, a, t) t.paper = a t.papersize = nil end
@@ -328,13 +342,13 @@ bool_prose = {["true"]="true", yes="true", on="true", ["false"]="false", no="fal
 boolopt = {
 	argument = bool_prose,
 	func = function(v)
-		if not v then return true end
+		if not v then return numbered(true) end
 		local b = bool_prose[v]
 		if b == nil then
 			return nil, "Cannot interpret '" .. v .. "' as boolean value.\n\n\z
 			Tip: Accepted values are 'true', 'yes' and 'on', respectively 'false', 'no' and 'off'"
 		else
-			return b
+			return numbered(b)
 		end
 	end
 }
@@ -349,8 +363,11 @@ function define_options()
 		"doublepages", "doublepagestwist", "doublepagestwistodd",
 		"doublepagestwist*", "doublepagestwistodd*"
 	}
+	local normal_options = {"builddir", "outfile", "suffix", "latex", "iconv",
+		"enc", "pdftitle", "pdfauthor", "pdfsubject", "pdfkeywords"
+	}
 	local flag_options = {"vanilla", "quiet", "tidy", "keepinfo",
-		"landscape", "twoside", "otheredge"
+		"landscape", "twoside", "checkfiles"
 	}
 	local paper_options = {
 		"a0paper","a1paper","a2paper","a3paper","a4paper","a5paper","a6paper",
@@ -365,6 +382,7 @@ function define_options()
 		configpath = show_configpath
 	}
 	for _, o in ipairs(bool_options) do options[o] = boolopt end
+	for _, o in ipairs(normal_options) do options[o] = normalopt end
 	for _, o in ipairs(flag_options) do options[o] = flagopt end
 	for _, o in ipairs(paper_options) do options[o] = paperopt end
 	for o, f in pairs(mode_options) do options[o] = {argument = false, func = f} end
@@ -412,7 +430,7 @@ function define_options()
 				\\pagecolor{bgclr}"
 		end
 	}
-	options.otheredge = table.fastcopy(flagopt)
+	options.otheredge = table.fastcopy(flagopt) -- copy before manipulating
 	options.otheredge.retrieve = function(v)
 		return "\n"..[[{\makeatletter\AddToHook{shipout/before}{\ifodd\c@page\pdfpageattr{/Rotate 180}\fi}}]]
 	end
@@ -455,7 +473,7 @@ function define_options()
 		pdfinfo = "pdfinfo",
 		iconv = "iconv",
 		checkfiles = magic_file(arg[0]) == "a texlua script",
-		pages = "-",
+		pages = numbered("-", "pages")
 	}
 	initial.paper, initial.papersize = default_paper()
 	return options, initial
