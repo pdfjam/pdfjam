@@ -76,7 +76,7 @@ end
 
 -- option parser
 
-function getopt()
+function getopt(arg)
 	local vanilla
 	for _, w in ipairs(arg) do
 		if w == "--" then break
@@ -272,6 +272,7 @@ function Interpreter:new(obj)
 	local obj = obj or {}
 	obj.t = obj.t or {}
 	obj.options = obj.options or {}
+	if DEBUG then table.print(obj.t) end
 	self.__index = self
 	setmetatable(obj, self)
 	return obj
@@ -302,12 +303,11 @@ function Interpreter:list(...)
 	return r or ""
 end
 
-function Interpreter:listall()
+function Interpreter:pdfpagesoptions()
 	local r = ""
 	for i, a in recall_numbered do
 		r = r .. "," .. self:retrieve(a)
 	end
-	self.t = {}
 	return string.sub(r, 2)
 end
 
@@ -364,7 +364,7 @@ function define_options()
 		"doublepagestwist*", "doublepagestwistodd*"
 	}
 	local normal_options = {"builddir", "outfile", "suffix", "latex", "iconv",
-		"enc", "pdftitle", "pdfauthor", "pdfsubject", "pdfkeywords"
+		"enc", "pdftitle", "pdfauthor", "pdfsubject", "pdfkeywords", runs
 	}
 	local flag_options = {"vanilla", "quiet", "tidy", "keepinfo",
 		"landscape", "twoside", "checkfiles"
@@ -473,7 +473,7 @@ function define_options()
 		pdfinfo = "pdfinfo",
 		iconv = "iconv",
 		checkfiles = magic_file(arg[0]) == "a texlua script",
-		pages = numbered("-", "pages")
+		pages = "-"
 	}
 	initial.paper, initial.papersize = default_paper()
 	return options, initial
@@ -491,17 +491,36 @@ function show_configpath() print("configpath is ...") exit() end
 do
 local pdfkeys = {"Title", "Author", "Subject", "Keywords"}
 
+function pop_pdfinfo(x)
+	local iconv, enc = x:pop"iconv", x:pop"enc"
+	local to_utf16_be = utf.utf8_to_utf16_be
+	if enc then
+		local iconv = iconv .. " -f " .. enc .. " -t UTF-16BE -- iconv.txt"
+		to_utf16_be = function(s)
+			local f = io.savedata("iconv.txt", s)
+			local p = popen(iconv)
+			local result = "\xfe\xff" .. p:read("a")
+			return result
+		end
+	end
+	local info = {}
+	for _, k in ipairs(pdfkeys) do
+		local v = x:pop("pdf" .. string.lower(k))
+		if v then info[k] = to_utf16_be(v) end
+	end
+	return info
+end
+
 local labels = {}
 for _, a in ipairs(pdfkeys) do
 	labels[string.format("%-17s", a..":")] = a
 end
-
-local function get_pdfinfo(pdfinfo, f)
+function read_pdfinfo(pdfinfo, f)
 	local info = {}
 	-- Note: There does not seem to be the choice of UTF-16BE.
 	for l in popen(pdfinfo, "-enc UTF-8 --", f):lines() do
 		local k = labels[string.sub(l, 1, 17)]
-		if k then info[k] = string.sub(l, 18) end
+		if k and #l > 17 then info[k] = utf.utf8_to_utf16_be(string.sub(l, 18)) end
 	end
 	return info
 end
@@ -514,34 +533,16 @@ local pdfinfo_template = "\n" .. [[
 	\protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
 \fi
 \ifdefined\pdfinfo
-	\pdfinfo{]]
+	\pdfinfo{%]]
 local pdfinfo_template_end = "\n\t}\n\\fi"
 
-function make_pdfinfo(x, last_in)
-	local pdfinfo, iconv, enc = x:pop("pdfinfo"), x:pop("iconv"), x:pop("enc")
-	local info = x:pop("keepinfo") and get_pdfinfo(pdfinfo, last_in) or {}
-	local to_utf16_be = utf.utf8_to_utf16_be
-	if not to_utf16_be and not enc then enc = "UTF-8" end
-	if enc then
-		local iconv = iconv .. " -f " .. enc .. " -t UTF-16BE -- iconv.txt"
-		to_utf16_be = function(s)
-			local f = io.savedata("iconv.txt", s)
-			local p = popen(iconv)
-			local result = p:read("a")
-			return result
-		end
-	end
-
-	for _, k in ipairs(pdfkeys) do
-		info[k] = x:pop("pdf" .. string.lower(k)) or info[k]
-	end
-
+function pdfinfo_code(info)
 	local r = ""
 	if next(info) then
 		r = pdfinfo_template
 		for _, k in ipairs(pdfkeys) do
-			if info[k] then
-				r = r .. "\n\t\t/" .. k .. " <feff" .. string.tohex(to_utf16_be(info[k])) .. ">"
+			if info[k] and info[k] ~= "\xfe\xff" then
+				r = r .. "\n\t\t/" .. k .. " <" .. string.tohex(info[k]) .. ">"
 			end
 		end
 		r = r .. pdfinfo_template_end
@@ -549,6 +550,15 @@ function make_pdfinfo(x, last_in)
 	return r
 end
 end -- /pdfinfo
+
+function merge_pdfinfo(overwrite, pdfinfo, file)
+	if pdfinfo and file then
+		local info = read_pdfinfo(pdfinfo, file)
+		table.merge(info, overwrite)
+		return info
+	else return overwrite
+	end
+end
 
 --- file utility ---
 
@@ -587,18 +597,9 @@ do
 	end
 end
 
-function with_pagespec(l, ps)
-	local r = {}
-	for _, a in ipairs(l) do
-		table.insert(r, a)
-		table.insert(r, ps)
-	end
-	return r
-end
-
 --- file and pagespec list ---
 
-function outfile(out, last_in, suffix)
+function out_name(out, last_in, suffix)
 	out = out or "."
 	if lfs.isdir(out) then
 		local dir = file.collapsepath(out, true) -- bug when out contains :
@@ -608,21 +609,60 @@ function outfile(out, last_in, suffix)
 	return out
 end
 
-function make_filepagelist(args, d, checkfiles)
-	local filepagelist = {}
-	local l = {}
-	local last_in, last_in_renamed
-	local i = 0
-	local function add_pagespec(a)
-		table.append(filepagelist, with_pagespec(l, a))
-		l = {}
+function out_names(out, files, suffix)
+	out = out or "."
+	if not lfs.isdir(out) then err("Output must go to directory in batch mode.") end
+	suffix = suffix and "-"..suffix or ""
+	local dir = file.collapsepath(out, true) -- bug when out contains :
+	local r = {}
+	for _, name in files do
+		table.insert(r, file.join(dir, file.nameonly(name) .. suffix .. ".pdf"))
 	end
-	local function add_file(a)
-		i = i + 1
-		last_in = a
-		last_in_renamed = "source-"..i..".pdf"
-		file.copy(last_in, file.join(d, last_in_renamed))
-		table.insert(l, last_in_renamed)
+	return r
+end
+
+function make_filepagelist(args, d, batch, checkfiles)
+	local filepagelist, l = {}, {}
+	local last_in, last_in_renamed
+	local add_file, add_pagespec
+	if batch then
+		function add_pagespec(ps)
+			for _, a in ipairs(l) do table.insert(filepagelist, {a, ps}) end
+			l = {}
+		end
+		local i = 0
+		function add_file(a)
+			local ext = get_extension(a) or "pdf"
+			local b = file.addsuffix(file.robustname(file.basename(a)), ext, ext)
+			i = i + 1
+			file.copy(a, file.join(d, i, b))
+			table.insert(l, b)
+		end
+	else
+		function add_pagespec(ps)
+			for _, a in ipairs(l) do
+				table.insert(filepagelist, a)
+				table.insert(filepagelist, ps)
+			end
+			l = {}
+		end
+		local names = {["a.pdf"]=true}
+		local function robustname(a)
+			local ext = get_extension(a) or "pdf"
+			local b = file.addsuffix(file.robustname(file.basename(a)), ext, ext)
+			if names[b] then
+				local ext, i = "."..ext, 0
+				local c = string.sub(b, 1, #b-#ext).."-"
+				repeat i=i+1 b = c .. i .. ext until not names[b]
+			end
+			names[b] = true
+			return b
+		end
+		function add_file(a)
+			last_in, last_in_renamed = a, robustname(a)
+			file.copy(a, file.join(d, last_in_renamed))
+			table.insert(l, last_in_renamed)
+		end
 	end
 	local cases = { -- binary coded index
 		"Input file expected, but '%s' not even exists in your file system",
@@ -641,7 +681,7 @@ function make_filepagelist(args, d, checkfiles)
 	local function add_argument(a)
 		local valid = io.exists(a) and (get_extension(a, check, checkfiles) and 8 or 4) or 0
 		local pagespec = is_valid_pagespec(a) and 2 or 0
-		local awaited = l[1] ~= nil and 1 or 0
+		local awaited = next(l) and 1 or 0
 		local c = cases[valid + pagespec + awaited + 1]
 		if valid == 8 then
 			add_file(a)
@@ -651,26 +691,20 @@ function make_filepagelist(args, d, checkfiles)
 		end
 	end
 	for _, a in ipairs(args) do
-		if a == false then table.append(filepagelist, l) l = {}
+		if a == false then add_pagespec()
 		else add_argument(a)
 		end
 	end
-	table.append(filepagelist, l)
-	if not last_in then
-		last_in_renamed = "stdin.pdf"
-		last_in = file.join(d, last_in_renamed)
+	add_pagespec()
+	if not next(filepagelist) then
+		local a = file.join(d, "stdin")
 		local s = io.read("a")
-		if s and s ~= "" then
-			local f = io.savedata(last_in, s)
+		if s and s ~= "" then io.savedata(a, s)
 		else err("Either an input file must be given or there must be input from stdin")
 		end
-		local ext = get_extension(last_in)
-		if not ext then err("No input file given and stdin is no valid input")
-		elseif ext ~= "pdf" then
-			last_in_renamed = "stdin." .. ext
-			file.copy(last_in, file.join(d, last_in_renamed))
-			last_in = file.join(d, last_in_renamed)
-		end
+		if checkfiles and not get_extension(a) then err("No input file given and stdin is no valid input") end
+		add_file(a)
+		add_pagespec()
 	end
 	return filepagelist, last_in, last_in_renamed
 end
@@ -678,48 +712,76 @@ end
 --- main ---
 
 template = [[
-\documentclass[~documentoptions~]{article}~colorcode~
-\usepackage[~geometryoptions~]{geometry}
-\usepackage[utf8]{inputenc}~raw_pdfinfo~
-\usepackage{pdfpages}~otheredge~~preamble~
+\documentclass[$documentoptions]{article}$colorcode
+\usepackage[$geometryoptions]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{pdfpages}$info$otheredge$preamble
 \begin{document}
-\includepdfmerge[~options~]{~filepagelist~}
+\includepdf$merge[$pages$comma$options]{$filepagelist}
 \end{document}
 ]]
-
-function main()
-	local x = getopt()
-	local d, gc_dummy = providedir(x:pop("builddir"), x:pop("tidy"))
-	local filepagelist, last_in, last_in_renamed = make_filepagelist(x.a, d, x:pop("checkfiles"))
-	local outfile = outfile(x:pop("outfile"), last_in, x:pop("suffix"))
-	local latex = x:pop("latex")
-	local runs = tonumber(x:pop("runs"))
-	if runs <= 0 then err("The number of runs must be at least 1") end
-
-	lfs.chdir(d)
-
-	local opts = {
-		geometryoptions = x:retrieve("papersize"),
-		documentoptions = x:list("paper", "landscape", "twoside"),
-		colorcode = x:retrieve("pagecolor"),
-		raw_pdfinfo = make_pdfinfo(x, last_in_renamed),
-		otheredge = x:retrieve("otheredge"),
-		preamble = x:retrieve("preamble"),
-		options = x:listall(),
-		filepagelist = table.concat(filepagelist, ","),
-	}
-	local content = template
-	for k, v in pairs(opts) do
-		content = replace(content, "~"..k.."~", v)
-	end
-
-	local f = io.savedata("a.tex", content)
-	-- do return end -- for debugging
-	for _ = 1, runs do os.spawn({latex, "a.tex"}) end
+function run(tab, out, infofile)
+	tab.info = pdfinfo_code(merge_pdfinfo(tab.info, tab.pdfinfo, infofile))
+	tab.comma = tab.pages ~= "" and tab.options ~= "" and "," or ""
+	if DEBUG then print("Running "..tab.latex.." in "..lfs.currentdir().." to produce "..out.." with") table.print(tab) end
+	local pattern = lpeg.Cs((lpeg.P"$" * lpeg.C(lpeg.R"az" ^ 1) / tab + 1) ^ 0)
+	local content = pattern:match(template)
+	io.savedata("a.tex", content)
+	for _ = 1, tab.runs do os.spawn({tab.latex, "a.tex"}) end
 	file.copy("a.pdf", outfile)
 end
 
+function main(args)
+	args = args or arg
+	local x = getopt(args)
+	local outfile, suffix = x:pop"outfile", x:pop"suffix"
+
+	local tab = {
+		latex = x:pop"latex",
+		pdfinfo = x:pop"pdfinfo",
+		runs = tonumber(x:pop"runs"),
+		documentoptions = x:list("paper", "landscape", "twoside"),
+		colorcode = x:retrieve"pagecolor",
+		geometryoptions = x:retrieve"papersize",
+		otheredge = x:retrieve"otheredge",
+		preamble = x:retrieve"preamble",
+		merge = "merge",
+		pages = x:retrieve"pages",
+		options = x:pdfpagesoptions(),
+		info = pop_pdfinfo(x), -- set to actual code later
+		-- `comma` and `filepagelist` set later
+	}
+	if not x:pop"keepinfo" then tab.pdfinfo = nil end
+	if not (tab.runs and tab.runs > 0) then err("The number of runs must be at least 1") end
+
+	local d, gc_dummy = providedir(x:pop"builddir", x:pop"tidy")
+
+	local filepagelist, last_in, last_in_renamed = make_filepagelist(x.a, d, x:pop"batch", x:pop"checkfiles")
+
+	assert(not next(x.t) or table.print(x.t))
+
+	if last_in then --no-batch
+		local outfile = out_name(outfile, last_in, suffix)
+		lfs.chdir(d)
+		tab.merge = "merge"
+		tab.filepagelist = table.concat(filepagelist, ",")
+		run(tab, outfile, last_in_renamed)
+	else --batch
+		local outfiles = out_names(outfile, x.a, suffix)
+		lfs.chdir(file.join(d, 1))
+		for i, fp in ipairs(filepagelist) do
+			local f, pagespec = fp[1], fp[2]
+			tab.filepagelist = f
+			if pagespec then tab.pages = "pages=" .. embrace(pagespec) end
+			lfs.chdir(file.join("..", i))
+			run(tab, outfiles[i], f)
+		end
+	end
+end
+
+-- DEBUG = true
 success, msg = xpcall(main, debug.traceback)
+
 collectgarbage()
 if not success then
 	print(msg)
