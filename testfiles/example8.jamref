@@ -1,23 +1,7 @@
-%%% a.tex
-\batchmode
-\documentclass[a4paper,]{article}
+\documentclass[a4paper]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[nup=2x1]{source-1.pdf,-}
+\includepdfmerge[pages=-,nup=2x1]{letter-numbers-pdf.pdf}
 \end{document}
-
-%%% call.txt
-cd <TESTDIR>
-./pdfjam --checkfiles --latex <TESTDIR>/engine --vanilla --builddir example8.d/dryrun --outfile example8.pdf --nup 2x1 -- 'letter numbers pdf' - 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --checkfiles --latex <TESTDIR>/engine --vanilla --builddir example8.d/dryrun --outfile example8.pdf --nup 2x1 -- 'letter numbers pdf' - 
-  pdfjam: Calling <TESTDIR>/engine...
-  pdfjam: Finished.  Output was written to 'example8.pdf'.

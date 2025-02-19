@@ -13,7 +13,7 @@ do
 	if a then table.insert(configpath, a) end
 end
 
--- utility
+-- utilities --
 
 function identity(x) return x end
 
@@ -23,13 +23,36 @@ function coalesce(...) -- return first non-nil
 	end
 end
 
+-- string utilities --
+
+function startswith(s, a) return string.sub(s, 1, #a) == a end
+
 function replace(s, a, b)
 	local i, j = string.find(s, a, 1, true)
 	assert(i~=nil)
 	return string.sub(s, 1, i-1) .. b .. string.sub(s, j+1)
 end
 
-function startswith(s, a) return string.sub(s, 1, #a) == a end
+function embrace(s)
+	if string.find(s, "[],=]") and not
+		(string.sub(s, 1, 1) == "{" and string.sub(s, #s) == "}") then
+		return "{" .. s .. "}"
+	else return s
+	end
+end
+
+function unbrace(s)
+	if string.sub(s, 1, 1) == "{" and string.sub(s, #s) == "}" then
+		return string.sub(s, 2, #s-1)
+	else return s
+	end
+end
+
+function enquote(s)
+	return "'" .. string.gsub(s, "'", "'\\''") .. "'"
+end
+
+-- file utilities --
 
 function rmdir(t) os.spawn({"rm", "-rf", t[1]}) end
 function mkdir(d)
@@ -52,25 +75,10 @@ function providedir(d, tidy)
 	end
 end
 
-function embrace(s)
-	if string.find(s, "[],=]") and not
-		(string.sub(s, 1, 1) == "{" and string.sub(s, #s) == "}") then
-		return "{" .. s .. "}"
-	else return s
-	end
-end
-
-function unbrace(s)
-	if string.sub(s, 1, 1) == "{" and string.sub(s, #s) == "}" then
-		return string.sub(s, 2, #s-1)
-	else return s
-	end
-end
-
 local lookup = os.type == "windows" and "where.exe" or "command -v"
 function popen(exe, ...)
-	if io.popen(lookup .. " " .. exe):read() then
-		return io.popen(exe .. table.concat({"", ...}, " "))
+	if io.popen(lookup .. " " .. enquote(exe)):read() then
+		return io.popen(enquote(exe) .. table.concat({"", ...}, " "))
 	end
 end
 
@@ -496,10 +504,10 @@ function pop_pdfinfo(x)
 	local iconv, enc = x:pop"iconv", x:pop"enc"
 	local to_utf16_be = utf.utf8_to_utf16_be
 	if enc then
-		local iconv = iconv .. " -f " .. enc .. " -t UTF-16BE -- iconv.txt"
+		local iconv_opts = "-f " .. enc .. " -t UTF-16BE -- iconv.txt"
 		to_utf16_be = function(s)
 			local f = io.savedata("iconv.txt", s)
-			local p = popen(iconv)
+			local p = popen(iconv, iconv_opts)
 			local result = "\xfe\xff" .. p:read("a")
 			return result
 		end
@@ -565,8 +573,8 @@ end
 
 function magic_file(f)
 	-- Note: 19 = #"PostScript document"
-	local ans = popen("file", "-Lb", file.collapsepath(f, true)):read(19)
-	return (string.split(ans, ","))
+	local ans = popen("file", "-Lb", enquote(file.collapsepath(f, true))):read(19)
+	return string.split(ans, ",")[1]
 end
 
 do
@@ -577,13 +585,18 @@ do
 	local ext_names = {pdf="pdf", eps="eps", jpg="jpg", png="png",
 		ps="eps", jpeg="jpg"}
 
-	function get_extension(f, check)
-		if check then
+	function get_extension(f, checkfiles)
+		if checkfiles then
 			return magic_names[magic_file(f)]
 		else
 			return ext_names[string.lower(file.extname(f))]
 		end
 	end
+end
+
+function new_name(f, checkfiles)
+	local ext = get_extension(f, checkfiles) or "pdf"
+	return file.addsuffix(file.robustname(file.basename(f)), ext, ext), ext
 end
 
 --- page specs ---
@@ -633,8 +646,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		end
 		local i = 0
 		function add_file(a)
-			local ext = get_extension(a) or "pdf"
-			local b = file.addsuffix(file.robustname(file.basename(a)), ext, ext)
+			local b = new_name(a, checkfiles)
 			i = i + 1
 			file.copy(a, file.join(d, i, b))
 			table.insert(l, b)
@@ -649,8 +661,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		end
 		local names = {["a.pdf"]=true}
 		local function robustname(a)
-			local ext = get_extension(a) or "pdf"
-			local b = file.addsuffix(file.robustname(file.basename(a)), ext, ext)
+			local b, ext = new_name(a, checkfiles)
 			if names[b] then
 				local ext, i = "."..ext, 0
 				local c = string.sub(b, 1, #b-#ext).."-"
@@ -680,7 +691,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		"Ambiguous argument '%s' interpreted as pagespec. If you meant the file, please write './%s' instead",
 	}
 	local function add_argument(a)
-		local valid = io.exists(a) and (get_extension(a, check, checkfiles) and 8 or 4) or 0
+		local valid = io.exists(a) and ((not checkfiles or get_extension(a, true)) and 8 or 4) or 0
 		local pagespec = is_valid_pagespec(a) and 2 or 0
 		local awaited = next(l) and 1 or 0
 		local c = cases[valid + pagespec + awaited + 1]
@@ -703,7 +714,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		if s and s ~= "" then io.savedata(a, s)
 		else err("Either an input file must be given or there must be input from stdin")
 		end
-		if checkfiles and not get_extension(a) then err("No input file given and stdin is no valid input") end
+		if checkfiles and not get_extension(a, checkfiles) then err("No input file given and stdin is no valid input") end
 		add_file(a)
 		add_pagespec()
 	end
@@ -780,7 +791,7 @@ function main(args)
 	end
 end
 
-DEBUG = true
+-- DEBUG = true
 success, msg = xpcall(main, debug.traceback)
 
 collectgarbage()
