@@ -107,6 +107,7 @@ function getopt(arg)
 	})
 	a, t = parser:parse(arg)
 	t.vanilla = nil
+	if DEBUG then io.write"args " table.print(a) io.write"opts " table.print(t) end
 	return Interpreter:new({a=a, t=t, options=options})
 end
 
@@ -280,7 +281,6 @@ function Interpreter:new(obj)
 	local obj = obj or {}
 	obj.t = obj.t or {}
 	obj.options = obj.options or {}
-	if DEBUG then table.print(obj.t) end
 	self.__index = self
 	setmetatable(obj, self)
 	return obj
@@ -685,21 +685,19 @@ function make_filepagelist(args, d, batch, checkfiles)
 		"The argument '%s' is a valid path but not a valid PDF/EPS/JPG/PNG file or pagespec",
 		"The argument '%s' is both a valid path and a pagespec but a valid PDF/EPS/JPG/PNG file was expected",
 		add_pagespec,
-		nil,
-		nil,
-		"Dubious argument '%s' interpreted as file due to its position.\n\nTip: Write './%s' for extra clarity",
-		"Ambiguous argument '%s' interpreted as pagespec. If you meant the file, please write './%s' instead",
+		add_file,
+		add_file,
+		{add_file, "Dubious argument '%s' interpreted as file due to its position.\n\nTip: Write './%s' for extra clarity"},
+		{add_pagespec, "Ambiguous argument '%s' interpreted as pagespec. If you meant the file, please write './%s' instead"},
 	}
 	local function add_argument(a)
 		local valid = io.exists(a) and ((not checkfiles or get_extension(a, true)) and 8 or 4) or 0
 		local pagespec = is_valid_pagespec(a) and 2 or 0
 		local awaited = next(l) and 1 or 0
 		local c = cases[valid + pagespec + awaited + 1]
-		if valid == 8 then
-			add_file(a)
-			warn(c, a, a)
-		elseif type(c) == "function" then c(a)
-		else err(c, a)
+		if type(c) == "function" then c(a)
+		elseif type(c) == "string" then err(c, a)
+		else c[1](a) warn(c[2], a, a)
 		end
 	end
 	for _, a in ipairs(args) do
@@ -791,7 +789,7 @@ function main(args)
 	end
 end
 
--- DEBUG = true
+DEBUG = true
 success, msg = xpcall(main, debug.traceback)
 
 collectgarbage()

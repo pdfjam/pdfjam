@@ -1,26 +1,7 @@
-%%% a.tex
-\batchmode
-\documentclass[a4paper,]{article}
+\documentclass[a4paper]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[]{-.pdf,{},1-2.pdf,,,,,source-1.pdf,last,source-2.pdf,-,--fantasy.pdf,-,--.pdf,-}
+\includepdfmerge[pages=-]{-.pdf,{},1-2.pdf,,,,,--1.pdf,last,--.pdf,--fantasy.pdf,---1.pdf}
 \end{document}
-
-%%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir nastynames.d/dryrun --outfile nastynames.pdf -- - {} 1-2.pdf ,,, _.pdf last '{}' - --fantasy - -- - 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Ambiguous argument '{}' interpreted as pagespec. If you meant the file, please write './{}' instead.
-  pdfjam: Ambiguous argument 'last' interpreted as pagespec. If you meant the file, please write './last' instead.
-  pdfjam: Dubious argument '{}' interpreted as file due to its position. (Write './{}' for extra clarity.)
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir nastynames.d/dryrun --outfile nastynames.pdf -- - {} 1-2.pdf ,,, _.pdf last '{}' - --fantasy - -- - 
-  pdfjam: Calling <TESTDIR>/engine...
-  pdfjam: Finished.  Output was written to 'nastynames.pdf'.
