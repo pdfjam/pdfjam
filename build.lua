@@ -120,12 +120,7 @@ test_types = {
 		test = ".jam",
 		reference = ".jamref",
 		generated = "", -- it gets an implicit .dryrun anyway
-		rewrite = function(source, normalized, engine)
-			local dir=source .. ".d/" .. engine .. "/"
-			local f = io.open(normalized, "w")
-			f:write("%%% a.tex\n", read_file(dir.."a.tex"))
-			f:close()
-		end
+		rewrite = function(source, normalized, engine) cp("a.tex", source..".d/"..engine, normalized) end
 	},
 	sh = {
 		test = ".sh",

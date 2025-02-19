@@ -1,23 +1,7 @@
-%%% a.tex
-\batchmode
-\documentclass[a4paper,]{article}
+\documentclass[a4paper]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[]{lion.png,-,source-1.jpg,-}
+\includepdfmerge[pages=-]{lion.png,a.jpg}
 \end{document}
-
-%%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir images.d/dryrun --outfile images.pdf -- lion.png - a.jpg - 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir images.d/dryrun --outfile images.pdf -- lion.png - a.jpg - 
-  pdfjam: Calling <TESTDIR>/engine...
-  pdfjam: Finished.  Output was written to 'images.pdf'.

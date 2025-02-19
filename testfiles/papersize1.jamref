@@ -1,23 +1,7 @@
-%%% a.tex
-\batchmode
 \documentclass[]{article}
 \usepackage[papersize={10cm,30cm}]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[]{a4numbers.pdf,-}
+\includepdfmerge[pages=-]{a4numbers.pdf}
 \end{document}
-
-%%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir papersize1.d/dryrun --outfile papersize1.pdf --papersize 10cm,30cm -- a4numbers.pdf - 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir papersize1.d/dryrun --outfile papersize1.pdf --papersize 10cm,30cm -- a4numbers.pdf - 
-  pdfjam: Calling <TESTDIR>/engine...
-  pdfjam: Finished.  Output was written to 'papersize1.pdf'.

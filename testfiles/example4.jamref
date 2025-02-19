@@ -1,23 +1,7 @@
-%%% a.tex
-\batchmode
-\documentclass[a4paper,]{article}
+\documentclass[a4paper]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[]{source-1.pdf,-}
+\includepdfmerge[pages=-]{US-letter.pdf}
 \end{document}
-
-%%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example4.d/dryrun --outfile example4.pdf --paper a4paper -- US\ letter.PDF - 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example4.d/dryrun --outfile example4.pdf --paper a4paper -- US\ letter.PDF - 
-  pdfjam: Calling <TESTDIR>/engine...
-  pdfjam: Finished.  Output was written to 'example4.pdf'.

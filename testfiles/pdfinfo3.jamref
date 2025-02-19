@@ -1,35 +1,19 @@
-%%% a.tex
-\batchmode
-\documentclass[a4paper,]{article}
+\documentclass[a4paper]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
-\ifdefined\luatexversion% LuaLaTeX
-  \protected\def\pdfinfo{\pdfextension info}
-\fi
-\ifdefined\XeTeXversion% XeLaTeX
-  \protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
-\fi
-\ifdefined\pdfinfo%
-  \pdfinfo{%
-    /Author <feff004400e6006d006f006e00270073002000700061006300740020d83dde08> %
-    /Subject <feff0057006900740063006800630072006100660074> %
-  }%
-\fi
 \usepackage{pdfpages}
+\ifdefined\luatexversion
+	\protected\def\pdfinfo{\pdfextension info}
+\fi
+\ifdefined\XeTeXversion
+	\protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
+\fi
+\ifdefined\pdfinfo
+	\pdfinfo{%
+		/Author <feff004400e6006d006f006e00270073002000700061006300740020d83dde08>
+		/Subject <feff0057006900740063006800630072006100660074>
+	}
+\fi
 \begin{document}
-\includepdfmerge[]{a4.pdf,-}
+\includepdfmerge[pages=-]{a4.pdf}
 \end{document}
-
-%%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir pdfinfo3.d/dryrun --outfile pdfinfo3.pdf --enc UTF-8 --pdfauthor 'Dæmon'\''s pact 😈' --pdfsubject Witchcraft -- a4.pdf - 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir pdfinfo3.d/dryrun --outfile pdfinfo3.pdf --enc UTF-8 --pdfauthor 'Dæmon'\''s pact 😈' --pdfsubject Witchcraft -- a4.pdf - 
-  pdfjam: Calling <TESTDIR>/engine...
-  pdfjam: Finished.  Output was written to 'pdfinfo3.pdf'.

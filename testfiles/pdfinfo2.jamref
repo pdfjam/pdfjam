@@ -1,39 +1,19 @@
-%%% a.tex
-\batchmode
-\documentclass[a4paper,]{article}
+\documentclass[a4paper]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
-\ifdefined\luatexversion% LuaLaTeX
-  \protected\def\pdfinfo{\pdfextension info}
-\fi
-\ifdefined\XeTeXversion% XeLaTeX
-  \protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
-\fi
-\ifdefined\pdfinfo%
-  \pdfinfo{%
-    /Author <feff00520065007500620065006e002000540068006f006d00610073> %
-    /Keywords <feff00200074006100620009006e006c000a0022002100400024005e0026002c007d005d007b005b005c007c003a007e006000630072006100730068003f1234001bd83dde44d83cdff3fe0f200dd83cdf0800660069006e0061006c006c00790020263afe0f> %
-  }%
-\fi
 \usepackage{pdfpages}
+\ifdefined\luatexversion
+	\protected\def\pdfinfo{\pdfextension info}
+\fi
+\ifdefined\XeTeXversion
+	\protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
+\fi
+\ifdefined\pdfinfo
+	\pdfinfo{%
+		/Author <feff00520065007500620065006e002000540068006f006d00610073>
+		/Keywords <feff00200074006100620009006e006c000a0022002100400024005e0026002c007d005d007b005b005c007c003a007e006000630072006100730068003f1234001bd83dde44d83cdff3fe0f200dd83cdf0800660069006e0061006c006c00790020263afe0f>
+	}
+\fi
 \begin{document}
-\includepdfmerge[]{stdin.pdf,-}
+\includepdfmerge[pages=-]{stdin.pdf}
 \end{document}
-
-%%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir pdfinfo2.d/dryrun --outfile pdfinfo2.pdf --keepinfo --enc UTF-8 --pdftitle  --pdfkeywords ' tab	nl
-"!@$^&,}]{[\|:~`crash?ሴ🙄🏳️‍🌈finally ☺️' --keepinfo -- /dev/stdin - 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: No PDF/EPS/JPG/PNG source specified: input is from stdin.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir pdfinfo2.d/dryrun --outfile pdfinfo2.pdf --keepinfo --enc UTF-8 --pdftitle  --pdfkeywords ' tab	nl
-          "!@$^&,}]{[\|:~`crash?ሴ🙄🏳️‍🌈finally ☺️' --keepinfo -- /dev/stdin - 
-  pdfjam: Calling <TESTDIR>/../bin/pdfinfo...
-  pdfjam: Calling <TESTDIR>/engine...
-  pdfjam: Finished.  Output was written to 'pdfinfo2.pdf'.

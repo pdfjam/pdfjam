@@ -1,36 +1,19 @@
-%%% a.tex
-\batchmode
-\documentclass[a4paper,]{article}
+\documentclass[a4paper]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
-\ifdefined\luatexversion% LuaLaTeX
-  \protected\def\pdfinfo{\pdfextension info}
-\fi
-\ifdefined\XeTeXversion% XeLaTeX
-  \protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
-\fi
-\ifdefined\pdfinfo%
-  \pdfinfo{%
-    /Title <feff004f006e002000740068006500200043006f006d0070006c006500780069007400790020006f006600200053004e005000200042006c006f0063006b00200050006100720074006900740069006f006e0069006e006700200055006e0064006500720020007400680065002000500065007200660065006300740020005000680079006c006f00670065006e00790020004d006f00640065006c> %
-    /Author <feff0020004a0065006e00730020004700720061006d006d002c00200054007a00760069006b006100200048006100720074006d0061006e002c002000540069006c006c0020004e0069006500720068006f00660066002c00200052006f006400650064002000530068006100720061006e002c002000540069006c006c002000540061006e0074006100750020> %
-  }%
-\fi
 \usepackage{pdfpages}
+\ifdefined\luatexversion
+	\protected\def\pdfinfo{\pdfextension info}
+\fi
+\ifdefined\XeTeXversion
+	\protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
+\fi
+\ifdefined\pdfinfo
+	\pdfinfo{%
+		/Title <feff004f006e002000740068006500200043006f006d0070006c006500780069007400790020006f006600200053004e005000200042006c006f0063006b00200050006100720074006900740069006f006e0069006e006700200055006e0064006500720020007400680065002000500065007200660065006300740020005000680079006c006f00670065006e00790020004d006f00640065006c>
+		/Author <feff0020004a0065006e00730020004700720061006d006d002c00200054007a00760069006b006100200048006100720074006d0061006e002c002000540069006c006c0020004e0069006500720068006f00660066002c00200052006f006400650064002000530068006100720061006e002c002000540069006c006c002000540061006e0074006100750020>
+	}
+\fi
 \begin{document}
-\includepdfmerge[]{beamer.pdf,3-1}
+\includepdfmerge[pages=-]{beamer.pdf,3-1}
 \end{document}
-
-%%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir pdfinfo1.d/dryrun --outfile pdfinfo1.pdf --keepinfo -- beamer.pdf 3-1 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir pdfinfo1.d/dryrun --outfile pdfinfo1.pdf --keepinfo -- beamer.pdf 3-1 
-  pdfjam: Calling <TESTDIR>/../bin/pdfinfo...
-  pdfjam: Calling <TESTDIR>/engine...
-  pdfjam: Finished.  Output was written to 'pdfinfo1.pdf'.
