@@ -126,7 +126,7 @@ function getopt(arg)
 	})
 	a, t = parser:parse(arg)
 	t.vanilla = nil
-	debugprint("args: %,t\nopts: %T", a, t)
+	debugprint("args: %,T\nopts: %T", a, t)
 	return Interpreter:new({a=a, t=t, options=options})
 end
 
@@ -350,7 +350,7 @@ do
 	function recall_numbered(_, i)
 		i = (i or 0) + 1
 		if pos[i] then return i, pos[i]
-		else debugprint("pdfpagesoptsorder: %,t", pos) return nil end
+		else debugprint("pdfpagesoptsorder: %,T", pos) return nil end
 	end
 end
 
