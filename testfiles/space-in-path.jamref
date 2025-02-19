@@ -1,23 +1,7 @@
-%%% a.tex
-\batchmode
-\documentclass[a4paper,landscape,]{article}
+\documentclass[a4paper,landscape]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[nup=2x1,frame=true]{source-1.pdf,-}
+\includepdfmerge[pages=-,nup=2x1,frame=true]{letter-numbers.pdf}
 \end{document}
-
-%%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir space-in-path.d/dryrun --outfile space-in-path.pdf --nup 2x1 --frame true --landscape -- 'sub dir/letter numbers.pdf' - 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir space-in-path.d/dryrun --outfile space-in-path.pdf --nup 2x1 --frame true --landscape -- 'sub dir/letter numbers.pdf' - 
-  pdfjam: Calling <TESTDIR>/engine...
-  pdfjam: Finished.  Output was written to 'space-in-path.pdf'.

@@ -1,23 +1,7 @@
-%%% a.tex
-\batchmode
-\documentclass[a6paper,]{article}
+\documentclass[a6paper]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[noautoscale=true]{a4numbers.pdf,11,1}
+\includepdfmerge[pages=-,noautoscale=true]{a4numbers.pdf,11,1}
 \end{document}
-
-%%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir papersize5.d/dryrun --outfile papersize5.pdf --paper a6paper --noautoscale true -- a4numbers.pdf 11,1 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir papersize5.d/dryrun --outfile papersize5.pdf --paper a6paper --noautoscale true -- a4numbers.pdf 11,1 
-  pdfjam: Calling <TESTDIR>/engine...
-  pdfjam: Finished.  Output was written to 'papersize5.pdf'.

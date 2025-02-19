@@ -321,6 +321,7 @@ do
 		return v
 	end
 	function recall_numbered(_, i)
+		if DEBUG then table.print(pos) end
 		i = (i or 0) + 1
 		if pos[i] then return i, pos[i]
 		else return nil end
@@ -341,14 +342,14 @@ paperopt = {
 bool_prose = {["true"]="true", yes="true", on="true", ["false"]="false", no="false", off="false"}
 boolopt = {
 	argument = bool_prose,
-	func = function(v)
-		if not v then return numbered(true) end
+	func = function(v, a, t)
+		if not v then return numbered(true, a, t) end
 		local b = bool_prose[v]
 		if b == nil then
 			return nil, "Cannot interpret '" .. v .. "' as boolean value.\n\n\z
 			Tip: Accepted values are 'true', 'yes' and 'on', respectively 'false', 'no' and 'off'"
 		else
-			return numbered(b)
+			return numbered(b, a, t)
 		end
 	end
 }
@@ -588,9 +589,9 @@ end
 --- page specs ---
 
 do
-	local page = lpeg.R"09" ^ 0 + "last" -- any or no page
+	local page = "last" + lpeg.R"09" ^ 0 -- any or no page
 	local range = page * ("-" * page) ^ -1 -- any or no page range (the latter being an implicit empty page)
-	local part = range + "{}" -- page range or implicit or explicit empty page
+	local part = "{}" + range -- page range or implicit or explicit empty page
 	local spec = part * ("," * part) ^ 0 * -1 -- complete page spec
 	function is_valid_pagespec(word)
 		return lpeg.match(spec, word) ~= nil
@@ -740,9 +741,9 @@ function main(args)
 		latex = x:pop"latex",
 		pdfinfo = x:pop"pdfinfo",
 		runs = tonumber(x:pop"runs"),
+		geometryoptions = x:retrieve"papersize", -- before `landscape`
 		documentoptions = x:list("paper", "landscape", "twoside"),
 		colorcode = x:retrieve"pagecolor",
-		geometryoptions = x:retrieve"papersize",
 		otheredge = x:retrieve"otheredge",
 		preamble = x:retrieve"preamble",
 		merge = "merge",
@@ -779,7 +780,7 @@ function main(args)
 	end
 end
 
--- DEBUG = true
+DEBUG = true
 success, msg = xpcall(main, debug.traceback)
 
 collectgarbage()

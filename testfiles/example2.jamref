@@ -1,23 +1,7 @@
-%%% a.tex
-\batchmode
-\documentclass[a4paper,]{article}
+\documentclass[a4paper]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[]{file1.pdf,{},2-,file2.pdf,10,3-6}
+\includepdfmerge[pages=-]{file1.pdf,{},2-,file2.pdf,10,3-6}
 \end{document}
-
-%%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example2.d/dryrun --outfile example2.pdf -- file1.pdf {},2- file2.pdf 10,3-6 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example2.d/dryrun --outfile example2.pdf -- file1.pdf {},2- file2.pdf 10,3-6 
-  pdfjam: Calling <TESTDIR>/engine...
-  pdfjam: Finished.  Output was written to 'example2.pdf'.
