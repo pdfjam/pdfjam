@@ -23,6 +23,11 @@ function coalesce(...) -- return first non-nil
 	end
 end
 
+function debugprint(s, ...)
+	if not DEBUG then return end
+	io.stderr:write(string.formatters[s.."\n"](...))
+end
+
 -- string utilities --
 
 function startswith(s, a) return string.sub(s, 1, #a) == a end
@@ -74,12 +79,26 @@ function providedir(d, tidy)
 		return mkdir(d), tidy and gcdir(d) or nil
 	end
 end
+slash = os.type == "windows" and "\\" or "/"
+function ismkdir(d)
+	if lfs.isdir(d) then
+	elseif string.sub(d, #d) == slash then mkdir(d)
+	else return end
+	return d
+end
 
 local lookup = os.type == "windows" and "where.exe" or "command -v"
+function executable(exe)
+	exe = enquote(exe)
+	return io.popen(lookup .. " " .. exe):read() and exe
+end
 function popen(exe, ...)
-	if io.popen(lookup .. " " .. enquote(exe)):read() then
-		return io.popen(enquote(exe) .. table.concat({"", ...}, " "))
-	end
+	exe = executable(exe)
+	return exe and io.popen(exe .. table.concat({"", ...}, " "))
+end
+function execute(exe, ...)
+	exe = executable(exe)
+	return exe and os.execute(exe .. table.concat({"", ...}, " "))
 end
 
 -- option parser
@@ -107,7 +126,7 @@ function getopt(arg)
 	})
 	a, t = parser:parse(arg)
 	t.vanilla = nil
-	if DEBUG then io.write"args " table.print(a) io.write"opts " table.print(t) end
+	debugprint("args: %,t\nopts: %T", a, t)
 	return Interpreter:new({a=a, t=t, options=options})
 end
 
@@ -329,10 +348,9 @@ do
 		return v
 	end
 	function recall_numbered(_, i)
-		if DEBUG then table.print(pos) end
 		i = (i or 0) + 1
 		if pos[i] then return i, pos[i]
-		else return nil end
+		else debugprint("pdfpagesoptsorder: %,t", pos) return nil end
 	end
 end
 
@@ -615,17 +633,20 @@ end
 
 function out_name(out, last_in, suffix)
 	out = out or "."
-	if lfs.isdir(out) then
-		local dir = file.collapsepath(out, true) -- bug when out contains :
-		local name = file.nameonly(last_in) .. (suffix and "-" .. suffix or "")
-		out = file.join(dir, name .. ".pdf")
+	local dir = "."
+	if ismkdir(out) then
+		dir = out
+		local name = file.nameonly(last_in) .. (suffix and "-" .. suffix or "") .. ".pdf"
+	elseif file.is_rootbased_path(out) then return out
+	else name = out
 	end
-	return out
+	dir = file.collapsepath(dir, true) -- bug when dir contains :
+	return file.join(dir, name)
 end
 
 function out_names(out, files, suffix)
 	out = out or "."
-	if not lfs.isdir(out) then err("Output must go to directory in batch mode.") end
+	if not ismkdir(out) then err("Output must go to directory in batch mode.") end
 	suffix = suffix and "-"..suffix or ""
 	local dir = file.collapsepath(out, true) -- bug when out contains :
 	local r = {}
@@ -730,14 +751,14 @@ template = [[
 \includepdf$merge[$pages$comma$options]{$filepagelist}
 \end{document}
 ]]
-function run(tab, out, infofile)
+function run(tab, outfile, infofile)
 	tab.info = pdfinfo_code(merge_pdfinfo(tab.info, tab.pdfinfo, infofile))
 	tab.comma = tab.pages ~= "" and tab.options ~= "" and "," or ""
-	if DEBUG then print("Running "..tab.latex.." in "..lfs.currentdir().." to produce "..out.." with") table.print(tab) end
+	debugprint("Running %s in %s to produce %s using %T", tab.latex, lfs.currentdir(), outfile, tab)
 	local pattern = lpeg.Cs((lpeg.P"$" * lpeg.C(lpeg.R"az" ^ 1) / tab + 1) ^ 0)
 	local content = pattern:match(template)
 	io.savedata("a.tex", content)
-	for _ = 1, tab.runs do os.spawn({tab.latex, "a.tex"}) end
+	for _ = 1, tab.runs do execute(tab.latex, tab.latexopts, "a.tex", ">/dev/null") end
 	file.copy("a.pdf", outfile)
 end
 
@@ -748,6 +769,7 @@ function main(args)
 
 	local tab = {
 		latex = x:pop"latex",
+		latexopts = "-interaction batchmode",
 		pdfinfo = x:pop"pdfinfo",
 		runs = tonumber(x:pop"runs"),
 		geometryoptions = x:retrieve"papersize", -- before `landscape`
