@@ -3,5 +3,5 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[pages=-]{-.pdf,{},1-2.pdf,,,,,--1.pdf,last,--.pdf,--fantasy.pdf,---1.pdf}
+\includepdfmerge[pages=-]{-.pdf,{},1-2.pdf,,,,,-+1.pdf,last,--.pdf,--fantasy.pdf,--+1.pdf}
 \end{document}

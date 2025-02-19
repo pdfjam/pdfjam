@@ -664,7 +664,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 			local b, ext = new_name(a, checkfiles)
 			if names[b] then
 				local ext, i = "."..ext, 0
-				local c = string.sub(b, 1, #b-#ext).."-"
+				local c = string.sub(b, 1, #b-#ext).."+"
 				repeat i=i+1 b = c .. i .. ext until not names[b]
 			end
 			names[b] = true

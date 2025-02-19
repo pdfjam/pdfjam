@@ -3,5 +3,5 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[pages=-]{a.jpg,a4.pdf,a4-1.pdf,l--we.png}
+\includepdfmerge[pages=-]{a.jpg,a4.pdf,a4+1.pdf,l--we.png}
 \end{document}
