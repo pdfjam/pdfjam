@@ -18,26 +18,12 @@ end
 
 function identity(x) return x end
 
-function coalesce(...) -- return first non-nil
-	for i = 1, select("#", ...) do
-		if select(i, ...) ~= nil then return (select(i, ...)) end
-	end
-end
-
 function debugprint(s, ...)
 	if not DEBUG then return end
 	io.stderr:write(string.formatters[s.."\n"](...))
 end
 
 -- string utilities --
-
-function startswith(s, a) return string.sub(s, 1, #a) == a end
-
-function replace(s, a, b)
-	local i, j = string.find(s, a, 1, true)
-	assert(i~=nil)
-	return string.sub(s, 1, i-1) .. b .. string.sub(s, j+1)
-end
 
 function embrace(s)
 	if string.find(s, "[],=]") and not
@@ -848,7 +834,6 @@ function main(args)
 	end
 end
 
-DEBUG=true
 success, msg = xpcall(main, debug.traceback)
 
 collectgarbage()
