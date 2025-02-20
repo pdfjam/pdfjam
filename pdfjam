@@ -58,7 +58,8 @@ function enquote(s)
 end
 
 do
-local separator = " " * (lpeg.P" " ^ 0 * ("," * lpeg.P" " ^ 0) ^ -1) + "," * lpeg.P" " ^ 0
+local w = lpeg.patterns.whitespace
+local separator = w * (w ^ 0 * ("," * w ^ 0) ^ -1) + "," * w ^ 0
 tocomma = lpeg.Cs((separator/"," + 1)^0)
 tospace = lpeg.Cs((separator/" " + 1)^0)
 end

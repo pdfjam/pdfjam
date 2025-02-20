@@ -58,6 +58,19 @@ File: a4numbers.pdf Graphic file (type pdf)
 <use a4numbers.pdf>
 Package pdftex.def Info: a4numbers.pdf  used on input line ....
 (pdftex.def)             Requested size: 597.506pt x 845.045pt.
+<letter-numbers-pdf.pdf, id=00, 614.295pt x 794.97pt>
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf>
+Package pdftex.def Info: letter-numbers-pdf.pdf  used on input line ....
+(pdftex.def)             Requested size: 614.293pt x 794.968pt.
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf>
+Package pdftex.def Info: letter-numbers-pdf.pdf  used on input line ....
+(pdftex.def)             Requested size: 614.293pt x 794.968pt.
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf>
+Package pdftex.def Info: letter-numbers-pdf.pdf  used on input line ....
+(pdftex.def)             Requested size: 614.293pt x 794.968pt.
 <a4.pdf, id=00, page=1, 597.508pt x 845.047pt>
 File: a4.pdf Graphic file (type pdf)
 <use a4.pdf, page 1>
@@ -215,7 +228,35 @@ File: a4numbers.pdf Graphic file (type pdf)
 <use a4numbers.pdf, page 1>
 Package pdftex.def Info: a4numbers.pdf , page1 used on input line ....
 (pdftex.def)             Requested size: 100.453pt x 142.070pt.
-[13](a.aux)
+[13]
+<letter-numbers-pdf.pdf, id=00, page=1, 614.295pt x 794.97pt>
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 1>
+Package pdftex.def Info: letter-numbers-pdf.pdf , page1 used on input line ....
+(pdftex.def)             Requested size: 103.275pt x 133.651pt.
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 1>
+Package pdftex.def Info: letter-numbers-pdf.pdf , page1 used on input line ....
+(pdftex.def)             Requested size: 103.275pt x 133.651pt.
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 1>
+Package pdftex.def Info: letter-numbers-pdf.pdf , page1 used on input line ....
+(pdftex.def)             Requested size: 103.275pt x 133.651pt.
+[14<./letter-numbers-pdf.pdf>]
+<letter-numbers-pdf.pdf, id=00, page=2, 614.295pt x 794.97pt>
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 2>
+Package pdftex.def Info: letter-numbers-pdf.pdf , page2 used on input line ....
+(pdftex.def)             Requested size: 103.275pt x 133.651pt.
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 2>
+Package pdftex.def Info: letter-numbers-pdf.pdf , page2 used on input line ....
+(pdftex.def)             Requested size: 103.275pt x 133.651pt.
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 2>
+Package pdftex.def Info: letter-numbers-pdf.pdf , page2 used on input line ....
+(pdftex.def)             Requested size: 103.275pt x 133.651pt.
+[15<./letter-numbers-pdf.pdf>](a.aux)
 Creator:         TeX
 Producer:        TeXengine
 Custom Metadata: no
@@ -225,7 +266,7 @@ UserProperties:  no
 Suspects:        no
 Form:            none
 JavaScript:      no
-Pages:           13
+Pages:           15
 Encrypted:       no
 Page size:       100 x 200 pts
 Page rot:        0

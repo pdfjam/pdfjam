@@ -28,6 +28,12 @@ File: a4numbers.pdf Graphic file (type pdf)
 <use a4numbers.pdf>
 File: a4numbers.pdf Graphic file (type pdf)
 <use a4numbers.pdf>
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf>
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf>
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf>
 File: a4.pdf Graphic file (type pdf)
 <use a4.pdf, page 1>
 File: a4.pdf Graphic file (type pdf)
@@ -110,7 +116,21 @@ File: a4numbers.pdf Graphic file (type pdf)
 <use a4numbers.pdf, page 1>
 File: a4numbers.pdf Graphic file (type pdf)
 <use a4numbers.pdf, page 1>
-[13](a.aux)
+[13]
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 1>
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 1>
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 1>
+[14]
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 2>
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 2>
+File: letter-numbers-pdf.pdf Graphic file (type pdf)
+<use letter-numbers-pdf.pdf, page 2>
+[15](a.aux)
 Creator:         TeX
 Producer:        TeXengine
 CreationDate:    Fri May 20 09:00:00 2016 UTC
@@ -121,7 +141,7 @@ UserProperties:  no
 Suspects:        no
 Form:            none
 JavaScript:      no
-Pages:           13
+Pages:           15
 Encrypted:       no
 Page size:       100 x 200 pts
 Page rot:        0

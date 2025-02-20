@@ -1,1 +1,1 @@
-a4.pdf '  1   2  4-3,,2 ,1,  {} ' a4numbers.pdf ' , 1 ,' --papersize=100\ 200
+a4.pdf '  1   2  4-3,,2 ,1,  {} ' a4numbers.pdf ' , 1 ,' 'letter numbers pdf' "$(echo 1;echo 2)" --papersize=100\ 200
