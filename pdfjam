@@ -59,6 +59,24 @@ end
 
 -- file utilities --
 
+-- variant of file.copy which works independent of /dev/stdin and /dev/stdout
+function file_copy(oldname, newname)
+	if oldname and newname then
+		local data
+		if oldname == "" then
+			io.input():seek"set"
+			data = io.input():read"a"
+		else data = io.loaddata(oldname)
+		end
+		if data and data ~= "" then
+			if newname == "" then io.write(data)
+			else io.savedata(newname, data) end
+		end
+	end
+end
+
+-- directory utilities --
+
 function rmdir(t) os.spawn({"rm", "-rf", t[1]}) end
 function mkdir(d)
 	d, success = dir.makedirs(d)
@@ -86,6 +104,8 @@ function ismkdir(d)
 	else return end
 	return d
 end
+
+-- executable utilities --
 
 local lookup = os.type == "windows" and "where.exe" or "command -v"
 function executable(exe)
@@ -396,7 +416,7 @@ function define_options()
 		"doublepagestwist*", "doublepagestwistodd*"
 	}
 	local normal_options = {"builddir", "outfile", "suffix", "latex", "iconv",
-		"enc", "pdftitle", "pdfauthor", "pdfsubject", "pdfkeywords", runs
+		"enc", "pdftitle", "pdfauthor", "pdfsubject", "pdfkeywords", "runs", "pages"
 	}
 	local flag_options = {"vanilla", "quiet", "tidy", "keepinfo",
 		"landscape", "twoside", "checkfiles", "batch"
@@ -652,6 +672,7 @@ end
 --- file and pagespec list ---
 
 function out_name(out, last_in, suffix)
+	if out == "" then return out end
 	out = out or "."
 	local dir, name = ".", out
 	if ismkdir(out) then
@@ -686,10 +707,10 @@ function make_filepagelist(args, d, batch, checkfiles)
 		end
 		local i = 0
 		function add_file(a, b)
-			b = b or new_name(a, checkfiles)
+			b = new_name(b or a, checkfiles)
 			i = i + 1
 			mkdir(file.join(d, i))
-			file.copy(a, file.join(d, i, b))
+			file_copy(a, file.join(d, i, b))
 			table.insert(l, b)
 		end
 	else
@@ -712,24 +733,10 @@ function make_filepagelist(args, d, batch, checkfiles)
 			return b
 		end
 		function add_file(a, b)
-			last_in, last_in_renamed = a, b or robustname(a)
-			file.copy(a, file.join(d, last_in_renamed))
+			last_in, last_in_renamed = a, robustname(b or a)
+			file_copy(a, file.join(d, last_in_renamed))
 			table.insert(l, last_in_renamed)
 		end
-	end
-	local stdin_ext
-	local function add_stdin(msg)
-		msg = msg or ""
-		local a = file.join(d, "+stdin+")
-		if not stdin_ext then
-			local s = io.read("a")
-			if s and s ~= "" then io.savedata(a, s)
-			else err(msg .. "stdin not available")
-			end
-			stdin_ext = checkfiles and (get_extension(a, true) or err(msg .. "stdin is no legid input")) or "pdf"
-		end
-		add_file(a, "+stdin+."..stdin_ext)
-		last_in = "stdin"
 	end
 	local cases = { -- binary coded index
 		"Input file expected, but '%s' not even exists in your file system",
@@ -746,7 +753,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		{add_pagespec, "Ambiguous argument '%s' interpreted as pagespec. If you meant the file, please write './%s' instead"},
 	}
 	local function add_argument(a)
-		if a == "" then add_stdin() return end
+		if a == "" then add_file("", "stdin") return end
 		local valid = io.exists(a) and ((not checkfiles or get_extension(a, true)) and 8 or 4) or 0
 		local pagespec = is_valid_pagespec(a) and 2 or 0
 		local awaited = next(l) and 1 or 0
@@ -762,7 +769,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		end
 	end
 	add_pagespec()
-	if not next(filepagelist) then add_stdin("No input file given and ") add_pagespec() end
+	if not next(filepagelist) then add_file("", "stdin") add_pagespec() end
 	return filepagelist, last_in, last_in_renamed
 end
 
@@ -786,7 +793,7 @@ function run(tab, d, outfile, infofile)
 	local content = pattern:match(template)
 	io.savedata("a.tex", content)
 	for _ = 1, tab.runs do execute(tab.latex, tab.latexopts, "a.tex", ">/dev/null") end
-	file.copy("a.pdf", outfile)
+	file_copy("a.pdf", outfile)
 end
 
 function main(args)

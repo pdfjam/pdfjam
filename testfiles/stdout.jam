@@ -1,0 +1,1 @@
+--outfile= --pages=2 '' a4.pdf '' <a4numbers.pdf >stdout.pdf
