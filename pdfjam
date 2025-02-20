@@ -606,6 +606,19 @@ function merge_pdfinfo(overwrite, pdfinfo, file)
 	end
 end
 
+--- page specs ---
+
+do
+	local page = "last" + lpeg.R"09" ^ 0 -- any or no page
+	local range = page * ("-" * page) ^ -1 -- any or no page range (the latter being an implicit empty page)
+	local part = "{}" + range -- page range or implicit or explicit empty page
+	local spec = part * ("," * part) ^ 0 * -1 -- complete page spec
+	-- Note: if pagespec contains no proper page, the default pagespec is implicitely appended
+	function is_valid_pagespec(word)
+		return lpeg.match(spec, word) ~= nil
+	end
+end
+
 --- file utility ---
 
 function magic_file(f)
@@ -636,29 +649,15 @@ function new_name(f, checkfiles)
 	return file.addsuffix(file.robustname(file.basename(f)), ext, ext), ext
 end
 
---- page specs ---
-
-do
-	local page = "last" + lpeg.R"09" ^ 0 -- any or no page
-	local range = page * ("-" * page) ^ -1 -- any or no page range (the latter being an implicit empty page)
-	local part = "{}" + range -- page range or implicit or explicit empty page
-	local spec = part * ("," * part) ^ 0 * -1 -- complete page spec
-	-- Note: if pagespec contains no proper page, the default pagespec is implicitely appended
-	function is_valid_pagespec(word)
-		return lpeg.match(spec, word) ~= nil
-	end
-end
-
 --- file and pagespec list ---
 
 function out_name(out, last_in, suffix)
 	out = out or "."
-	local dir = "."
+	local dir, name = ".", out
 	if ismkdir(out) then
 		dir = out
-		local name = file.nameonly(last_in) .. (suffix and "-" .. suffix or "") .. ".pdf"
+		name = file.nameonly(last_in) .. (suffix and "-" .. suffix or "") .. ".pdf"
 	elseif file.is_rootbased_path(out) then return out
-	else name = out
 	end
 	dir = file.collapsepath(dir, true) -- bug when dir contains :
 	return file.join(dir, name)
@@ -686,8 +685,8 @@ function make_filepagelist(args, d, batch, checkfiles)
 			l = {}
 		end
 		local i = 0
-		function add_file(a)
-			local b = new_name(a, checkfiles)
+		function add_file(a, b)
+			b = b or new_name(a, checkfiles)
 			i = i + 1
 			mkdir(file.join(d, i))
 			file.copy(a, file.join(d, i, b))
@@ -712,11 +711,25 @@ function make_filepagelist(args, d, batch, checkfiles)
 			names[b] = true
 			return b
 		end
-		function add_file(a)
-			last_in, last_in_renamed = a, robustname(a)
+		function add_file(a, b)
+			last_in, last_in_renamed = a, b or robustname(a)
 			file.copy(a, file.join(d, last_in_renamed))
 			table.insert(l, last_in_renamed)
 		end
+	end
+	local stdin_ext
+	local function add_stdin(msg)
+		msg = msg or ""
+		local a = file.join(d, "+stdin+")
+		if not stdin_ext then
+			local s = io.read("a")
+			if s and s ~= "" then io.savedata(a, s)
+			else err(msg .. "stdin not available")
+			end
+			stdin_ext = checkfiles and (get_extension(a, true) or err(msg .. "stdin is no legid input")) or "pdf"
+		end
+		add_file(a, "+stdin+."..stdin_ext)
+		last_in = "stdin"
 	end
 	local cases = { -- binary coded index
 		"Input file expected, but '%s' not even exists in your file system",
@@ -733,6 +746,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		{add_pagespec, "Ambiguous argument '%s' interpreted as pagespec. If you meant the file, please write './%s' instead"},
 	}
 	local function add_argument(a)
+		if a == "" then add_stdin() return end
 		local valid = io.exists(a) and ((not checkfiles or get_extension(a, true)) and 8 or 4) or 0
 		local pagespec = is_valid_pagespec(a) and 2 or 0
 		local awaited = next(l) and 1 or 0
@@ -748,16 +762,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		end
 	end
 	add_pagespec()
-	if not next(filepagelist) then
-		local a = file.join(d, "stdin")
-		local s = io.read("a")
-		if s and s ~= "" then io.savedata(a, s)
-		else err("Either an input file must be given or there must be input from stdin")
-		end
-		if checkfiles and not get_extension(a, checkfiles) then err("No input file given and stdin is no valid input") end
-		add_file(a)
-		add_pagespec()
-	end
+	if not next(filepagelist) then add_stdin("No input file given and ") add_pagespec() end
 	return filepagelist, last_in, last_in_renamed
 end
 
@@ -830,6 +835,7 @@ function main(args)
 	end
 end
 
+DEBUG=true
 success, msg = xpcall(main, debug.traceback)
 
 collectgarbage()
