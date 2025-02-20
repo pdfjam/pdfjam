@@ -5,10 +5,6 @@ File: test.pdf Graphic file (type pdf)
 <use test.pdf>
 Package pdftex.def Info: test.pdf  used on input line ....
 (pdftex.def)             Requested size: 421.573pt x 597.229pt.
-File: test.pdf Graphic file (type pdf)
-<use test.pdf>
-Package pdftex.def Info: test.pdf  used on input line ....
-(pdftex.def)             Requested size: 421.573pt x 597.229pt.
 <test.pdf, id=00, page=1, 421.575pt x 597.231pt>
 File: test.pdf Graphic file (type pdf)
 <use test.pdf, page 1>

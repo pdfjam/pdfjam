@@ -15,19 +15,6 @@ File: example-image-eps-converted-to.pdf Graphic file (type pdf)
 <use example-image-eps-converted-to.pdf>
 Package pdftex.def Info: example-image-eps-converted-to.pdf  used on input line ....
 (pdftex.def)             Requested size: 321.199pt x 240.899pt.
-Package epstopdf Info: Source file: <example-image.eps>
-(epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 0000 bytes
-(epstopdf)             Output file: <example-image-eps-converted-to.pdf>
-(epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 0000 bytes
-(epstopdf)             Command: <repstopdf --outfile=example-image-eps-converted-to.pdf example-image.eps>
-(epstopdf)             \includegraphics on input line ....
-Package epstopdf Info: Output file is already uptodate.
-File: example-image-eps-converted-to.pdf Graphic file (type pdf)
-<use example-image-eps-converted-to.pdf>
-Package pdftex.def Info: example-image-eps-converted-to.pdf  used on input line ....
-(pdftex.def)             Requested size: 321.199pt x 240.899pt.
 Package epstopdf Info: Source file: <diagrams.eps>
 (epstopdf)                    date: ....-..-.. ..:..:..
 (epstopdf)                    size: 0000 bytes
@@ -39,19 +26,6 @@ Package epstopdf Info: Result file: <diagrams-eps-converted-to.pdf>
 (epstopdf)                    date: ....-..-.. ..:..:..
 (epstopdf)                    size: 0000 bytes.
 <diagrams-eps-converted-to.pdf, id=00, 598.235pt x 845.157pt>
-File: diagrams-eps-converted-to.pdf Graphic file (type pdf)
-<use diagrams-eps-converted-to.pdf>
-Package pdftex.def Info: diagrams-eps-converted-to.pdf  used on input line ....
-(pdftex.def)             Requested size: 598.233pt x 845.155pt.
-Package epstopdf Info: Source file: <diagrams.eps>
-(epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 0000 bytes
-(epstopdf)             Output file: <diagrams-eps-converted-to.pdf>
-(epstopdf)                    date: ....-..-.. ..:..:..
-(epstopdf)                    size: 0000 bytes
-(epstopdf)             Command: <repstopdf --outfile=diagrams-eps-converted-to.pdf diagrams.eps>
-(epstopdf)             \includegraphics on input line ....
-Package epstopdf Info: Output file is already uptodate.
 File: diagrams-eps-converted-to.pdf Graphic file (type pdf)
 <use diagrams-eps-converted-to.pdf>
 Package pdftex.def Info: diagrams-eps-converted-to.pdf  used on input line ....

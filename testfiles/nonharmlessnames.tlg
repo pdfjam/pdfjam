@@ -1,62 +1,46 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-<source-1.jpg, id=1, 401.5pt x 301.125pt>
-File: source-1.jpg Graphic file (type jpg)
-<use source-1.jpg>
-Package pdftex.def Info: source-1.jpg  used on input line ....
-(pdftex.def)             Requested size: 401.499pt x 301.124pt.
-File: source-1.jpg Graphic file (type jpg)
-<use source-1.jpg>
-Package pdftex.def Info: source-1.jpg  used on input line ....
+<a.jpg, id=1, 401.5pt x 301.125pt>
+File: a.jpg Graphic file (type jpg)
+<use a.jpg>
+Package pdftex.def Info: a.jpg  used on input line ....
 (pdftex.def)             Requested size: 401.499pt x 301.124pt.
 <a4.pdf, id=00, 597.508pt x 845.047pt>
 File: a4.pdf Graphic file (type pdf)
 <use a4.pdf>
 Package pdftex.def Info: a4.pdf  used on input line ....
 (pdftex.def)             Requested size: 597.506pt x 845.045pt.
-File: a4.pdf Graphic file (type pdf)
-<use a4.pdf>
-Package pdftex.def Info: a4.pdf  used on input line ....
+<a4+1.pdf, id=5, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf>
+Package pdftex.def Info: a4+1.pdf  used on input line ....
 (pdftex.def)             Requested size: 597.506pt x 845.045pt.
-<source-2.pdf, id=00, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf>
-Package pdftex.def Info: source-2.pdf  used on input line ....
-(pdftex.def)             Requested size: 597.506pt x 845.045pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf>
-Package pdftex.def Info: source-2.pdf  used on input line ....
-(pdftex.def)             Requested size: 597.506pt x 845.045pt.
-<source-3.png, id=10, 248.93pt x 206.772pt>
-File: source-3.png Graphic file (type png)
-<use source-3.png>
-Package pdftex.def Info: source-3.png  used on input line ....
+<l--we.png, id=7, 248.93pt x 206.772pt>
+File: l--we.png Graphic file (type png)
+<use l--we.png>
+Package pdftex.def Info: l--we.png  used on input line ....
 (pdftex.def)             Requested size: 248.929pt x 206.771pt.
-File: source-3.png Graphic file (type png)
-<use source-3.png>
-Package pdftex.def Info: source-3.png  used on input line ....
-(pdftex.def)             Requested size: 248.929pt x 206.771pt.
-File: source-1.jpg Graphic file (type jpg)
-<use source-1.jpg>
-Package pdftex.def Info: source-1.jpg  used on input line ....
+File: a.jpg Graphic file (type jpg)
+<use a.jpg>
+Package pdftex.def Info: a.jpg  used on input line ....
 (pdftex.def)             Requested size: 401.499pt x 301.124pt.
-File: source-1.jpg Graphic file (type jpg)
-<use source-1.jpg>
-Package pdftex.def Info: source-1.jpg  used on input line ....
+File: a.jpg Graphic file (type jpg)
+<use a.jpg>
+Package pdftex.def Info: a.jpg  used on input line ....
 (pdftex.def)             Requested size: 598.247pt x 448.685pt.
-File: source-1.jpg Graphic file (type jpg)
-<use source-1.jpg>
-Package pdftex.def Info: source-1.jpg  used on input line ....
+File: a.jpg Graphic file (type jpg)
+<use a.jpg>
+Package pdftex.def Info: a.jpg  used on input line ....
 (pdftex.def)             Requested size: 598.247pt x 448.685pt.
-File: source-1.jpg Graphic file (type jpg)
-<use source-1.jpg>
-Package pdftex.def Info: source-1.jpg  used on input line ....
+File: a.jpg Graphic file (type jpg)
+<use a.jpg>
+Package pdftex.def Info: a.jpg  used on input line ....
 (pdftex.def)             Requested size: 598.247pt x 448.685pt.
-File: source-1.jpg Graphic file (type jpg)
-<use source-1.jpg>
-Package pdftex.def Info: source-1.jpg  used on input line ....
+File: a.jpg Graphic file (type jpg)
+<use a.jpg>
+Package pdftex.def Info: a.jpg  used on input line ....
 (pdftex.def)             Requested size: 598.247pt x 448.685pt.
-[1<./source-1.jpg>]
+[1<./a.jpg>]
 <a4.pdf, id=00, page=1, 597.508pt x 845.047pt>
 File: a4.pdf Graphic file (type pdf)
 <use a4.pdf, page 1>
@@ -225,229 +209,229 @@ File: a4.pdf Graphic file (type pdf)
 Package pdftex.def Info: a4.pdf , page12 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
 [13<./a4.pdf>]
-<source-2.pdf, id=00, page=1, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 1>
-Package pdftex.def Info: source-2.pdf , page1 used on input line ....
+<a4+1.pdf, id=69, page=1, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 1>
+Package pdftex.def Info: a4+1.pdf , page1 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 1>
-Package pdftex.def Info: source-2.pdf , page1 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 1>
+Package pdftex.def Info: a4+1.pdf , page1 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 1>
-Package pdftex.def Info: source-2.pdf , page1 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 1>
+Package pdftex.def Info: a4+1.pdf , page1 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[14<./source-2.pdf>]
-<source-2.pdf, id=00, page=2, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 2>
-Package pdftex.def Info: source-2.pdf , page2 used on input line ....
+[14<./a4+1.pdf>]
+<a4+1.pdf, id=88, page=2, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 2>
+Package pdftex.def Info: a4+1.pdf , page2 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 2>
-Package pdftex.def Info: source-2.pdf , page2 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 2>
+Package pdftex.def Info: a4+1.pdf , page2 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 2>
-Package pdftex.def Info: source-2.pdf , page2 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 2>
+Package pdftex.def Info: a4+1.pdf , page2 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[15<./source-2.pdf>]
-<source-2.pdf, id=00, page=3, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 3>
-Package pdftex.def Info: source-2.pdf , page3 used on input line ....
+[15<./a4+1.pdf>]
+<a4+1.pdf, id=92, page=3, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 3>
+Package pdftex.def Info: a4+1.pdf , page3 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 3>
-Package pdftex.def Info: source-2.pdf , page3 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 3>
+Package pdftex.def Info: a4+1.pdf , page3 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 3>
-Package pdftex.def Info: source-2.pdf , page3 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 3>
+Package pdftex.def Info: a4+1.pdf , page3 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[16<./source-2.pdf>]
-<source-2.pdf, id=00, page=4, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 4>
-Package pdftex.def Info: source-2.pdf , page4 used on input line ....
+[16<./a4+1.pdf>]
+<a4+1.pdf, id=96, page=4, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 4>
+Package pdftex.def Info: a4+1.pdf , page4 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 4>
-Package pdftex.def Info: source-2.pdf , page4 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 4>
+Package pdftex.def Info: a4+1.pdf , page4 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 4>
-Package pdftex.def Info: source-2.pdf , page4 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 4>
+Package pdftex.def Info: a4+1.pdf , page4 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[17<./source-2.pdf>]
-<source-2.pdf, id=00, page=5, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 5>
-Package pdftex.def Info: source-2.pdf , page5 used on input line ....
+[17<./a4+1.pdf>]
+<a4+1.pdf, id=100, page=5, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 5>
+Package pdftex.def Info: a4+1.pdf , page5 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 5>
-Package pdftex.def Info: source-2.pdf , page5 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 5>
+Package pdftex.def Info: a4+1.pdf , page5 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 5>
-Package pdftex.def Info: source-2.pdf , page5 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 5>
+Package pdftex.def Info: a4+1.pdf , page5 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[18<./source-2.pdf>]
-<source-2.pdf, id=00, page=6, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 6>
-Package pdftex.def Info: source-2.pdf , page6 used on input line ....
+[18<./a4+1.pdf>]
+<a4+1.pdf, id=104, page=6, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 6>
+Package pdftex.def Info: a4+1.pdf , page6 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 6>
-Package pdftex.def Info: source-2.pdf , page6 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 6>
+Package pdftex.def Info: a4+1.pdf , page6 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 6>
-Package pdftex.def Info: source-2.pdf , page6 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 6>
+Package pdftex.def Info: a4+1.pdf , page6 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[19<./source-2.pdf>]
-<source-2.pdf, id=00, page=7, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 7>
-Package pdftex.def Info: source-2.pdf , page7 used on input line ....
+[19<./a4+1.pdf>]
+<a4+1.pdf, id=109, page=7, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 7>
+Package pdftex.def Info: a4+1.pdf , page7 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 7>
-Package pdftex.def Info: source-2.pdf , page7 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 7>
+Package pdftex.def Info: a4+1.pdf , page7 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 7>
-Package pdftex.def Info: source-2.pdf , page7 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 7>
+Package pdftex.def Info: a4+1.pdf , page7 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[20<./source-2.pdf>]
-<source-2.pdf, id=00, page=8, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 8>
-Package pdftex.def Info: source-2.pdf , page8 used on input line ....
+[20<./a4+1.pdf>]
+<a4+1.pdf, id=120, page=8, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 8>
+Package pdftex.def Info: a4+1.pdf , page8 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 8>
-Package pdftex.def Info: source-2.pdf , page8 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 8>
+Package pdftex.def Info: a4+1.pdf , page8 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 8>
-Package pdftex.def Info: source-2.pdf , page8 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 8>
+Package pdftex.def Info: a4+1.pdf , page8 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[21<./source-2.pdf>]
-<source-2.pdf, id=00, page=9, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 9>
-Package pdftex.def Info: source-2.pdf , page9 used on input line ....
+[21<./a4+1.pdf>]
+<a4+1.pdf, id=124, page=9, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 9>
+Package pdftex.def Info: a4+1.pdf , page9 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 9>
-Package pdftex.def Info: source-2.pdf , page9 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 9>
+Package pdftex.def Info: a4+1.pdf , page9 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 9>
-Package pdftex.def Info: source-2.pdf , page9 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 9>
+Package pdftex.def Info: a4+1.pdf , page9 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[22<./source-2.pdf>]
-<source-2.pdf, id=00, page=10, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 10>
-Package pdftex.def Info: source-2.pdf , page10 used on input line ....
+[22<./a4+1.pdf>]
+<a4+1.pdf, id=128, page=10, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 10>
+Package pdftex.def Info: a4+1.pdf , page10 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 10>
-Package pdftex.def Info: source-2.pdf , page10 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 10>
+Package pdftex.def Info: a4+1.pdf , page10 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 10>
-Package pdftex.def Info: source-2.pdf , page10 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 10>
+Package pdftex.def Info: a4+1.pdf , page10 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[23<./source-2.pdf>]
-<source-2.pdf, id=00, page=11, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 11>
-Package pdftex.def Info: source-2.pdf , page11 used on input line ....
+[23<./a4+1.pdf>]
+<a4+1.pdf, id=132, page=11, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 11>
+Package pdftex.def Info: a4+1.pdf , page11 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 11>
-Package pdftex.def Info: source-2.pdf , page11 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 11>
+Package pdftex.def Info: a4+1.pdf , page11 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 11>
-Package pdftex.def Info: source-2.pdf , page11 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 11>
+Package pdftex.def Info: a4+1.pdf , page11 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[24<./source-2.pdf>]
-<source-2.pdf, id=00, page=12, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 12>
-Package pdftex.def Info: source-2.pdf , page12 used on input line ....
+[24<./a4+1.pdf>]
+<a4+1.pdf, id=136, page=12, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 12>
+Package pdftex.def Info: a4+1.pdf , page12 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 12>
-Package pdftex.def Info: source-2.pdf , page12 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 12>
+Package pdftex.def Info: a4+1.pdf , page12 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 12>
-Package pdftex.def Info: source-2.pdf , page12 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 12>
+Package pdftex.def Info: a4+1.pdf , page12 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[25<./source-2.pdf>]
-<source-2.pdf, id=00, page=13, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 13>
-Package pdftex.def Info: source-2.pdf , page13 used on input line ....
+[25<./a4+1.pdf>]
+<a4+1.pdf, id=141, page=13, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 13>
+Package pdftex.def Info: a4+1.pdf , page13 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 13>
-Package pdftex.def Info: source-2.pdf , page13 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 13>
+Package pdftex.def Info: a4+1.pdf , page13 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 13>
-Package pdftex.def Info: source-2.pdf , page13 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 13>
+Package pdftex.def Info: a4+1.pdf , page13 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[26<./source-2.pdf>]
-<source-2.pdf, id=00, page=14, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 14>
-Package pdftex.def Info: source-2.pdf , page14 used on input line ....
+[26<./a4+1.pdf>]
+<a4+1.pdf, id=145, page=14, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 14>
+Package pdftex.def Info: a4+1.pdf , page14 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 14>
-Package pdftex.def Info: source-2.pdf , page14 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 14>
+Package pdftex.def Info: a4+1.pdf , page14 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 14>
-Package pdftex.def Info: source-2.pdf , page14 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 14>
+Package pdftex.def Info: a4+1.pdf , page14 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[27<./source-2.pdf>]
-<source-2.pdf, id=00, page=15, 597.508pt x 845.047pt>
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 15>
-Package pdftex.def Info: source-2.pdf , page15 used on input line ....
+[27<./a4+1.pdf>]
+<a4+1.pdf, id=149, page=15, 597.508pt x 845.047pt>
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 15>
+Package pdftex.def Info: a4+1.pdf , page15 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 15>
-Package pdftex.def Info: source-2.pdf , page15 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 15>
+Package pdftex.def Info: a4+1.pdf , page15 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-File: source-2.pdf Graphic file (type pdf)
-<use source-2.pdf, page 15>
-Package pdftex.def Info: source-2.pdf , page15 used on input line ....
+File: a4+1.pdf Graphic file (type pdf)
+<use a4+1.pdf, page 15>
+Package pdftex.def Info: a4+1.pdf , page15 used on input line ....
 (pdftex.def)             Requested size: 890.306pt x 1259.147pt.
-[28<./source-2.pdf>]
-File: source-3.png Graphic file (type png)
-<use source-3.png>
-Package pdftex.def Info: source-3.png  used on input line ....
+[28<./a4+1.pdf>]
+File: l--we.png Graphic file (type png)
+<use l--we.png>
+Package pdftex.def Info: l--we.png  used on input line ....
 (pdftex.def)             Requested size: 370.913pt x 308.097pt.
-File: source-3.png Graphic file (type png)
-<use source-3.png>
-Package pdftex.def Info: source-3.png  used on input line ....
+File: l--we.png Graphic file (type png)
+<use l--we.png>
+Package pdftex.def Info: l--we.png  used on input line ....
 (pdftex.def)             Requested size: 370.913pt x 308.097pt.
-File: source-3.png Graphic file (type png)
-<use source-3.png>
-Package pdftex.def Info: source-3.png  used on input line ....
+File: l--we.png Graphic file (type png)
+<use l--we.png>
+Package pdftex.def Info: l--we.png  used on input line ....
 (pdftex.def)             Requested size: 370.913pt x 308.097pt.
-[29<./source-3.png(PNGcopy)>](a.aux)
+[29<./l--we.png(PNGcopy)>](a.aux)
 Creator:         TeX
 Producer:        TeXengine
 Custom Metadata: no

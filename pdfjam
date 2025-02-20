@@ -643,6 +643,7 @@ do
 	local range = page * ("-" * page) ^ -1 -- any or no page range (the latter being an implicit empty page)
 	local part = "{}" + range -- page range or implicit or explicit empty page
 	local spec = part * ("," * part) ^ 0 * -1 -- complete page spec
+	-- Note: if pagespec contains no proper page, the default pagespec is implicitely appended
 	function is_valid_pagespec(word)
 		return lpeg.match(spec, word) ~= nil
 	end

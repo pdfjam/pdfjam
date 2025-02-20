@@ -5,10 +5,6 @@ File: file2.pdf Graphic file (type pdf)
 <use file2.pdf>
 Package pdftex.def Info: file2.pdf  used on input line ....
 (pdftex.def)             Requested size: 597.506pt x 845.045pt.
-File: file2.pdf Graphic file (type pdf)
-<use file2.pdf>
-Package pdftex.def Info: file2.pdf  used on input line ....
-(pdftex.def)             Requested size: 597.506pt x 845.045pt.
 <file2.pdf, id=00, page=1, 597.508pt x 845.047pt>
 File: file2.pdf Graphic file (type pdf)
 <use file2.pdf, page 1>
