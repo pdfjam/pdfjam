@@ -57,9 +57,15 @@ function enquote(s)
 	return "'" .. string.gsub(s, "'", "'\\''") .. "'"
 end
 
+do
+local separator = " " * (lpeg.P" " ^ 0 * ("," * lpeg.P" " ^ 0) ^ -1) + "," * lpeg.P" " ^ 0
+tocomma = lpeg.Cs((separator/"," + 1)^0)
+tospace = lpeg.Cs((separator/" " + 1)^0)
+end
+
 -- file utilities --
 
--- variant of file.copy which works independent of /dev/stdin and /dev/stdout
+-- variant of file.copy which works independently of /dev/stdin and /dev/stdout
 function file_copy(oldname, newname)
 	if oldname and newname then
 		local data
@@ -151,7 +157,7 @@ function getopt(arg)
 	})
 	a, t = parser:parse(arg)
 	t.vanilla = nil
-	debugprint("args: %,T\nopts: %T", a, t)
+	debugprint("args: %T\nopts: %T", a, t)
 	return Interpreter:new({a=a, t=t, options=options})
 end
 
@@ -455,7 +461,7 @@ function define_options()
 	options.papersize = {
 		func = function(v, _, t)
 			t.paper = nil
-			v = unbrace(v)
+			v = tocomma:match(unbrace(v))
 			h, h_unit, w, w_unit = string.match(v, "^(%d+)(%l*),(%d+)(%l*)$")
 			if not h then return nil, "wrong syntax for papersize" end
 			h_unit = h_unit ~= "" and h_unit or "bp"
@@ -635,7 +641,7 @@ do
 	local spec = part * ("," * part) ^ 0 * -1 -- complete page spec
 	-- Note: if pagespec contains no proper page, the default pagespec is implicitely appended
 	function is_valid_pagespec(word)
-		return lpeg.match(spec, word) ~= nil
+		return lpeg.match(spec, tocomma:match(word)) ~= nil
 	end
 end
 
@@ -702,6 +708,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 	local add_file, add_pagespec
 	if batch then
 		function add_pagespec(ps)
+			ps = ps and tocomma:match(ps)
 			for _, a in ipairs(l) do table.insert(filepagelist, {a, ps}) end
 			l = {}
 		end
@@ -715,6 +722,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		end
 	else
 		function add_pagespec(ps)
+			ps = ps and tocomma:match(ps)
 			for _, a in ipairs(l) do
 				table.insert(filepagelist, a)
 				table.insert(filepagelist, ps)
