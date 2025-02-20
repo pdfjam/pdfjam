@@ -1,1 +1,1 @@
-eval "./pdfjam --vanilla --help" | sed -n 's/^ *\[Default for you at this site: \(.*\)\]/\1/p'
+./pdfjam --vanilla --help | sed -En 's/=true,$//; s/="(.*)",$/=\1/; s/^ \["([^"]*)"\]/\1/p'

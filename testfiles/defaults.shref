@@ -1,11 +1,12 @@
-suffix=pdfjam
-checkfiles=checkfiles
-keepinfo=
-landscape=
-twoside=
+checkfiles
+iconv=iconv
+latex=pdflatex
+latexopts=-interaction batchmode
+outfile=.
+pages=-
 paper=a4paper
-papersize=
-tidy=tidy
-latex=<TESTDIR>/../bin/pdflatex
-runs=1
-enc=
+pdfinfo=pdfinfo
+runs=1,
+suffix=pdfjam
+tidy
+vanilla

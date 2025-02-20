@@ -92,6 +92,11 @@ function executable(exe)
 	exe = enquote(exe)
 	return io.popen(lookup .. " " .. exe):read() and exe
 end
+function pread(t, mode, default)
+	default = default or ""
+	local o = popen(table.unpack(t))
+	return o and o:read(mode) or default
+end
 function popen(exe, ...)
 	exe = executable(exe)
 	return exe and io.popen(exe .. table.concat({"", ...}, " "))
@@ -465,10 +470,10 @@ function define_options()
 	options.shortedge = "no-otheredge"
 
 	local paper_pattern = lpeg.C((1 - lpeg.P":")^1) * ": "
-		* lpeg.C(lpeg.R"09"^1) * "x" * lpeg.C(lpeg.R"09"^1)
+		* lpeg.C(lpeg.patterns.cpnumber) * "x" * lpeg.C(lpeg.patterns.cpnumber)
 		* " " * lpeg.C(lpeg.R"az"^1) * -1
 	local paperconf_pattern = lpeg.C(lpeg.patterns.number)
-		* " " * lpeg.C(lpeg.patterns.number)
+		* " " * lpeg.C(lpeg.patterns.number) * -1
 	local function default_paper()
 		local o = popen("paper")
 		if o then
@@ -477,18 +482,31 @@ function define_options()
 				warn("The `paper` program seems not to be working; not using it")
 			else
 				local paper = to_paper(p)
-				if paper then return paper
-				else return nil, {x .. u, y .. u} end
+				if paper then
+					return paper
+				else
+					return nil, {x .. u, y .. u}
+				end
 			end
 		end
 		o = popen("paperconf")
-		if not o then return "a4paper" end
-		local paper = to_paper(o:read())
-		if paper then return paper end
-		o = popen("paperconf", "-s")
-		if not o then return "a4paper" end
-		local x, y = lpeg.match(paperconf_pattern, o:read())
-		return nil, {x .. "bp", y .. "bp"}
+		if o then
+			local p = to_paper(o:read())
+			if p then
+				return p
+			else
+				o = popen("paperconf", "-s")
+				if o then
+					local x, y = paperconf_pattern:match(o:read())
+					if y then
+						return nil, {x .. "bp", y .. "bp"}
+					else
+						warn("The `paperconf` program seems not to be working; not using it")
+					end
+				end
+			end
+		end
+		return "a4paper"
 	end
 
 	local initial = {
@@ -811,7 +829,6 @@ function main(args)
 	end
 end
 
-DEBUG = true
 success, msg = xpcall(main, debug.traceback)
 
 collectgarbage()

@@ -1,73 +1,51 @@
 ===  ===
 paper=a4paper
-papersize=
 === mock/paperconf/a5 ===
 paper=a5paper
-papersize=
 === mock/paperconf/a10 ===
-paper=
 papersize=73.7008bp,104.882bp
 === mock/paperconf/letter ===
 paper=letterpaper
-papersize=
 === mock/paperconf/halfletter ===
-paper=
 papersize=396bp,612bp
 === mock/paper/a5 ===
 paper=a5paper
-papersize=
 === mock/paper/a10 ===
-paper=
 papersize=26mm,37mm
 === mock/paper/letter ===
 paper=letterpaper
-papersize=
 === mock/paperconf/halfletter ===
-paper=
 papersize=396bp,612bp
 === mock/paper/letter:mock/paperconf/a10 ===
 paper=letterpaper
-papersize=
 === mock/paper/a10:mock/paperconf/a10 ===
-paper=
 papersize=26mm,37mm
 === mock/paper/foo:mock/paperconf/a5 ===
 paper=a5paper
-papersize=
 === mock/paper/foo:mock/paperconf/a10 ===
-paper=
 papersize=73.7008bp,104.882bp
 === mock/paperconf/foo ===
 paper=a4paper
-papersize=
 === mock/paper/foo ===
 paper=a4paper
-papersize=
 === mock/paper/foo:mock/paperconf/foo ===
 paper=a4paper
-papersize=
 ===== Using config =====
 paper=a5paper
 ===  ===
 paper=a5paper
-papersize=
 === mock/paper/letter ===
 paper=a5paper
-papersize=
 ===== Using config =====
 papersize=10cm,30cm
 ===  ===
-paper=
 papersize=10cm,30cm
 === mock/paper/letter ===
-paper=letterpaper
 papersize=10cm,30cm
 ===== Using config =====
-paper=a5paper
 papersize=10cm,30cm
+paper=a5paper
 ===  ===
 paper=a5paper
-papersize=
 === mock/paper/letter ===
 paper=a5paper
-papersize=

@@ -1,17 +1,10 @@
 papersize() {
 	echo "=== $1 ==="
-	eval "PATH='$1:$PATH' ./pdfjam --help" \
-		| sed -n 's/^ *\[Default for you at this site: \(paper.*\)\]/\1/p'
+	eval "PATH='$1:$PATH' ./pdfjam$vanilla --help" \
+		| sed -En 's/^ \["(paper)"\]="(.*)",$/\1=\2/p; s/^ \["(papersize)"\]=\{ "(.*)", "(.*)" \},$/\1=\2,\3/p'
 }
 
-if [ -f ~/.pdfjam.conf ]; then
-	mv ~/.pdfjam.conf ~/.pdfjam.conf.back
-	trap 'mv ~/.pdfjam.conf.back ~/.pdfjam.conf' EXIT
-else
-	trap 'rm ~/.pdfjam.conf' EXIT
-fi
-echo 'paper=
-papersize=' >~/.pdfjam.conf
+vanilla=' --vanilla'
 
 # default with libpaper uninstalled
 papersize
@@ -42,7 +35,16 @@ papersize mock/paper/foo
 papersize mock/paper/foo:mock/paperconf/foo
 
 # with config
+
+if [ -f ~/.pdfjam.conf ]; then
+	mv ~/.pdfjam.conf ~/.pdfjam.conf.back
+	trap 'mv ~/.pdfjam.conf.back ~/.pdfjam.conf' EXIT
+else
+	trap 'rm ~/.pdfjam.conf' EXIT
+fi
+
 echo ===== Using config =====
+vanilla=
 echo paper=a5paper|tee ~/.pdfjam.conf
 papersize
 papersize mock/paper/letter
@@ -53,7 +55,6 @@ papersize
 papersize mock/paper/letter
 
 echo ===== Using config =====
-echo 'paper=a5paper
-papersize=10cm,30cm'|tee ~/.pdfjam.conf
+echo $'papersize=10cm,30cm\npaper=a5paper'|tee ~/.pdfjam.conf
 papersize
 papersize mock/paper/letter
