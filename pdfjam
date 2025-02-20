@@ -2,6 +2,7 @@
 version="N.NN"
 kpse.set_program_name("kpsewhich")
 require "lualibs"
+patterns = lpeg.patterns
 
 configpath = {"/etc", "/usr/share/etc", "/usr/local/share", "/usr/local/etc"}
 home = os.getenv("HOME")
@@ -58,7 +59,7 @@ function enquote(s)
 end
 
 do
-local w = lpeg.patterns.whitespace
+local w = patterns.whitespace
 local separator = w * (w ^ 0 * ("," * w ^ 0) ^ -1) + "," * w ^ 0
 tocomma = lpeg.Cs((separator/"," + 1)^0)
 tospace = lpeg.Cs((separator/" " + 1)^0)
@@ -295,7 +296,7 @@ end
 
 ConfigParser = Parser:new()
 do
-	local spaces = lpeg.patterns.spacer^0
+	local spaces = patterns.spacer^0
 	local rest = lpeg.P(1)^0
 	local key = lpeg.C((1 - lpeg.S(" \t\f\v="))^1)
 	local value = lpeg.C(rest)
@@ -459,19 +460,17 @@ function define_options()
 		end,
 		retrieve = identity
 	}
+	local dimen = patterns.number * (patterns.lowercase^1 + lpeg.P(true) / "bp")
+	local papersize_pattern = lpeg.Cs(dimen * ((patterns.whitespace + lpeg.P",")^1 / ",") * dimen)
+	local swap_pattern = lpeg.Cs(lpeg.C((1-lpeg.P",")^1) * "," * lpeg.C(lpeg.P(1)^1) / "%2,%1")
 	options.papersize = {
 		func = function(v, _, t)
 			t.paper = nil
-			v = tocomma:match(unbrace(v))
-			h, h_unit, w, w_unit = string.match(v, "^(%d+)(%l*),(%d+)(%l*)$")
-			if not h then return nil, "wrong syntax for papersize" end
-			h_unit = h_unit ~= "" and h_unit or "bp"
-			w_unit = w_unit ~= "" and w_unit or "bp"
-			return {h .. h_unit, w .. w_unit}
+			return papersize_pattern:match(unbrace(v))
 		end,
 		retrieve = function(v, t)
-			if t.landscape then v = {v[2], v[1]} end
-			return "papersize={" .. v[1] .. "," .. v[2] .. "}"
+			if t.landscape then v = swap_pattern:match(v) end
+			return "papersize={" .. v .. "}"
 		end
 	}
 	options.preamble = {
@@ -497,23 +496,21 @@ function define_options()
 	options.shortedge = "no-otheredge"
 
 	local paper_pattern = lpeg.C((1 - lpeg.P":")^1) * ": "
-		* lpeg.C(lpeg.patterns.cpnumber) * "x" * lpeg.C(lpeg.patterns.cpnumber)
-		* " " * lpeg.C(lpeg.R"az"^1) * -1
-	local paperconf_pattern = lpeg.C(lpeg.patterns.number)
-		* " " * lpeg.C(lpeg.patterns.number) * -1
+	* (lpeg.C(patterns.cpnumber) * "x" * lpeg.C(patterns.cpnumber)
+	* " " * lpeg.C(lpeg.R"az"^1) * -1 / "%1%3,%2%3")
+	local paperconf_pattern = (lpeg.C(patterns.number) * " " * lpeg.C(patterns.number)) / "%1bp,%2bp" * -1
 	local function default_paper()
 		local o = popen("paper")
 		if o then
-			local p, x, y, u = lpeg.match(paper_pattern, o:read())
-			if not u then
-				warn("The `paper` program seems not to be working; not using it")
-			else
+			local p, xy = paper_pattern:match(o:read())
+			if xy then
 				local paper = to_paper(p)
 				if paper then
 					return paper
 				else
-					return nil, {x .. u, y .. u}
+					return nil, xy
 				end
+			else warn"The `paper` program seems not to be working; not using it"
 			end
 		end
 		o = popen("paperconf")
@@ -524,11 +521,11 @@ function define_options()
 			else
 				o = popen("paperconf", "-s")
 				if o then
-					local x, y = paperconf_pattern:match(o:read())
-					if y then
-						return nil, {x .. "bp", y .. "bp"}
-					else
-						warn("The `paperconf` program seems not to be working; not using it")
+					o = o:read()
+					local xy = paperconf_pattern:match(o)
+					if xy then
+						return nil, xy
+					else warn"The `paperconf` program seems not to be working; not using it"
 					end
 				end
 			end
