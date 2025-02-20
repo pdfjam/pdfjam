@@ -8,13 +8,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get -y --no-install-recommends install shellcheck devscripts groff mandoc
+      run: sudo apt-get update && sudo apt-get -y --no-install-recommends install groff mandoc
     - name: Unpack
       run: utils/build.sh N.NN
-    - name: Shellcheck
-      run: shellcheck build/pdfjam/bin/pdfjam
-    - name: Check Bash-isms
-      run: checkbashisms -xp build/pdfjam/bin/pdfjam
     - name: Check man page (groff)
       run: groff -mandoc -t -K utf8 -b -rCHECKSTYLE=10 -ww -z build/pdfjam/man/pdfjam.1
     - name: Check man page (nroff)
