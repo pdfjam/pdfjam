@@ -18,6 +18,18 @@ end
 
 function identity(x) return x end
 
+function exit(code) collectgarbage() os.exit(code, true) end
+
+function err(s, ...)
+	if not s then return end
+	collectgarbage()
+	error(string.format("Error: " .. s .. ".", ...))
+end
+function warn(s, ...)
+	if not s then return end
+	print(string.format("Warning: " .. s, ...))
+end
+
 function debugprint(s, ...)
 	if not DEBUG then return end
 	io.stderr:write(string.formatters[s.."\n"](...))
@@ -44,11 +56,36 @@ function enquote(s)
 	return "'" .. string.gsub(s, "'", "'\\''") .. "'"
 end
 
+-- argument massage --
+-- Give a common way to enter multi-value arguments, also used for page specs.
+-- The underlying LaTeX packages expect them either by spaces or by commas with spaces stripped of.
+-- We accept both and transform any run of separators into a single space respectively comma.
+-- We also strip leading and trailing separators, thus leaving no empty entries.
+-- However, content in braces is left as is. (Especially you get an empty page via `{}`.)
+-- More than the necessary number of values are ignored by the packages, so we accept them likewise (we may give a warning, though).
+-- The values usually get expanded/assigned to dimens, so we need to accept TeX code in addition to numbers.
+-- The graphics package adds bp as a unit where no unit is given.
+-- We thus do the same for options to other packages.
+
 do
-local w = patterns.whitespace
-local separator = w * (w ^ 0 * ("," * w ^ 0) ^ -1) + "," * w ^ 0
-tocomma = lpeg.Cs((separator/"," + 1)^0)
-tospace = lpeg.Cs((separator/" " + 1)^0)
+	sep = lpeg.S"\t\n\v\f\r ,"
+	local normaltoken = "\\" * lpeg.S"\\{}" + (1 - lpeg.S"{}")
+	token = lpeg.P{normaltoken + "{" * lpeg.V(1)^0 * "}"}
+	local group = "{" * token^0 * "}"
+	local x = normaltoken - sep + group
+	local unbalanced = -1 + lpeg.P( function(s, i)
+		err("Unbalanced braces in '"..string.sub(s, 1, i).."<--here "..string.sub(s, i+1) .. "'")
+	end )
+	local function tosep(d)
+		local pattern = lpeg.Cs(sep^0/"" * x^0 * (sep^1/d * x^1)^0 * (sep^0/"")) * unbalanced
+		return function(v) return lpeg.match(pattern, v) end
+	end
+	tocomma = tosep","
+	tospace = tosep" "
+end
+
+function optgroup_pattern(x)
+	return lpeg.P"{" * x * lpeg.P"}" + x
 end
 
 -- file utilities --
@@ -130,7 +167,7 @@ function getopt(arg)
 		elseif w == "--no-vanilla" then vanilla = nil
 		end
 	end
-	local options, t = define_options()
+	local options, t = define_options(), define_initial()
 	local a
 	if not vanilla then
 		local p = ConfigParser:new({options = options, t = t})
@@ -270,16 +307,6 @@ function Parser:error(s, ...)
 	error(string.format("Error while parsing %s: " .. s .. ".", self:word(), ...))
 end
 
-function err(s, ...)
-	if not s then return end
-	collectgarbage()
-	error(string.format("Error: " .. s .. ".", ...))
-end
-function warn(s, ...)
-	if not s then return end
-	print(string.format("Warning: " .. s, ...))
-end
-
 ConfigParser = Parser:new()
 do
 	local spaces = patterns.spacer^0
@@ -357,9 +384,9 @@ function Interpreter:pdfpagesoptions()
 	return string.sub(r, 2)
 end
 
--- pdfjam options
+-- pdfjam options --
 
-do
+do -- overhead to keep the order of options although tables are unordered
 	local pos = {}
 	function numbered(v, a, t)
 		if t and t[a] then table.remove(pos, table.contains(pos, a)) end
@@ -373,34 +400,24 @@ do
 	end
 end
 
-normalopt = {func = identity}
-pdfpagesopt = {func = numbered}
-flagopt = {
-	argument = false,
-	func = function() return true end
-}
-paperopt = {
-	argument = false,
-	func = function(_, a, t) t.paper = a t.papersize = nil end
-}
+do
+	pdfpagesopt = {func = numbered}
 
-bool_prose = {["true"]="true", yes="true", on="true", ["false"]="false", no="false", off="false"}
-boolopt = {
-	argument = bool_prose,
-	func = function(v, a, t)
-		if not v then return numbered(true, a, t) end
-		local b = bool_prose[v]
-		if b == nil then
-			return nil, "Cannot interpret '" .. v .. "' as boolean value.\n\n\z
-			Tip: Accepted values are 'true', 'yes' and 'on', respectively 'false', 'no' and 'off'"
-		else
-			return numbered(b, a, t)
+	local bool_prose = {["true"]="true", yes="true", on="true", ["false"]="false", no="false", off="false"}
+	local boolopt = {
+		argument = bool_prose,
+		func = function(v, a, t)
+			if not v then return numbered(true, a, t) end
+			local b = bool_prose[v]
+			if b == nil then
+				return nil, "Cannot interpret '" .. v .. "' as boolean value.\n\n\z
+				Tip: Accepted values are 'true', 'yes' and 'on', respectively 'false', 'no' and 'off'"
+			else
+				return numbered(b, a, t)
+			end
 		end
-	end
-}
+	}
 
-function define_options()
-	local options = {}
 	local bool_options = {
 		"flip-other-edge", "frame", "column", "columnstrict",
 		"openright", "openrighteach", "turn", "noautoscale", "fitpaper",
@@ -409,11 +426,20 @@ function define_options()
 		"doublepages", "doublepagestwist", "doublepagestwistodd",
 		"doublepagestwist*", "doublepagestwistodd*"
 	}
+
+	local normalopt = {func = identity}
 	local normal_options = {"builddir", "outfile", "suffix", "latex", "iconv",
 		"enc", "pdftitle", "pdfauthor", "pdfsubject", "pdfkeywords", "runs", "pages"
 	}
+
+	local flagopt = { argument = false, func = function() return true end }
 	local flag_options = {"vanilla", "quiet", "tidy", "keepinfo",
 		"landscape", "twoside", "checkfiles", "batch"
+	}
+
+	local paperopt = {
+		argument = false,
+		func = function(_, a, t) t.paper = a t.papersize = nil end
 	}
 	local paper_options = {
 		"a0paper","a1paper","a2paper","a3paper","a4paper","a5paper","a6paper",
@@ -424,68 +450,96 @@ function define_options()
 		"b0j","b1j","b2j","b3j","b4j","b5j","b6j"
 	}
 	local paper_hash = table.tohash(paper_options)
-	local mode_options = {help = show_help, version = show_version,
-		configpath = show_configpath
-	}
-	for _, o in ipairs(bool_options) do options[o] = boolopt end
-	for _, o in ipairs(normal_options) do options[o] = normalopt end
-	for _, o in ipairs(flag_options) do options[o] = flagopt end
-	for _, o in ipairs(paper_options) do options[o] = paperopt end
-	for o, f in pairs(mode_options) do options[o] = {argument = false, func = f} end
-	function to_paper(a)
+	local function to_paper(a)
 		a = string.lower(a)
 		return paper_hash[a] and a or paper_hash[a .. "paper"] and a .. "paper"
 	end
-	options.paper = {
-		func = function(v, _, t)
-			t.papersize = nil
-			local paper = to_paper(v)
-			if paper then return paper
-			else return nil, "Unknown paper format '" .. v .. "'"
-			end
-		end,
-		retrieve = identity
-	}
-	local dimen = patterns.number * (patterns.lowercase^1 + lpeg.P(true) / "bp")
-	local papersize_pattern = lpeg.Cs(dimen * ((patterns.whitespace + lpeg.P",")^1 / ",") * dimen)
-	local swap_pattern = lpeg.Cs(lpeg.C((1-lpeg.P",")^1) * "," * lpeg.C(lpeg.P(1)^1) / "%2,%1")
-	options.papersize = {
-		func = function(v, _, t)
-			t.paper = nil
-			return papersize_pattern:match(unbrace(v))
-		end,
-		retrieve = function(v, t)
-			if t.landscape then v = swap_pattern:match(v) end
-			return "papersize={" .. v .. "}"
-		end
-	}
-	options.preamble = {
-		func = function(v, _, t)
-			t.preamble = (t.preamble or "") .. "\n" .. v
-		end,
-		retrieve = identity
-	}
-	options.pagecolor = {
-		func = identity,
-		retrieve = function(v)
-			return "\n\z
-				\\usepackage{color}\n\z
-				\\definecolor{bgclr}{RGB}{"..v.."}\n\z
-				\\pagecolor{bgclr}"
-		end
-	}
-	options.otheredge = table.fastcopy(flagopt) -- copy before manipulating
-	options.otheredge.retrieve = function(v)
-		return "\n"..[[{\makeatletter\AddToHook{shipout/before}{\ifodd\c@page\pdfpageattr{/Rotate 180}\fi}}]]
+	do
+		local s = lpeg.S"\t\n\v\f\r "
+		local blank = s^0/""
+		local tex_unit = lpeg.P"pc" + "in" + "bp" + "cm" + "mm" + "dd" + "cc" + "sp" + "em" + "ex"
+		local digit = patterns.digit
+		local tex_number = (lpeg.S"+-" * blank)^0 * (digit^1 * ("." * digit^0)^-1 + "." * digit^1)
+		local dimen = lpeg.Cs(tex_number * (blank * tex_unit + lpeg.P(true)/"bp")) + lpeg.C(token^0)
+		papersize_pattern = lpeg.Ct("{" * s^0 * dimen * s^0 * "," * s^0 * dimen * s^0 * "}" * -1
+			+ sep^0 * dimen * lpeg.S" ,"^1 * dimen * (sep + -1))
 	end
-	options.longedge = "otheredge"
-	options.shortedge = "no-otheredge"
+
+	function show_help(_, _, t) print("This is how to use it.") table.print(t) exit() end -- TODO
+	function show_version() print("pdfjam version " .. version) exit() end
+	function show_configpath() print("configpath is ...") exit() end -- TODO
+
+	local mode_options = {help = show_help, version = show_version,
+		configpath = show_configpath
+	}
+
+	local function add_multioption(options, name, sep)
+		options[name] = {
+			func = function(v, _, t)
+				t[name] = t[name] or {}
+				table.insert(t[name], v)
+			end,
+			retrieve = function(v) return v and table.concat(v, sep) or "" end
+		}
+	end
+	local multi_options = {preamble = "\n", latexopts = " "}
+
+	local alias_options = {longedge = "otheredge", shortedge = "no-otheredge"}
+
+	function define_options()
+		local options = {}
+		for _, o in ipairs(bool_options) do options[o] = boolopt end
+		for _, o in ipairs(normal_options) do options[o] = normalopt end
+		for _, o in ipairs(flag_options) do options[o] = flagopt end
+		for _, o in ipairs(paper_options) do options[o] = paperopt end
+		for o, f in pairs(mode_options) do options[o] = {argument = false, func = f} end
+		for o, s in pairs(multi_options) do add_multioption(options, o, s) end
+		for o, a in pairs(alias_options) do options[o] = a end
+		options.paper = {
+			func = function(v, _, t)
+				t.papersize = nil -- papersize would overwrite paper, thus nil it.
+				local paper = to_paper(v)
+				if paper then return paper
+				else return nil, "Unknown paper format '" .. v .. "'"
+				end
+			end,
+			retrieve = identity
+		}
+		options.papersize = {
+			func = function(v, _, t)
+				return papersize_pattern:match(v)
+			end,
+			retrieve = function(v, t)
+				if type(v) == "string" then return "papersize=" .. embrace(v)
+				elseif t.landscape then
+					return "papersize={" .. v[2] .. "," .. v[1] .. "}"
+				else
+					return "papersize={" .. v[1] .. "," .. v[2] .. "}"
+				end
+			end
+		}
+		options.pagecolor = {
+			func = identity,
+			retrieve = function(v)
+				return "\n\z
+					\\usepackage{color}\n\z
+					\\definecolor{bgclr}{RGB}{"..v.."}\n\z
+					\\pagecolor{bgclr}"
+			end
+		}
+		options.otheredge = table.fastcopy(flagopt) -- copy before manipulating
+		options.otheredge.retrieve = function(v)
+			return "\n"..[[{\makeatletter\AddToHook{shipout/before}{\ifodd\c@page\pdfpageattr{/Rotate 180}\fi}}]]
+		end
+		return options
+	end
 
 	local paper_pattern = lpeg.C((1 - lpeg.P":")^1) * ": "
-	* (lpeg.C(patterns.cpnumber) * "x" * lpeg.C(patterns.cpnumber)
-	* " " * lpeg.C(lpeg.R"az"^1) * -1 / "%1%3,%2%3")
+		* (lpeg.C(patterns.cpnumber) * "x" * lpeg.C(patterns.cpnumber)
+		* " " * lpeg.C(lpeg.R"az"^1) * -1 / "%1%3,%2%3")
 	local paperconf_pattern = (lpeg.C(patterns.number) * " " * lpeg.C(patterns.number)) / "%1bp,%2bp" * -1
-	local function default_paper()
+
+	function default_paper()
 		local o = popen("paper")
 		if o then
 			local p, xy = paper_pattern:match(o:read())
@@ -519,29 +573,25 @@ function define_options()
 		return "a4paper"
 	end
 
-	local initial = {
-		tidy = true,
-		outfile = ".",
-		suffix = "pdfjam",
-		runs = 1,
-		latex = "pdflatex",
-		latexopts = "-interaction batchmode",
-		pdfinfo = "pdfinfo",
-		iconv = "iconv",
-		checkfiles = magic_file(arg[0]) == "a texlua script",
-		pages = "-"
-	}
-	initial.paper, initial.papersize = default_paper()
-	return options, initial
+	function define_initial()
+		local initial = {
+			tidy = true,
+			suffix = false,
+			runs = 1,
+			latex = "pdflatex",
+			latexopts = {"-interaction batchmode"},
+			pdfinfo = "pdfinfo",
+			iconv = "iconv",
+			checkfiles = magic_file(arg[0]) == "a texlua script",
+			pages = "-"
+		}
+		return initial
+	end
 end
 
--- Used: [Vhoq]. Used in pagespec: [-,0-9l].
+--- short options ---
+-- Used in pagespec: [-,0-9l].
 short_options = {h="help", V="version", q="quiet", o="outfile"}
-
-function exit(code) collectgarbage() os.exit(code, true) end
-function show_help(_, _, t) print("This is how to use it.") table.print(t) exit() end
-function show_version() print("pdfjam version "..version) exit() end
-function show_configpath() print("configpath is ...") exit() end
 
 --- pdfinfo ---
 do
@@ -625,7 +675,7 @@ do
 	local spec = part * ("," * part) ^ 0 * -1 -- complete page spec
 	-- Note: if pagespec contains no proper page, the default pagespec is implicitely appended
 	function is_valid_pagespec(word)
-		return lpeg.match(spec, tocomma:match(word)) ~= nil
+		return lpeg.match(spec, tocomma(word)) ~= nil
 	end
 end
 
@@ -662,16 +712,16 @@ end
 --- file and pagespec list ---
 
 function out_name(out, last_in, suffix)
-	if out == "" then return out end
-	out = out or "."
-	local dir, name = ".", out
-	if ismkdir(out) then
-		dir = out
-		name = file.nameonly(last_in) .. (suffix and "-" .. suffix or "") .. ".pdf"
-	elseif file.is_rootbased_path(out) then return out
+	local name = file.nameonly(last_in)
+	if not out then
+		suffix = (suffix and "-" .. suffix or suffix == false and "-pdfjam" or "") .. ".pdf"
+	elseif out == "" then
+		return out
+	else
+		suffix = (suffix and "-" .. suffix or "") .. ".pdf"
+		name = ismkdir(out) and file.join(out, name) or out
 	end
-	dir = file.collapsepath(dir, true) -- bug when dir contains :
-	return file.join(dir, name)
+	return file.collapsepath(name .. suffix, true)
 end
 
 function out_names(out, files, suffix)
@@ -692,7 +742,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 	local add_file, add_pagespec
 	if batch then
 		function add_pagespec(ps)
-			ps = ps and tocomma:match(ps)
+			ps = ps and tocomma(ps)
 			for _, a in ipairs(l) do table.insert(filepagelist, {a, ps}) end
 			l = {}
 		end
@@ -706,7 +756,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		end
 	else
 		function add_pagespec(ps)
-			ps = ps and tocomma:match(ps)
+			ps = ps and tocomma(ps)
 			for _, a in ipairs(l) do
 				table.insert(filepagelist, a)
 				table.insert(filepagelist, ps)
@@ -791,11 +841,16 @@ end
 function main(args)
 	args = args or arg
 	local x = getopt(args)
+
+	if not x.t.paper and not x.t.papersize then
+		x.t.paper, x.t.papersize = default_paper()
+	end
+
 	local batch, outfile, suffix = x:pop"batch", x:pop"outfile", x:pop"suffix"
 
 	local tab = {
 		latex = x:pop"latex",
-		latexopts = x:pop"latexopts" or "",
+		latexopts = x:retrieve"latexopts",
 		pdfinfo = x:pop"pdfinfo",
 		info = pop_pdfinfo(x),
 		runs = tonumber(x:pop"runs"),

@@ -1,12 +1,10 @@
 checkfiles
 iconv=iconv
 latex=pdflatex
-latexopts=-interaction batchmode
-outfile=.
+latexopts={ "-interaction batchmode" },
 pages=-
-paper=a4paper
 pdfinfo=pdfinfo
 runs=1,
-suffix=pdfjam
+suffix=false,
 tidy
 vanilla
