@@ -1,7 +1,7 @@
 papersize() {
 	echo "=== $1 ==="
 	eval "PATH='$1:$PATH' ./pdfjam$vanilla --help" \
-		| sed -En 's/^ \["(paper(size|))"\]="(.*)",$/\1=\3/p'
+		| sed -En 's/^ \["(paper(size|))"\]=(.*),$/\1=\3/p'
 }
 
 vanilla=' --vanilla'

@@ -4,6 +4,8 @@ kpse.set_program_name("kpsewhich")
 require "lualibs"
 patterns = lpeg.patterns
 
+DEBUG=true
+
 configpath = {"/etc", "/usr/share/etc", "/usr/local/share", "/usr/local/etc"}
 home = os.getenv("HOME")
 
@@ -351,16 +353,24 @@ function Interpreter:new(obj)
 	return obj
 end
 
+function Interpreter:show(a)
+	local v = self.t[a]
+	local f = self.options[a] and self.options[a].show
+	return f and v and f(v, self.t) or v
+end
 function Interpreter:pop(a)
 	local v = self.t[a]
-	if v ~= nil then self.t[a] = nil return v end
+	if v ~= nil then
+		self.t[a] = nil
+		local f = self.options[a] and self.options[a].show
+		return f and f(v, self.t) or v
+	end
 end
 function Interpreter:retrieve(a)
 	local v = self:pop(a)
 	if v then
 		local f = self.options[a] and self.options[a].retrieve
-		if f then return f(v, self.t) end
-		return v == true and a or a .. "=" .. embrace(v)
+		return f and f(v, self.t) or v == true and a or a .. "=" .. embrace(v)
 	else return ""
 	end
 end
@@ -454,7 +464,7 @@ do
 		a = string.lower(a)
 		return paper_hash[a] and a or paper_hash[a .. "paper"] and a .. "paper"
 	end
-	do
+	do -- overly complex pattern to match the most common ways to specify the papersize
 		local s = lpeg.S"\t\n\v\f\r "
 		local blank = s^0/""
 		local tex_unit = lpeg.P"pc" + "in" + "bp" + "cm" + "mm" + "dd" + "cc" + "sp" + "em" + "ex"
@@ -465,7 +475,7 @@ do
 			+ sep^0 * dimen * lpeg.S" ,"^1 * dimen * (sep + -1))
 	end
 
-	function show_help(_, _, t) print("This is how to use it.") table.print(t) exit() end -- TODO
+	function show_help(_, _, t) print("This is how to use it.") provide_default_paper(t) table.print(t) exit() end -- TODO
 	function show_version() print("pdfjam version " .. version) exit() end
 	function show_configpath() print("configpath is ...") exit() end -- TODO
 
@@ -509,13 +519,8 @@ do
 			func = function(v, _, t)
 				return papersize_pattern:match(v)
 			end,
-			retrieve = function(v, t)
-				if type(v) == "string" then return "papersize=" .. embrace(v)
-				elseif t.landscape then
-					return "papersize={" .. v[2] .. "," .. v[1] .. "}"
-				else
-					return "papersize={" .. v[1] .. "," .. v[2] .. "}"
-				end
+			show = function(v, t)
+				return type(v) == "string" and v or t.landscape and v[2]..","..v[1] or v[1]..","..v[2]
 			end
 		}
 		options.pagecolor = {
@@ -539,7 +544,7 @@ do
 		* " " * lpeg.C(lpeg.R"az"^1) * -1 / "%1%3,%2%3")
 	local paperconf_pattern = (lpeg.C(patterns.number) * " " * lpeg.C(patterns.number)) / "%1bp,%2bp" * -1
 
-	function default_paper()
+	local function default_paper()
 		local o = popen("paper")
 		if o then
 			local p, xy = paper_pattern:match(o:read())
@@ -571,6 +576,11 @@ do
 			end
 		end
 		return "a4paper"
+	end
+	function provide_default_paper(t)
+		if not t.paper and not t.papersize then
+			t.paper, t.papersize = default_paper()
+		end
 	end
 
 	function define_initial()
@@ -841,10 +851,7 @@ end
 function main(args)
 	args = args or arg
 	local x = getopt(args)
-
-	if not x.t.paper and not x.t.papersize then
-		x.t.paper, x.t.papersize = default_paper()
-	end
+	provide_default_paper(x.t)
 
 	local batch, outfile, suffix = x:pop"batch", x:pop"outfile", x:pop"suffix"
 

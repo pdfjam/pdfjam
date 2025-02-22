@@ -3,6 +3,7 @@ iconv=iconv
 latex=pdflatex
 latexopts={ "-interaction batchmode" },
 pages=-
+paper=a4paper
 pdfinfo=pdfinfo
 runs=1,
 suffix=false,
