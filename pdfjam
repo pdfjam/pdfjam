@@ -94,7 +94,7 @@ escape_quote() {  ## Put everything in '' and care for actual '
 	printf %s "'$(printf %s "$1" | sed "s/'/'\\\\''/g")'"
 }
 escape_chars() {  ## Prefix tricky characters with \
-	printf %s "$1" | sed 's/[	 !"#$&-*;<>?[-^`{|}~]/\\&/g'
+	printf %s "$1" | sed 's/[]	 !"#$&'\''()*;<>?[\\^`{|}~]/\\&/g'
 }
 ##  Put argument in {} if necessary for parsing inside a key value list
 embrace() {
