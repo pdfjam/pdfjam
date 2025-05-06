@@ -1,3 +1,5 @@
+# Version 4.2
+* Expand some character ranges for compatibility with BSD sed (#94).
 # Version 4.1
 * Man page now contains actual information.
 * Add zsh completion file with completions for all relevant options.
