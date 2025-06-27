@@ -1,3 +1,31 @@
+quiet[Suppress verbose commentary on progress.]
+batch[Run pdfjam sequentially on each input file in turn, and produce a separate output file for each input.]
+(--builddir)tidy[Clean temporary build directory.]
+vanilla[Suppress the reading of any pdfjam configuration files.]
+landscape[Exchange width and height of paper, usually resulting in landscape.]
+twoside[Specify 'twoside' document class option.]
+checkfiles[Use `file` utility to determine file type.]
+keepinfo[Preserve Title, Author, Subject and Keywords (from the last input PDF) in the output PDF file.]
+otheredge[Rotate every odd page by 180 degrees.]
+
+(- :){-h,--help}[Print help message.]
+(- :){-V,--version}[Print the version number.]
+(- :)--configpath[Print the 'configpath' variable.]
+{-o,--outfile}[File or directory name for output(s).]:output:_output
+--suffix[Suffix for output, when file name is not given explicitely.]:string: 
+*--preamble[Append code to the LaTeX preamble.]:tex code: 
+*--latexopts
+--pdftitle[Set Title of the output PDF file.]:string: 
+--pdfauthor[Set Author of the output PDF file.]:string: 
+--pdfsubject[Set Subject of the output PDF file.]:string: 
+--pdfkeywords[Set Keywords of the output PDF file.]:string: 
+--flip-other-edge[For signatures/booklets: flip paper for duplex printing on the other edge.]:bool:(true false)
+--pagecolor[Background color.]:rgb:_pagecolor
+(--tidy --no-tidy)--builddir[Build directory.]:directory:_files -/
+--latex[LaTeX engine to be used.]:engine:_absolute_command_paths:
+--runs[Run latex N times, for each output document made.]:number of runs:_numbers -l 1 "number of runs"
+--enc[Command-line encoding.]:encoding:_enc
+
 PDFPAGES
 !page PAGESPEC; Alias for pages.
 pages PAGESPEC; Select pages to insert.
@@ -5,8 +33,8 @@ nup XxY; Put multiple logical pages onto each sheet of paper.
 landscape BOOL; Rotate output sheet format by 90 degrees.
 !deltax DIM; Set X part of delta.
 !deltay DIM; Set Y part of delta.
-delta Xdim Ydim; Put some horizontal and vertical space between the logical pages.
-offset Xdim Ydim; Displace the origin of the inserted pages.
+delta DIMS horizontal space,vertical space; Put some horizontal and vertical space between the logical pages.
+offset DIMS horizontal displacement,vertical displacement; Displace the origin of the inserted pages.
 frame BOOL; Put a frame around each logical page.
 column BOOL; Use column-major layout, where successive pages are arranged in columns down the paper.
 columnstrict BOOL; For column-major layout only: Do not balance the columns on the last page.
@@ -26,8 +54,8 @@ signature* NUM4; Similar to signature, but for right-edge binding.
 booklet BOOL; Same as signature with signature size chosen such that all pages fit into one signature.
 booklet* BOOL; Similar to booklet, but for right-edge binding.
 flip-other-edge BOOL; Only for signature[*] and booklet[*]: Flip paper for duplex printing on the other edge.
-pagetemplate PAGENUMBER; Declare page to be used as a template. All other pages are scaled such that they match within its size.
-templatesize {Xdim}{Ydim}; Specify size of page template. All pages are scaled such that they match within this size.
+pagetemplate NUM; Declare page to be used as a template. All other pages are scaled such that they match within its size.
+templatesize DIMX width height; Specify size of page template. All pages are scaled such that they match within this size.
 rotateoversize BOOL; Rotate oversized pages.
 doublepages BOOL; Insert every page twice.
 doublepagestwist BOOL; Insert every page twice: once upside down and once normally.
@@ -61,10 +89,10 @@ GRAPHICX
 !natheight TOP
 !hiresbb BOOL; Look for %%HiResBoundingBox instead of %%BoundingBox in eps files.
 pagebox (mediabox|cropbox|bleedbox|trimbox|artbox); Specify which PDF bounding box specification to read.
-viewport 'LEFT BOTTOM RIGHT TOP'; Consider image to consist of given rectangle only.
-trim 'LEFT BOTTOM RIGHT TOP'; Similar to viewport, but here the four lengths specify the amount to remove or add to each side.
+viewport DIMS left bottom right top; Consider image to consist of given rectangle only.
+trim DIMS left bottom right top; Similar to viewport, but here the four lengths specify the amount to remove or add to each side.
 angle ANGLE; Rotation angle.
-origin ORIGIN; Origin for rotation. [lrc][ctb]
+origin ORIGIN; Origin for rotation.
 width WIDTH; Required width. The graphic is scaled to this width.
 height HEIGHT; Required height. The graphic is scaled to this height.
 totalheight HEIGHT; Required height+depth. Differs from height if rotation has occured.
@@ -82,11 +110,16 @@ draft BOOL; Switch to draft mode.
 interpolate BOOL; Enable interpolation of bitmap images by the viewer.
 !alt TEXT; Alternative text for accessibility uses. Used for tagged PDF.
 
-BOOL: true|false
-NUM: [1,2,...]
-NUM4: [4,8,12,...]
+Zeilen mit Ausrufezeichen am Anfang für alle Zwecke ignorieren.
+ARGUMENT → pdfjam code → zsh completion
+PAGESPEC → → pagespec:_pagespec
+BOOL →→ bool:(true|false)
+NUM →→ number:_numbers -l 1
+XxY →→ XxY:_nup
+NUM4 →→ signature size:compadd -o nosort $(seq 4 4 96)
 DIM: FLOAT|FLOAT UNIT
 TOP, RIGHT, LEFT, BOTTOM, WIDTH, HEIGHT, Xdim, Ydim: DIM
-ANGLE: [0,90,180,270,...]
-ORIGIN: c l r t b [bt][lr]
+ANGLE=FLOAT
+ORIGIN: c l r t b bl br tl tr
+NAME=TEX=%s
 SECTION,LEVEL ∈ (part,0), (section,1), (subsection,2), (subsubsection,3), (paragraph,4), (subparagraph,5)
