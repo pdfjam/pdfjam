@@ -114,6 +114,7 @@ end
 
 function rmdir(t) os.spawn({"rm", "-rf", t[1]}) end
 function mkdir(d)
+	local success
 	d, success = dir.makedirs(d)
 	if not success then err("Could not create directory " .. d) end
 	return file.collapsepath(d, true)
@@ -179,7 +180,7 @@ function getopt(arg)
 		if home then p:parse(file.join(home, ".pdfjam.conf")) end
 		t = p.t
 	end
-	parser = Parser:new({
+	local parser = Parser:new({
 		options = options,
 		short_options = short_options,
 		t = t,
@@ -251,7 +252,7 @@ function Parser:set_option(a, v)
 		if v then self:error("unsetting expects no value") end
 		return
 	end
-	o = self.options[a] or pdfpagesopt
+	local o = self.options[a] or pdfpagesopt
 	if type(o) == "string" then -- alias
 		return self:set_option(o, v)
 	end
@@ -299,7 +300,7 @@ function Parser:argument(options)
 		self:error("argument required, but the following word '" .. w
 			.. "' seems to be an option.\n\n\z
 			Tip: For supplying an argument starting with '-' use " .. self:word()
-			.. (string.sub(self:word(), 2, 2) == "-" and "=" or "") .. w .. " instead.")
+			.. (string.sub(self:word(), 2, 2) == "-" and "=" or "") .. w .. " instead")
 	end
 	self.i = self.i + 1
 	return w
@@ -413,6 +414,7 @@ do -- overhead to keep the order of options although tables are unordered
 end
 
 do
+	-- TODO: Warn about unknown options to pdfpages
 	pdfpagesopt = {func = numbered}
 
 	local bool_prose = {["true"]="true", yes="true", on="true", ["false"]="false", no="false", off="false"}
@@ -783,7 +785,8 @@ function make_filepagelist(args, d, batch, checkfiles)
 		local function robustname(a)
 			local b, ext = new_name(a, checkfiles)
 			if names[b] then
-				local ext, i = "."..ext, 0
+				ext = "."..ext
+				local i = 0
 				local c = string.sub(b, 1, #b-#ext).."+"
 				repeat i=i+1 b = c .. i .. ext until not names[b]
 			end
