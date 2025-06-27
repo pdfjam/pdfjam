@@ -1,4 +1,6 @@
 #!/usr/bin/env texlua
+-- BUG: pdfjam --a4paper --landscape b 2 k b 3 k b 4 k b 5 k b 6 k b 7 k b 8 k b 9 k b 10 k b 11 k b 12 k b 13 k b 14 k b 15 k -o out.pdf
+-- does not produce any output (see badges)
 version="N.NN"
 kpse.set_program_name("kpsewhich")
 require "lualibs"
@@ -428,6 +430,7 @@ do
 		end
 	}
 
+	-- TODO: Do they actually work without argument?
 	local bool_options = {
 		"flip-other-edge", "frame", "column", "columnstrict",
 		"openright", "openrighteach", "turn", "noautoscale", "fitpaper",
