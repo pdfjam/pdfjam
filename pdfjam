@@ -725,11 +725,14 @@ function out_name(out, last_in, suffix)
 	local name = file.nameonly(last_in)
 	if not out then
 		suffix = (suffix and "-" .. suffix or suffix == false and "-pdfjam" or "") .. ".pdf"
-	elseif out == "" then
+	elseif out == "" then -- To stdout
 		return out
-	else
+	elseif ismkdir(out) then
 		suffix = (suffix and "-" .. suffix or "") .. ".pdf"
-		name = ismkdir(out) and file.join(out, name) or out
+		name = file.join(out, name)
+	else
+		suffix = ""
+		name = out
 	end
 	return file.collapsepath(name .. suffix, true)
 end
