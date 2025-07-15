@@ -44,16 +44,16 @@ pagecommand TEX; Declare LATEX commands, which are executed on each sheet of pap
 pagecommand* TEX; Declare LATEX commands, which are executed on the very first page only.
 picturecommand TEX; Similar to pagecommand, but executed within a picture environment with base point at the lower left page corner.
 picturecommand* TEX; Similar to picturecommand, but for very first page only.
-turn BOOL; Tell PDF viewer to display landscape pages in lanscape orientation. On by default.
+turn BOOL; Tell PDF viewer to display landscape pages in landscape orientation. On by default.
 noautoscale BOOL; Suppress automatic scaling of pages.
-fitpaper BOOL; Adjust the paper size to the one of the inserted document.
+fitpaper BOOL; Adjust the paper size to the size of the inserted document.
 reflect BOOL; Reflect included pages.
 !reflect* BOOL; ?
 signature NUM4; Create booklets by rearranging pages into signatures of 2 pages each.
 signature* NUM4; Similar to signature, but for right-edge binding.
 booklet BOOL; Same as signature with signature size chosen such that all pages fit into one signature.
 booklet* BOOL; Similar to booklet, but for right-edge binding.
-flip-other-edge BOOL; Only for signature[*] and booklet[*]: Flip paper for duplex printing on the other edge.
+flip-other-edge BOOL; Only for signature[*] and booklet[*]: Set duplex binding edge perpendicular (instead of parallel) to signature binding edge. Has same result as `otheredge`.
 pagetemplate NUM; Declare page to be used as a template. All other pages are scaled such that they match within its size.
 templatesize DIMX width height; Specify size of page template. All pages are scaled such that they match within this size.
 rotateoversize BOOL; Rotate oversized pages.
