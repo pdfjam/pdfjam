@@ -566,7 +566,7 @@ while test -n "$1$2"; do
 				path--true) error_exit "The argument '$1' is a valid path but not a valid PDF/EPS/JPG/PNG file or pagespec." $E_USAGE ;;
 				-pagespec-false) error_exit "The argument '$1' is a valid pagespec but not a valid PDF/EPS/JPG/PNG file." $E_NOINPUT ;;
 				--true) error_exit "Input file or pagespec expected, but '$1' neither exists in your file system nor is it a pagespec." $E_USAGE ;;
-				--false) error_exit "Input file expected, but '$1' not even exists in your file system." $E_NOINPUT ;;
+				--false) error_exit "Input file expected, but '$1' does not even exist in your file system." $E_NOINPUT ;;
 			esac
 			case "$valid_input-$valid_pagespec-$pageSpecAwaited" in  ##  The 6=3+3 working combinations
 				*-pagespec-true) fileSpec="${fileSpec%|awaited}|$1"; pageSpecAwaited=false ;;
