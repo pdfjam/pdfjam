@@ -494,7 +494,7 @@ do
 				t[name] = t[name] or {}
 				table.insert(t[name], v)
 			end,
-			retrieve = function(v) return v and table.concat(v, sep) or "" end
+			retrieve = function(v) return v and sep .. table.concat(v, sep) or "" end
 		}
 	end
 	local multi_options = {preamble = "\n", latexopts = " "}
@@ -853,7 +853,7 @@ function run(tab, d, outfile, infofile)
 	local pattern = lpeg.Cs((lpeg.P"$" * lpeg.C(lpeg.R"az" ^ 1) / tab + 1) ^ 0)
 	local content = pattern:match(template)
 	io.savedata("a.tex", content)
-	for _ = 1, tab.runs do execute(tab.latex, tab.latexopts, "a.tex", ">/dev/null") end
+	for _ = 1, tab.runs do execute(tab.latex .. tab.latexopts, "a.tex", ">/dev/null") end
 	file_copy("a.pdf", outfile)
 end
 
