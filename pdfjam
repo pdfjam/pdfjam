@@ -800,7 +800,7 @@ function make_filepagelist(args, d, batch, checkfiles)
 		end
 	end
 	local cases = { -- binary coded index
-		"Input file expected, but '%s' not even exists in your file system",
+		"Input file expected, but '%s' does not even exist in your file system",
 		"Input file or pagespec expected, but '%s' neither exists in your file system nor is it a pagespec",
 		"The argument '%s' is a valid pagespec but a valid PDF/EPS/JPG/PNG file was expected",
 		add_pagespec,
