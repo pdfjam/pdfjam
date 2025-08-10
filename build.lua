@@ -3,6 +3,7 @@ module = "pdfjam"
 -- For testing, run `l3build check`.
 -- For testing tex outputs, run `l3build check -ccheck-tex`.
 -- For installing in TEXMFHOME/scripts/pdfjam/, run `l3build install`.
+-- For additionally installing documentation, run `l3build install --full`.
 -- For releasing, run `l3build release`, for major releases `l3build release major`.
 
 ---- Version information from git tag
