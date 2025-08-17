@@ -499,7 +499,7 @@ do
 	end
 	local multi_options = {preamble = "\n", latexopts = " "}
 
-	local alias_options = {longedge = "otheredge", shortedge = "no-otheredge"}
+	local alias_options = {output = "outfile", longedge = "otheredge", shortedge = "no-otheredge"}
 
 	function define_options()
 		local options = {}
