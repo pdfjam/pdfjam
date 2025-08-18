@@ -442,7 +442,7 @@ while test -n "$1$2"; do
 				verbose=false
 				callOptions="$callOptions --quiet"
 				;;
-			--outfile | -o)
+			--outfile | --output | -o)
 				outFile="$2"
 				callOptions="$callOptions --outfile $(enquote "$2")"
 				shift

@@ -38,7 +38,7 @@ _pdfjam() {
 		'--flip-other-edge[For signatures/booklets: set duplex binding edge perpendicular (instead of parallel) to signature binding edge.]:bool:(true false)'this
 		'--pagecolor[Background color.]:rgb:_pagecolor'
 		'(--tidy --no-tidy)--builddir[Build directory.]:directory:_files -/'
-		'--latex[LaTeX engine to be used.]:engine:_absolute_command_paths:'
+		'--latex[LaTeX engine to be used.]:engine:_absolute_command_paths'
 		'--runs[Run latex N times, for each output document made.]:number of runs:_numbers -l 1 "number of runs"'
 		'--enc[Command-line encoding.]:encoding:_enc'
 		# \includepdfmerge options
