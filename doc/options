@@ -28,7 +28,7 @@ latex :engine:_absolute_command_paths; Absolute path to LaTeX engine to be used.
 *latexopts :latex command line options: ; Provide arguments to use when calling the LaTeX engine.
 %--latexopts
 *preamble TEX; Append code to the LaTeX preamble.
---preamble '\usepackage{pifont}' --picturecommand '\put(.5\paperwidth,.8\paperheight){\Huge\Pisymbol{mvs}{"66}}' a4.pdf 1
+!--preamble '\usepackage{pifont}' --picturecommand '\put(.5\paperwidth,.8\paperheight){\Huge\Pisymbol{mvs}{"66}}' a4.pdf 1
 runs NUM number of runs; Run latex N times, for each output document made.
 
 # Set PDF metadata

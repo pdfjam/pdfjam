@@ -125,9 +125,9 @@ function build_markdown(opts)
 	local options_md_table = map(opts, as_markdown_option)
 	local options_md = table.concat(options_md_table, "\n\n")
 
-	local readme = io.loaddata("README.md")
+	local readme = loaddata("README.md")
 	readme = string.gsub(readme, "!!!OPTIONS!!!", options_md, 1)
-	savedata("build/README.md", readme)
+	savedata("README.md", readme)
 end
 
 COMPLETER = {BOOL=":bool:(true false)", STRING=":string: ", NAME=":name: ", TEX=":TEX: ",
@@ -179,11 +179,12 @@ function build_zsh_complete(opts)
 	opts = imap(opts, as_zsh_completion)
 	local options_zsh = table.concat(opts, "\n\t\t")
 
-	local zcmp = io.loaddata("zsh-completion.sh")
+	local zcmp = loaddata("zsh-completion.sh")
 	zcmp = string.gsub(zcmp, "!!!OPTIONS!!!", options_zsh, 1)
-	savedata("build/_pdfjam", zcmp)
+	savedata("_pdfjam", zcmp)
 end
 
+function loaddata(f) return io.loaddata(f) or error("File not found: " .. f) end
 function savedata(f, s)
 	if io.loaddata(f) ~= s then io.savedata(f, s) end
 end
@@ -206,38 +207,29 @@ function surround_concat(t, pre, mid, post)
 end
 
 function make_examples(opts)
-	lfs.mkdir("examples/in")
-	lfs.mkdir("examples/out")
-	lfs.mkdir("examples/small")
-	lfs.mkdir("examples/cropped")
-	os.remove("examples/out/pdfjam.log")
-	os.remove("examples/small/pdfjam.log")
-	os.remove("examples/cropped/pdfcrop.log")
+	lfs.mkdir("in")
+	lfs.mkdir("out")
+	lfs.mkdir("small")
+	lfs.mkdir("cropped")
 	local targets = imap(opts, function(t) return t.example and t.option[1] end)
-	local make = "PDFJAM = ../../pdfjam\n\nall: cleanlog " .. surround_concat(targets, "cropped/", " ", ".pdf") ..
-		"\n\nout/%.pdf: in/%\n\t$(PDFJAM) --outfile '$@' $(file < $<) 2>>out/pdfjam.log " ..
+	local make = "PDFJAM = ./pdfjam\n\nall: " .. surround_concat(targets, "cropped/", " ", ".pdf") ..
+		"\n\nout/%.pdf: in/%\n\t$(PDFJAM) --outfile '$@' $(file < $<) >>out/pdfjam.log " ..
 		"\n\nsmall/%.pdf: out/%.pdf\n\t$(PDFJAM)  --a2paper --noautoscale true --scale .1 --nup 9x9 --delta '1mm 1mm' --frame true --outfile '$@' '$<' 2>>small/pdfjam.log" ..
 		"\n\ncropped/%.pdf: small/%.pdf\n\tpdfcrop '$<' '$@' >>cropped/pdfcrop.log" ..
-		"\n\n%.log: " .. surround_concat(targets, "in/", " ") .. "\n\trm -f $@" ..
-		"\n\ncleanlog: out/pdfjam.log small/pdfjam.log cropped/pdfcrop.log" ..
 		"\n\nclean:\n\trm -r out small cropped" ..
-		"\n\n.PHONY: all clean cleanlog"
+		"\n\n.PHONY: all clean"
 	imap(opts, make_example)
-	savedata("examples/Makefile", make)
+	savedata("Makefile", make)
 end
 
 function main()
-	local doc_dir = file.dirname(arg[0]) .. "/"
-	lfs.chdir(doc_dir)
-
 	local opts = read_options("options")
 	build_markdown(opts)
 	build_zsh_complete(opts)
 	make_examples(opts)
 
 	if arg[1] then
-		os.execute("pandoc --from markdown-smart --standalone --toc -o build/readme.html build/README.md")
-		os.execute("make -C examples -j")
+		os.execute("make -j")
 	end
 end
 
