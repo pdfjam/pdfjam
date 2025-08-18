@@ -49,6 +49,12 @@ scriptfiles = {"pdfjam"}
 scriptmanfiles = {"build/pdfjam/man/pdfjam.1"}
 textfiles = {"COPYING", "README.md"}
 
+-- used for l3build doc
+typesetexe = "./run.lua"
+supportdir = "doc"
+typesetsuppfiles = { "run.lua", "options", "README.md", "zsh-completion.sh", "examples/*.pdf" }
+typesetfiles = { "pdfjam" }
+
 ---- Test setup
 local escape_pattern = function(s)
 	return string.gsub(s,"[][^$()%%.*+?-]", "%%%0")
