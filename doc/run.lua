@@ -5,46 +5,15 @@
 kpse.set_program_name("kpsewhich")
 require "lualibs"
 
-P = {}
-do
-	P.space_to_hyphen = lpeg.Cs((lpeg.P" "/"-" + 1)^0)
-	P.escape_asterisk = lpeg.Cs((lpeg.P"*"/"\\*" + 1)^0)
-	P.escape_squote = lpeg.Cs((lpeg.P"'"/"\\'" + 1)^0)
-
-	local flag = lpeg.Cg(lpeg.S"*=+", "flag")
-	local short_option = lpeg.Cg(lpeg.P(1), "short") * "|"
-	local option_name = lpeg.C((lpeg.R"az" + lpeg.S"-*")^1)
-	local option = lpeg.Cg(lpeg.Ct(option_name * ("|" * option_name)^0), "option")
-	local exclude = lpeg.Cg("(" * (1 - lpeg.P")")^1 * ")", "exclude")
-	local colon_arg = ":" * lpeg.Cg((1 - lpeg.S":;")^1, "description") * (":" * lpeg.Cg((1 - lpeg.P";")^1, "completer")) ^-1
-	local argnames = lpeg.Ct(lpeg.C((1-lpeg.S",;")^1) * ("," * lpeg.C((1-lpeg.S",;")^1))^0)
-	local typed_arg = lpeg.Cg(lpeg.R"@Z"^1, "argtype") * (" " * lpeg.Cg(argnames, "argnames")) ^-1
-	local arguments = " " * (colon_arg + typed_arg)
-	local help = "; " * lpeg.Cg(lpeg.P(1)^1, "help")
-	P.pattern = lpeg.Ct(flag^-1 * short_option^-1 * option * exclude^-1 * arguments^-1 * help)
-
-	P.alternatives = lpeg.Ct("(" * lpeg.C((1 - lpeg.S" )")^1) * (" " * lpeg.C((1 - lpeg.S" )")^1))^0 * ")")
-	P.cmd_pattern = lpeg.C(lpeg.P"-" * (1 - lpeg.P" ") ^1)
-end
+P = {
+	space_to_hyphen = lpeg.Cs((lpeg.P" "/"-" + 1)^0),
+	escape_asterisk = lpeg.Cs((lpeg.P"*"/"\\*" + 1)^0),
+	escape_squote = lpeg.Cs((lpeg.P"'"/"\\'" + 1)^0),
+	alternatives = lpeg.Ct("(" * lpeg.C((1 - lpeg.S" )")^1) * (" " * lpeg.C((1 - lpeg.S" )")^1))^0 * ")"),
+}
 
 function singlequote(s) return "'" .. P.escape_squote:match(s) .. "'" end
 function escape_asterisk(s) return P.escape_asterisk:match(s) end
-
-function test()
-	table.print(P.pattern:match("a AAA; Foo."))
-	table.print(P.pattern:match("a(ex); Foo."))
-	table.print(P.pattern:match("a(ex) AA; Foo."))
-	table.print(P.pattern:match("a AAA abc; Foo."))
-	table.print(P.pattern:match("a AAA abc; Foo."))
-	table.print(P.pattern:match("a :foo; Foo."))
-	table.print(P.pattern:match("a :foo:abc; Foo."))
-	table.print(P.pattern:match("a|aha|bib :foo:abc; Foo."))
-	table.print(P.pattern:match("aha|bib :foo:abc; Foo."))
-	table.print(P.pattern:match("*aha|bib :foo:abc; Foo."))
-	print(P.cmd_pattern:match("--aha soso"))
-	table.print(P.alternatives:match("(a bc d)"))
-	os.exit()
-end
 
 function serialize(t)
 	if type(t) == "table" then
@@ -60,51 +29,6 @@ function serialize(t)
 	else
 		io.write(t)
 	end
-end
-
-function make_sense(t)
-	print"T = {"
-	for _, o in ipairs(t) do
-		if type(o) == "table" then
-			io.write"{"
-			serialize(o[1])
-			for _,k in ipairs{"alias", "short", "flag", "argtype", "argnames", "description", "completer", "help", "example"} do
-				if o[k] then
-					io.write(", ", k, " = ")
-					serialize(o[k])
-				end
-			end
-			io.write"},\n"
-		else io.write(singlequote(o), ",\n")
-		end
-	end
-	print"}"
-	print"return T"
-end
-
-function read_options(f)
-	local opts = {}
-	local t = {}
-	for l in io.lines(f) do
-		local a = string.sub(l, 1, 1)
-		if a == "" or a == "%" or a == "!" then
-		elseif a == "#" then
-			table.insert(opts, l)
-		elseif string.match(a, "[%a=*+]") then
-			t = P.pattern:match(l)
-			if not t then error("Syntax error on: " .. l) end
-			table.insert(opts, t)
-		elseif a == ">" then
-			t.completer = string.sub(l, 2)
-		elseif starts_with(l, "--" .. t[1]) then
-			t.example = l
-		elseif a == "-" then
-			error("Example for " .. t[1] .. " expected, but found: " .. l)
-		else
-			error("Syntax error: Wrong first character: " .. l)
-		end
-	end
-	return opts
 end
 
 function space_to_hyphen(a) return P.space_to_hyphen:match(a) end
@@ -133,10 +57,8 @@ function format_arguments(option, arg, alias)
 		(alias and ", " .. format_arguments(alias, arg) or "")
 end
 
-function starts_with(s, a) return string.sub(s, 1, #a) == a end
-
 function as_markdown_option(t)
-	if type(t) ~= "table" then return "#" .. t end
+	if type(t) ~= "table" then return string.sub(t, 1, 1) == "#" and "#" .. t or nil end
 	local arguments = ""
 	if t.completer and P.alternatives:match(t.completer) then
 		arguments = t.completer
@@ -154,17 +76,17 @@ function as_markdown_option(t)
 	if arguments ~= "" then arguments = " " .. arguments end
 	local header = t.short and "**-" .. t.short .. "**" .. arguments .. ", " or ""
 	header = header .. format_arguments(t[1], arguments, t.alias)
-	if t.flag == "+" then header = header .. "_respectively_ **--no-" .. t[1] .. "**" end
+	if t.flag == "+" then header = header .. " _respectively_ **--no-" .. t[1] .. "**" end
 	return header .. "\n\n: " .. t.help
 end
 
 function build_markdown(opts, out)
-	local options_md_table = map(opts, as_markdown_option)
+	local options_md_table = imap(opts, as_markdown_option)
 	local options_md = table.concat(options_md_table, "\n\n")
 
 	local readme = loaddata("README.md")
 	readme = string.gsub(readme, "!!!OPTIONS!!!", options_md, 1)
-	savedata("README.md", out)
+	io.savedata(out, readme)
 end
 
 COMPLETER = {bool=":bool:(true false)", string=":string: ", name=":name: ", tex=":tex: ",
@@ -177,8 +99,8 @@ COMPLETER = {bool=":bool:(true false)", string=":string: ", name=":name: ", tex=
 }
 
 function as_zsh_completion_group(t)
-	local result = t[1] .. "\n\t\t+ '(" .. t[2][1] .. ")'"
-	for i = 2, #t do
+	local result = t[0] .. "\n\t\t+ '(" .. t[1][1] .. ")'"
+	for i = 0, #t do
 		result = result .. "\n\t\t\t" .. as_zsh_completion(t[i])
 	end
 	return result
@@ -186,17 +108,16 @@ end
 
 function as_zsh_completion(t)
 	if type(t) ~= "table" then return t end
-	if t[0] then Z[t[0]] = as_zsh_completion_group(t); return end
+	if t[0] then table.insert(Z, as_zsh_completion_group(t)); return end
 	local quote = t.quote or "'"
 	local pre = quote
-	local post = quote
-	local exclude = t.exclude and "(" .. table.concat(imap(t.exclude, escape_asterisk), " ") or ""
+	local exclude = t.exclude and "(" .. surround_concat(imap(t.exclude, escape_asterisk), "--", " ") .. ")" or ""
 	local flag_with_no = t.flag == "+"
 	local flag = t.flag == "=" and "(- :)" or t.flag == "*" and "*" or ""
 	local option = "--" .. escape_asterisk(t[1])
 	if t.short or t.alias then
-		if flag == "" then pre = "" else flag = flag .. pre end
-		option = "{" .. (t.short and "-" .. t.short .. "," or "") .. option .. (t.alias and ",--" .. escape_asterisk(t.alias) or "") .. "}"
+		option = "{" .. (t.short and "-" .. t.short .. "," or "") .. option .. (t.alias and ",--" .. escape_asterisk(t.alias) or "") .. "}" .. pre
+		if flag == "" then pre = "" else flag = flag .. quote end
 	end
 	local completer = ""
 	if t.description then
@@ -219,7 +140,7 @@ function as_zsh_completion(t)
 		return "'" .. exclude1 .. option .. "[" .. t.help .. "]'" ..
 			"\n\t\t'" .. exclude2 .. "--no-" .. t[1] .. "[Do not " .. lower_first(t.help) .. "]'"
 	end
-	return pre .. flag .. exclude .. option .. "[" .. t.help .. "]" .. completer .. post
+	return pre .. flag .. exclude .. option .. "[" .. t.help .. "]" .. completer .. quote
 end
 
 function build_zsh_complete(opts)
@@ -274,7 +195,7 @@ function flatten_groups(opts)
 	local result = {}
 	for _, t in ipairs(opts) do
 		if type(t) == "table" and t[0] then
-			for i = 1, #t do
+			for i = 0, #t do
 				table.insert(result, t[i])
 			end
 		else
