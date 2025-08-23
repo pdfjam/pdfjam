@@ -8,11 +8,6 @@ _pdfjam() {
 	)
 	local options=(
 		!!!OPTIONS!!!
-		# Set paper format
-		+ '(paper)'
-			"--paper[Paper size.]:paper name:($paperformats)"
-			"--papersize[Specify a paper size as 'WIDTH,HEIGHT'.]:width,height:_dimens , width,height"
-			$paperflags
 	)
 
 	_file_or_pagespec() {
