@@ -35,10 +35,10 @@ function space_to_hyphen(a) return P.space_to_hyphen:match(a) end
 
 function lower_first(s) return string.lower(string.sub(s, 1, 1)) .. string.sub(s, 2) end
 
-function imap(t, f)
+function imap(t, f, ...)
 	local a = {}
 	for _, x in ipairs(t) do
-		local y = f(x)
+		local y = f(x, ...)
 		if y then table.insert(a, y) end
 	end
 	return a
@@ -57,7 +57,7 @@ function format_arguments(option, arg, alias)
 		(alias and ", " .. format_arguments(alias, arg) or "")
 end
 
-function as_markdown_option(t)
+function markdown_option(t)
 	if type(t) ~= "table" then return string.sub(t, 1, 1) == "#" and "#" .. t or nil end
 	local arguments = ""
 	if t.completer and P.alternatives:match(t.completer) then
@@ -77,16 +77,32 @@ function as_markdown_option(t)
 	local header = t.short and "**-" .. t.short .. "**" .. arguments .. ", " or ""
 	header = header .. format_arguments(t[1], arguments, t.alias)
 	if t.flag == "+" then header = header .. " _respectively_ **--no-" .. t[1] .. "**" end
-	return header .. "\n\n: " .. t.help
+	return {header, t.help}
 end
 
-function build_markdown(opts, out)
-	local options_md_table = imap(opts, as_markdown_option)
-	local options_md = table.concat(options_md_table, "\n\n")
+function as_markdown_option(t)
+	local a = markdown_option(t)
+	return type(a) == "table" and a[1] .. "\n\n: " .. a[2] or a
+end
+function as_tex_option(t)
+	local a = markdown_option(t)
+	local d = "`}{`{=tex}"
+	return type(a) == "table" and
+		"`\\option{`{=tex}" .. a[1] .. d .. a[2] .. d .. (t.example and
+			"`" .. t[1] .. "}{`{=tex}" .. "`pdfjam " .. t.example .. "`{.sh}"
+		or d) .. "`}`{=tex}" or a
+end
 
+function build_markdown(opts)
+	local options = table.concat(imap(opts, as_markdown_option), "\n\n")
 	local readme = loaddata("README.md")
-	readme = string.gsub(readme, "!!!OPTIONS!!!", options_md, 1)
-	io.savedata(out, readme)
+	readme = string.gsub(readme, "\\input{options.tex}", options, 1)
+	io.savedata("README-out.md", readme)
+end
+
+function build_tex_md(opts)
+	local options = table.concat(imap(opts, as_tex_option), "\n\n")
+	io.savedata("options.tex.md", options)
 end
 
 COMPLETER = {bool=":bool:(true false)", string=":string: ", name=":name: ", tex=":tex: ",
@@ -106,9 +122,9 @@ function as_zsh_completion_group(t)
 	return result
 end
 
-function as_zsh_completion(t)
+function as_zsh_completion(t, groups)
 	if type(t) ~= "table" then return t end
-	if t[0] then table.insert(Z, as_zsh_completion_group(t)); return end
+	if t[0] then table.insert(groups, as_zsh_completion_group(t)); return end
 	local quote = t.quote or "'"
 	local pre = quote
 	local exclude = t.exclude and "(" .. surround_concat(imap(t.exclude, escape_asterisk), "--", " ") .. ")" or ""
@@ -144,9 +160,9 @@ function as_zsh_completion(t)
 end
 
 function build_zsh_complete(opts)
-	Z = {}
-	opts = imap(opts, as_zsh_completion)
-	local options_zsh = table.concat(opts, "\n\t\t") .. "\n\t\t# Completion groups\n\t\t" .. table.concat(Z, "\n\t\t")
+	local groups = {}
+	opts = imap(opts, as_zsh_completion, groups)
+	local options_zsh = table.concat(opts, "\n\t\t") .. "\n\t\t# Completion groups\n\t\t" .. table.concat(groups, "\n\t\t")
 
 	local zcmp = loaddata("zsh-completion.sh")
 	zcmp = string.gsub(zcmp, "!!!OPTIONS!!!", options_zsh, 1)
@@ -154,21 +170,11 @@ function build_zsh_complete(opts)
 end
 
 function loaddata(f) return io.loaddata(f) or error("File not found: " .. f) end
-function savedata(f, s)
-	if io.loaddata(f) ~= s then io.savedata(f, s) end
-end
+function savedata(f, s) if io.loaddata(f) ~= s then io.savedata(f, s) end end
 
 function make_example(t)
 	if not t.example then return end
 	savedata("in/"..t[1], t.example)
-end
-
-function compile_example(out, l)
-	out = "'" .. out .. ".pdf' "
-	local success = os.execute("2>>out/pdfjam.log ../../pdfjam --outfile out/" .. out .. l ..
-	" && 2>>small/pdfjam.log ../../pdfjam --a2paper --noautoscale true --scale .1 --nup 9x9 --delta '1mm 1mm' --frame true --outfile small/" .. out .. "out/" .. out ..
-	" && >>cropped/pdfcrop.log pdfcrop small/" .. out .. "cropped/" .. out)
-	print((success and "OK: " or "ERR ") .. out)
 end
 
 function surround_concat(t, pre, mid, post)
@@ -177,11 +183,11 @@ end
 
 function make_examples(opts)
 	dir.makedirs("in")
-	local targets = imap(opts, function(t) return t.example and t[1] end)
+	local targets = imap(opts, function(t) return t.example and escape_asterisk(t[1]) end)
 	local make = "PDFJAM = ./pdfjam\n\nall: " .. surround_concat(targets, "cropped/", " ", ".pdf") ..
-		"\n\nout/%.pdf: in/% | out\n\t$(PDFJAM) --outfile '$@' $(file < $<) 2>>out/pdfjam.log " ..
-		"\n\nsmall/%.pdf: out/%.pdf | small\n\t$(PDFJAM)  --a2paper --noautoscale true --scale .1 --nup 9x9 --delta '1mm 1mm' --frame true --outfile '$@' '$<' 2>>small/pdfjam.log" ..
-		"\n\ncropped/%.pdf: small/%.pdf | cropped\n\tpdfcrop '$<' '$@' >>cropped/pdfcrop.log" ..
+		"\n\nout/%.pdf: in/% | out\n\t$(PDFJAM) --outfile $@ $(file < '$<') 2>>out/pdfjam.log " ..
+		"\n\nsmall/%.pdf: out/%.pdf | small\n\t$(PDFJAM)  --a2paper --noautoscale true --scale .1 --nup 9x9 --delta '1mm 1mm' --frame true --outfile $@ '$<' 2>>small/pdfjam.log" ..
+		"\n\ncropped/%.pdf: small/%.pdf | cropped\n\tpdfcrop '$<' $@ >>cropped/pdfcrop.log" ..
 		"\n\nout: ; mkdir -p out" ..
 		"\n\nsmall: ; mkdir -p small" ..
 		"\n\ncropped: ; mkdir -p cropped" ..
@@ -206,10 +212,17 @@ function flatten_groups(opts)
 end
 
 function main()
+	local build = string.find(dir.current(), "build/doc$")
+	if not build then lfs.chdir(file.dirname(arg[0])) end
+
 	local opts = require"opts"
 	local flattened_opts = flatten_groups(opts)
-	local build = string.find(dir.current(), "build/doc$")
-	build_markdown(flattened_opts, build and "README.md" or "README-out.md")
+
+	build_markdown(flattened_opts)
+	build_tex_md(flattened_opts)
+	os.execute("pandoc --wrap=none options.tex.md -o " .. "options.tex")
+	os.execute("pandoc --wrap=none --toc -o p.tex README.md")
+	os.execute("pandoc --columns=80 --standalone --toc README-out.md -o " .. (build and "" or "../") .. "README.md")
 	build_zsh_complete(opts)
 	make_examples(flattened_opts)
 
@@ -219,6 +232,7 @@ function main()
 		os.execute("mv Makefile examples")
 		os.execute("make -C examples -j8")
 	end
+	os.execute("latexmk pdfjam.tex")
 end
 
 -- test()
