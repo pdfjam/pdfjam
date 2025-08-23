@@ -6,3 +6,4 @@ examples/cropped/
 examples/Makefile
 _pdfjam
 in/
+README-out.md
