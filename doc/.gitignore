@@ -4,3 +4,5 @@ examples/out/
 examples/small/
 examples/cropped/
 examples/Makefile
+_pdfjam
+in/
