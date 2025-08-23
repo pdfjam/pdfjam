@@ -7,3 +7,8 @@ examples/Makefile
 _pdfjam
 in/
 README-out.md
+pdfjam.pdf
+options.tex
+options.tex.md
+p.tex
+.aux
