@@ -28,8 +28,9 @@ Website: <https://github.com/pdfjam/pdfjam>
 License: [GPL 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 
 Pdfjam assembles a list of documents (pdf, ps, eps, jpg or png) into a single
-pdf. It allows to rotate, scale, n-up, reorder and combine pages freely using
-the power of the [pdfpages](https://ctan.org/pkg/pdfpages) and
+pdf. It allows to [rotate](#angle), [scale](#scale), [n-up](#nup), reorder and
+combine pages freely using the power of the
+[pdfpages](https://ctan.org/pkg/pdfpages) and
 [graphicx](https://ctan.org/pkg/graphicx) [LaTeX](https://latex-project.org)
 packages.
 
@@ -135,270 +136,270 @@ Also see the [manual]() which contains the same list with example output added.
 
 ### Change operation mode
 
-**-h**, **--help**  
+<span id="help"/>**-h**, **--help**  
 Print help message.
 
-**-V**, **--version**  
+<span id="version"/>**-V**, **--version**  
 Print the version number.
 
-**--configpath**  
+<span id="configpath"/>**--configpath**  
 Print the `configpath` variable.
 
-**-q**, **--quiet**  
+<span id="quiet"/>**-q**, **--quiet**  
 Suppress verbose commentary on progress.
 
-**--batch**  
+<span id="batch"/>**--batch**  
 Run pdfjam sequentially on each input file in turn, and produce a separate
 output file for each input.
 
-**--checkfiles** *respectively* **--no-checkfiles**  
+<span id="checkfiles"/>**--checkfiles** *respectively* **--no-checkfiles**  
 Use `file` utility to determine file type.
 
-**--vanilla**  
+<span id="vanilla"/>**--vanilla**  
 Suppress the reading of any pdfjam configuration files.
 
-**--enc** encoding  
+<span id="enc"/>**--enc** encoding  
 Command-line encoding as understood by `iconv`.
 
 ### Define where to put files
 
-**-o** output, **--outfile** output, **--output** output  
+<span id="outfile"/>**-o** output, **--outfile** output, **--output** output  
 File or directory name for output(s).
 
-**--suffix** string  
+<span id="suffix"/>**--suffix** string  
 Suffix for output, when file name is not given explicitly.
 
-**--tidy** *respectively* **--no-tidy**  
+<span id="tidy"/>**--tidy** *respectively* **--no-tidy**  
 Clean temporary build directory. On by default.
 
-**--builddir** directory  
+<span id="builddir"/>**--builddir** directory  
 Set build directory.
 
 ### Configure LaTeX run
 
-**--latex** engine  
+<span id="latex"/>**--latex** engine  
 Absolute path to LaTeX engine to be used.
 
-**--latexopts** latex-command-line-options  
+<span id="latexopts"/>**--latexopts** latex-command-line-options  
 Provide arguments to use when calling the LaTeX engine.
 
-**--preamble** tex  
+<span id="preamble"/>**--preamble** tex  
 Append code to the LaTeX preamble.
 
-**--runs** number-of-runs  
+<span id="runs"/>**--runs** number-of-runs  
 Run latex N times, for each output document made.
 
 ### Set PDF metadata
 
-**--keepinfo** *respectively* **--no-keepinfo**  
+<span id="keepinfo"/>**--keepinfo** *respectively* **--no-keepinfo**  
 Preserve Title, Author, Subject and Keywords (from the last input PDF) in the
 output PDF file.
 
-**--pdftitle** string  
+<span id="pdftitle"/>**--pdftitle** string  
 Set Title of the output PDF file.
 
-**--pdfauthor** string  
+<span id="pdfauthor"/>**--pdfauthor** string  
 Set Author of the output PDF file.
 
-**--pdfsubject** string  
+<span id="pdfsubject"/>**--pdfsubject** string  
 Set Subject of the output PDF file.
 
-**--pdfkeywords** string  
+<span id="pdfkeywords"/>**--pdfkeywords** string  
 Set Keywords of the output PDF file.
 
 ### Set paper format
 
-**--paper** paper-name  
+<span id="paper"/>**--paper** paper-name  
 Paper format.
 
-**--papersize** width,height  
+<span id="papersize"/>**--papersize** width,height  
 Specify a paper size as width × height.
 
 ### Adjust page
 
-**--landscape** *respectively* **--no-landscape**  
+<span id="landscape"/>**--landscape** *respectively* **--no-landscape**  
 Exchange width and height of paper.
 
-**--twoside** *respectively* **--no-twoside**  
+<span id="twoside"/>**--twoside** *respectively* **--no-twoside**  
 Specify `twoside` document class option.
 
-**--otheredge** *respectively* **--no-otheredge**  
+<span id="otheredge"/>**--otheredge** *respectively* **--no-otheredge**  
 Rotate every odd page by 180 degrees.
 
-**--pagecolor** rgb  
+<span id="pagecolor"/>**--pagecolor** rgb  
 Background color.
 
 ### Pdfpages settings
 
 #### N-up pages
 
-**--nup** XxY  
+<span id="nup"/>**--nup** XxY  
 Put multiple logical pages onto each sheet of paper.
 
-**--column** bool  
+<span id="column"/>**--column** bool  
 Use column-major layout, where successive pages are arranged in columns down the
 paper.
 
-**--columnstrict** bool  
+<span id="columnstrict"/>**--columnstrict** bool  
 For column-major layout only: Do not balance the columns on the last page.
 
 #### Shift pages
 
-**--delta** 'horizontal-space vertical-space'  
+<span id="delta"/>**--delta** 'horizontal-space vertical-space'  
 Put some horizontal and vertical space between the logical pages.
 
-**--offset** 'horizontal-displacement vertical-displacement'  
+<span id="offset"/>**--offset** 'horizontal-displacement vertical-displacement'  
 Displace the origin of the inserted pages.
 
-**--frame** bool  
+<span id="frame"/>**--frame** bool  
 Put a frame around each logical page.
 
 #### Scale pages
 
-**--noautoscale** bool  
+<span id="noautoscale"/>**--noautoscale** bool  
 Suppress automatic scaling of pages.
 
-**--fitpaper** bool  
+<span id="fitpaper"/>**--fitpaper** bool  
 Adjust the paper size to the size of the inserted document.
 
-**--turn** bool  
+<span id="turn"/>**--turn** bool  
 Tell PDF viewer to display landscape pages in landscape orientation. On by
 default.
 
-**--pagetemplate** pagenumber  
+<span id="pagetemplate"/>**--pagetemplate** pagenumber  
 Declare page to be used as a template. All other pages are scaled such that they
 match within its size.
 
-**--templatesize** width,height  
+<span id="templatesize"/>**--templatesize** width,height  
 Specify size of page template. All pages are scaled such that they match within
 this size.
 
-**--rotateoversize** bool  
+<span id="rotateoversize"/>**--rotateoversize** bool  
 Rotate oversized pages.
 
 #### Mirror pages
 
-**--reflect** bool  
+<span id="reflect"/>**--reflect** bool  
 Reflect output pages.
 
-**--reflect\*** bool  
+<span id="reflect*"/>**--reflect\*** bool  
 Reflect input pages.
 
 #### Create signatures
 
-**--signature** multiple-of-4  
+<span id="signature"/>**--signature** multiple-of-4  
 Create booklets by rearranging pages into signatures of 2 pages each.
 
-**--signature\*** multiple-of-4  
+<span id="signature*"/>**--signature\*** multiple-of-4  
 Similar to signature, but for right-edge binding.
 
-**--booklet** bool  
+<span id="booklet"/>**--booklet** bool  
 Same as signature with signature size chosen such that all pages fit into one
 signature.
 
-**--booklet\*** bool  
+<span id="booklet*"/>**--booklet\*** bool  
 Similar to booklet, but for right-edge binding.
 
-**--flip-other-edge** bool  
+<span id="flip-other-edge"/>**--flip-other-edge** bool  
 For signatures/booklets: set duplex binding edge perpendicular (instead of
 parallel) to signature binding edge. Has same result as `otheredge`.
 
 #### Add blank pages
 
-**--openright** bool  
+<span id="openright"/>**--openright** bool  
 Put an empty page before the first logical page.
 
-**--openrighteach** bool  
+<span id="openrighteach"/>**--openrighteach** bool  
 Put an empty page before the first logical page of each file.
 
 #### Duplicate pages
 
-**--doublepages** bool  
+<span id="doublepages"/>**--doublepages** bool  
 Insert every page twice.
 
-**--doublepagestwist** bool  
+<span id="doublepagestwist"/>**--doublepagestwist** bool  
 Insert every page twice: once upside down and once normally.
 
-**--doublepagestwistodd** bool  
+<span id="doublepagestwistodd"/>**--doublepagestwistodd** bool  
 Insert every page twice: once normally and once upside down.
 
-**--doublepagestwist\*** bool  
+<span id="doublepagestwist*"/>**--doublepagestwist\*** bool  
 Insert every page twice: for odd pages, the first copy is upside down; for even
 pages, the second copy.
 
-**--doublepagestwistodd\*** bool  
+<span id="doublepagestwistodd*"/>**--doublepagestwistodd\*** bool  
 Insert every page twice: for odd pages, the second copy is upside down; for even
 pages, the first copy.
 
-**--duplicatepages** number  
+<span id="duplicatepages"/>**--duplicatepages** number  
 Insert every page NUM times.
 
 #### Run LaTeX commands
 
-**--pagecommand** tex  
+<span id="pagecommand"/>**--pagecommand** tex  
 Declare LaTeX commands, which are executed on each sheet of paper.
 
-**--pagecommand\*** tex  
+<span id="pagecommand*"/>**--pagecommand\*** tex  
 Declare LaTeX commands, which are executed on the very first page only.
 
-**--picturecommand** tex  
+<span id="picturecommand"/>**--picturecommand** tex  
 Similar to pagecommand, but executed within a picture environment with base
 point at the lower left page corner.
 
-**--picturecommand\*** tex  
+<span id="picturecommand*"/>**--picturecommand\*** tex  
 Similar to picturecommand, but for very first page only.
 
 #### Add hyperlinks
 
-**--link** bool  
+<span id="link"/>**--link** bool  
 Each inserted page becomes the target of the hyperlink ⟨filename⟩.⟨pagenumber⟩.
 
-**--linkname** name  
+<span id="linkname"/>**--linkname** name  
 For link option only: Change the link base name from ⟨filname⟩ to name.
 
-**--threadname** name  
+<span id="threadname"/>**--threadname** name  
 For thread option only: Change the thread name from ⟨filename⟩ to name.
 
-**--linkfit** (Fit \| FitH ⟨top⟩ \| FitV ⟨left⟩ \| FitB \| FitBH ⟨top⟩ \| FitBV ⟨left⟩ \| Region)  
+<span id="linkfit"/>**--linkfit** (Fit \| FitH ⟨top⟩ \| FitV ⟨left⟩ \| FitB \| FitBH ⟨top⟩ \| FitBV ⟨left⟩ \| Region)  
 For link option only: Specify, how the viewer displays a linked page.
 
-**--addtotoc** pagenumber,section,level,heading,label  
+<span id="addtotoc"/>**--addtotoc** pagenumber,section,level,heading,label  
 Add an entry to the table of contents.
 
-**--addtolist** pagenumber,type,heading,label  
+<span id="addtolist"/>**--addtolist** pagenumber,type,heading,label  
 Add an entry to the list of figures, the list of tables, or any other list.
 
 ### Graphicx options
 
-**--viewport** 'left bottom right top'  
+<span id="viewport"/>**--viewport** 'left bottom right top'  
 Consider image to consist of given rectangle only.
 
-**--trim** 'left bottom right top'  
+<span id="trim"/>**--trim** 'left bottom right top'  
 Similar to viewport, but here the four lengths specify the amount to remove or
 add to each side.
 
-**--angle** angle  
+<span id="angle"/>**--angle** angle  
 Rotation angle (counterclockwise).
 
-**--width** width  
+<span id="width"/>**--width** width  
 Required width. The graphic is scaled to this width.
 
-**--height** height  
+<span id="height"/>**--height** height  
 Required height. The graphic is scaled to this height.
 
-**--keepaspectratio** bool  
+<span id="keepaspectratio"/>**--keepaspectratio** bool  
 Do not distort figure if both width and height are given.
 
-**--scale** float  
+<span id="scale"/>**--scale** float  
 Scale factor.
 
-**--clip** bool  
+<span id="clip"/>**--clip** bool  
 Clip the graphic to the viewport.
 
-**--pagebox** (mediabox \| cropbox \| bleedbox \| trimbox \| artbox)  
+<span id="pagebox"/>**--pagebox** (mediabox \| cropbox \| bleedbox \| trimbox \| artbox)  
 Specify which PDF bounding box specification to read.
 
-**--draft** bool  
+<span id="draft"/>**--draft** bool  
 Switch to draft mode.
 
 ## Configuration

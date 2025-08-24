@@ -56,10 +56,7 @@ function map(t, f)
 	return a
 end
 
-function format_arguments(option, arg, alias)
-	return "**--" .. escape_asterisk(option) .. "**" .. arg ..
-		(alias and ", " .. format_arguments(alias, arg) or "")
-end
+function format_arguments(option, arg) return "**--" .. escape_asterisk(option) .. "**" .. arg end
 
 function markdown_option(t)
 	if type(t) ~= "table" then return string.sub(t, 1, 1) == "#" and "#" .. t or nil end
@@ -78,15 +75,16 @@ function markdown_option(t)
 		arguments = lookup[t.argtype] or error("Unknown argtype: "..t.argtype)
 	end
 	if arguments ~= "" then arguments = " " .. arguments end
-	local header = t.short and "**-" .. t.short .. "**" .. arguments .. ", " or ""
-	header = header .. format_arguments(t[1], arguments, t.alias)
+	local header = (t.short and "**-" .. t.short .. "**" .. arguments .. ", " or "") ..
+		format_arguments(t[1], arguments) ..
+		(t.alias and ", " .. format_arguments(t.alias, arguments) or "")
 	if t.flag == "+" then header = header .. " _respectively_ **--no-" .. t[1] .. "**" end
 	return {header, t.help}
 end
 
 function as_markdown_option(t)
 	local a = markdown_option(t)
-	return type(a) == "table" and a[1] .. "\n\n: " .. a[2] or a
+	return type(a) == "table" and '<span id="' .. t[1] .. '"/>' .. a[1] .. "\n\n: " .. a[2] or a
 end
 
 function as_tex_option(t)
