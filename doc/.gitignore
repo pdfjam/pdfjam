@@ -13,3 +13,4 @@ options.tex.md
 p.tex
 .aux
 Makefile
+README-gfm.md

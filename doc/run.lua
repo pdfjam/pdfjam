@@ -215,6 +215,13 @@ function flatten_groups(opts)
 	return result
 end
 
+HEADER = [[
+![GitHub CI](https://github.com/pdfjam/pdfjam/actions/workflows/ci.yml/badge.svg)
+
+# pdfjam
+
+_Markus Kurtz_ <_anything_ at mgkurtz.de>]]
+
 function main()
 	local build = string.find(dir.current(), "build/doc$")
 	if not build then lfs.chdir(file.dirname(arg[0])) end
@@ -226,7 +233,10 @@ function main()
 	build_tex_md(flattened_opts)
 	os.execute("pandoc --wrap=none options.tex.md -o " .. "options.tex")
 	os.execute("pandoc --wrap=none --toc -o p.tex README.md")
-	os.execute("pandoc --columns=80 --standalone --toc README-out.md -o " .. (build and "" or "../") .. "README.md")
+	local main_readme = (build and "" or "../") .. "README.md"
+	os.execute("pandoc --columns=80 --standalone --toc --shift-heading-level-by=1 --from=markdown-smart --to=gfm README-out.md -o README-gfm.md")
+	local header = lpeg.Cs(("---" * (1 - lpeg.P"---")^0 * "---")/HEADER * lpeg.P(1)^0)
+	savedata(main_readme, header:match(loaddata("README-gfm.md")))
 	build_zsh_complete(opts)
 	make_examples(flattened_opts)
 
