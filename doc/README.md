@@ -92,8 +92,6 @@ For the `--keepinfo` option, you need `pdfinfo` available by installing [poppler
 
 # Comprehensive list of options
 
-Also see the [manual]() which contains the same list with example output added.
-
 \input{options.tex}
 
 # Configuration

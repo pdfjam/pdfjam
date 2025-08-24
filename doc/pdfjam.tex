@@ -59,7 +59,6 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -76,8 +75,15 @@
 \setcounter{tocdepth}{3}
 
 \usepackage{graphicx}
+\usepackage{tcolorbox}
 \ExplSyntaxOn
-\newcommand\option[4]{#1:~#2\tl_if_empty:nF{#3}{\\#4\\\includegraphics{examples/cropped/#3.pdf}}}
+\newcommand\option[4]{
+	\begin { tcolorbox } [ title = { #1 } ]
+		#2
+		\tl_if_empty:nF { #3 }
+		{ \tcblower #4 \par \includegraphics { examples/cropped/#3.pdf } }
+	\end { tcolorbox }
+}
 \ExplSyntaxOff
 
 \begin{document}
