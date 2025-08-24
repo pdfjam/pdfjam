@@ -7,7 +7,7 @@ Website: <https://github.com/pdfjam/pdfjam>
 License: [GPL 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 
 Pdfjam assembles a list of documents (pdf, ps, eps, jpg or png) into a single pdf.
-It allows to rotate, scale, n-up, reorder and combine pages freely
+It allows to [rotate](#angle), [scale](#scale), [n-up](#nup), reorder and combine pages freely
 using the power of the [pdfpages](https://ctan.org/pkg/pdfpages) and [graphicx](https://ctan.org/pkg/graphicx) [LaTeX](https://latex-project.org) packages.
 
 # Overview

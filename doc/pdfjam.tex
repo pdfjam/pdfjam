@@ -75,10 +75,10 @@
 \setcounter{tocdepth}{3}
 
 \usepackage{graphicx}
-\usepackage{tcolorbox}
+\usepackage{tcolorbox,hyperref}
 \ExplSyntaxOn
 \newcommand\option[4]{
-	\begin { tcolorbox } [ title = { #1 } ]
+	\begin { tcolorbox } [ title = { #1 }, hypertarget = { #1 } ]
 		#2
 		\tl_if_empty:nF { #3 }
 		{ \tcblower #4 \par \includegraphics { examples/cropped/#3.pdf } }
