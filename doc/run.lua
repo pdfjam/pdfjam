@@ -9,10 +9,14 @@ P = {
 	space_to_hyphen = lpeg.Cs((lpeg.P" "/"-" + 1)^0),
 	escape_asterisk = lpeg.Cs((lpeg.P"*"/"\\*" + 1)^0),
 	escape_squote = lpeg.Cs((lpeg.P"'"/"\\'" + 1)^0),
+	singlequote_first_word = lpeg.Cs(lpeg.Cc"'" * (1 - lpeg.P" ")^0 * lpeg.Cc"'" * lpeg.P(1)^0),
+	x_asterisk = lpeg.Cs((lpeg.P"*"/"X" + 1)^0),
 	alternatives = lpeg.Ct("(" * lpeg.C((1 - lpeg.S" )")^1) * (" " * lpeg.C((1 - lpeg.S" )")^1))^0 * ")"),
+	tex_angle = lpeg.Cs((lpeg.P"⟨"/"$\\langle$" + lpeg.P"⟩"/"$\\rangle$" + 1)^0)
 }
 
 function singlequote(s) return "'" .. P.escape_squote:match(s) .. "'" end
+function singlequote_first_word(s) return P.singlequote_first_word:match(s) end
 function escape_asterisk(s) return P.escape_asterisk:match(s) end
 
 function serialize(t)
@@ -60,8 +64,8 @@ end
 function markdown_option(t)
 	if type(t) ~= "table" then return string.sub(t, 1, 1) == "#" and "#" .. t or nil end
 	local arguments = ""
-	if t.completer and P.alternatives:match(t.completer) then
-		arguments = t.completer
+	if t.alternatives then
+		arguments = "(" .. table.concat(t.alternatives, " | ") .. ")"
 	elseif t.description then
 		arguments = space_to_hyphen(t.description)
 	elseif t.argnames then
@@ -84,17 +88,18 @@ function as_markdown_option(t)
 	local a = markdown_option(t)
 	return type(a) == "table" and a[1] .. "\n\n: " .. a[2] or a
 end
+
 function as_tex_option(t)
 	local a = markdown_option(t)
 	local d = "`}{`{=tex}"
 	return type(a) == "table" and
-		"`\\option{`{=tex}" .. a[1] .. d .. a[2] .. d .. (t.example and
-			"`" .. t[1] .. "}{`{=tex}" .. "`pdfjam " .. t.example .. "`{.sh}"
+		"`\\option{`{=tex}" .. P.tex_angle:match(a[1] .. d .. a[2]) .. d .. (t.example and
+			"`" .. P.x_asterisk:match(t[1]) .. "}{`{=tex}" .. "`pdfjam " .. t.example .. "`{.sh}"
 		or d) .. "`}`{=tex}" or a
 end
 
 function build_markdown(opts)
-	local options = table.concat(imap(opts, as_markdown_option), "\n\n")
+	local options = "Also see the [manual]() which contains the same list with example output added.\n\n" .. table.concat(imap(opts, as_markdown_option), "\n\n")
 	local readme = loaddata("README.md")
 	readme = string.gsub(readme, "\\input{options.tex}", options, 1)
 	io.savedata("README-out.md", readme)
@@ -137,7 +142,11 @@ function as_zsh_completion(t, groups)
 	end
 	local completer = ""
 	if t.description then
-		completer = ":"..t.description..":" .. (t.completer and t.completer or "_"..t.description)
+		completer = ":" .. t.description .. ":" .. (
+			t.completer and t.completer or
+			t.alternatives and "(" .. table.concat(t.alternatives, " ") .. ")" or
+			"_" .. t.description
+		)
 	elseif t.argtype then
 		local compl = COMPLETER[t.argtype]
 		completer = type(compl) == "function" and compl(t.argnames) or compl and compl or error("Unknown argtype: "..t.argtype)
@@ -174,7 +183,10 @@ function savedata(f, s) if io.loaddata(f) ~= s then io.savedata(f, s) end end
 
 function make_example(t)
 	if not t.example then return end
-	savedata("in/"..t[1], t.example)
+	-- Argh: `make` just hates files with `*` in them in pattern recipes, thus replace it by `x`.
+	local name = P.x_asterisk:match(t[1])
+	savedata("in/"..name, t.example)
+	return name
 end
 
 function surround_concat(t, pre, mid, post)
@@ -183,17 +195,9 @@ end
 
 function make_examples(opts)
 	dir.makedirs("in")
-	local targets = imap(opts, function(t) return t.example and escape_asterisk(t[1]) end)
-	local make = "PDFJAM = ./pdfjam\n\nall: " .. surround_concat(targets, "cropped/", " ", ".pdf") ..
-		"\n\nout/%.pdf: in/% | out\n\t$(PDFJAM) --outfile $@ $(file < '$<') 2>>out/pdfjam.log " ..
-		"\n\nsmall/%.pdf: out/%.pdf | small\n\t$(PDFJAM)  --a2paper --noautoscale true --scale .1 --nup 9x9 --delta '1mm 1mm' --frame true --outfile $@ '$<' 2>>small/pdfjam.log" ..
-		"\n\ncropped/%.pdf: small/%.pdf | cropped\n\tpdfcrop '$<' $@ >>cropped/pdfcrop.log" ..
-		"\n\nout: ; mkdir -p out" ..
-		"\n\nsmall: ; mkdir -p small" ..
-		"\n\ncropped: ; mkdir -p cropped" ..
-		"\n\nclean: ; rm -r out small cropped" ..
-		"\n\n.PHONY: all clean"
+	local targets = imap(opts, make_example)
 	imap(opts, make_example)
+	local make = "targets = " .. table.concat(targets, " \\\n") .. "\n\n" .. loaddata("Makefile.in")
 	savedata("Makefile", make)
 end
 
@@ -229,7 +233,6 @@ function main()
 	if build then
 		os.execute("make -j8")
 	else
-		os.execute("mv Makefile examples")
 		os.execute("make -C examples -j8")
 	end
 	os.execute("latexmk pdfjam.tex")

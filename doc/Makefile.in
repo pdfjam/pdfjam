@@ -1,0 +1,22 @@
+PDFJAM = ./pdfjam
+
+all: $(addprefix cropped/,$(addsuffix .pdf,$(targets)))
+
+out/%.pdf : in/% | out
+	$(PDFJAM) --preamble '\usepackage[scaled=10]{PTSerifCaption,PTMono}' --outfile '$@' $(file < $<) 2>>out/pdfjam.log
+
+small/% : out/% | small
+	$(PDFJAM) --a0paper --noautoscale true --scale .1 --nup 16x6 --delta '1mm 1mm' --frame true --outfile '$@' '$<' 2>>small/pdfjam.log
+
+cropped/% : small/% | cropped
+	pdfcrop '$<' '$@' >>cropped/pdfcrop.log
+
+out: ; mkdir -p out
+
+small: ; mkdir -p small
+
+cropped: ; mkdir -p cropped
+
+clean: ; rm -fr out small cropped
+
+.PHONY: all clean

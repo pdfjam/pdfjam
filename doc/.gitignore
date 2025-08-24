@@ -12,3 +12,4 @@ options.tex
 options.tex.md
 p.tex
 .aux
+Makefile
