@@ -9,7 +9,7 @@ version="$1"
 rm -fr build/unpacked "$target"
 mkdir -p build/local "$target/bin" "$target/man" "$target/shell-completion/zsh" build/unpacked build/release
 cp COPYING doc/pdfjam.conf README.md "$target"
-cp doc/shell-completion/zsh/_pdfjam "$target/shell-completion/zsh/"
+#cp doc/shell-completion/zsh/_pdfjam "$target/shell-completion/zsh/"
 <doc/pdfjam.1 sed "1s/N\\.NN/${version}/"'
 s+\$repository+https://github.com/pdfjam/pdfjam+' >"$target/man/pdfjam.1"
 
