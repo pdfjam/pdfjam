@@ -53,7 +53,7 @@ textfiles = {"COPYING"}
 -- used for l3build doc
 typesetexe = "./run.lua"
 supportdir = "doc"
-typesetsuppfiles = { "run.lua", "opts.lua", "README.md", "zsh-completion.sh", "examples/*.pdf" }
+typesetsuppfiles = { "run.lua", "opts.lua", "README.in.md", "Makefile.in", "pdfjam.tex", "zsh-completion.sh", "examples/*.pdf" }
 typesetfiles = { "pdfjam" }
 
 ---- Test setup

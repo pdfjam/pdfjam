@@ -96,16 +96,24 @@ function as_tex_option(t)
 		or d) .. "`}`{=tex}" or a
 end
 
-function build_markdown(opts)
+function build_markdown(opts, input, output)
 	local options = "Also see the [manual]() which contains the same list with example output added.\n\n" .. table.concat(imap(opts, as_markdown_option), "\n\n")
-	local readme = loaddata("README.md")
+	local readme = loaddata(input)
 	readme = string.gsub(readme, "\\input{options.tex}", options, 1)
-	io.savedata("README-out.md", readme)
+	io.savedata(output, readme)
 end
 
-function build_tex_md(opts)
+function write_markdown(flattened_opts, input, output)
+	build_markdown(flattened_opts, input, "README-out.md")
+	os.execute("pandoc --columns=80 --standalone --toc --shift-heading-level-by=1 --from=markdown-smart --to=gfm README-out.md -o README-gfm.md")
+	local header = lpeg.Cs(("---" * (1 - lpeg.P"---")^0 * "---")/HEADER * lpeg.P(1)^0)
+	savedata(output, header:match(loaddata("README-gfm.md")))
+end
+
+function build_tex_options(opts, output)
 	local options = table.concat(imap(opts, as_tex_option), "\n\n")
-	io.savedata("options.tex.md", options)
+	io.savedata(output .. ".md", options)
+	os.execute("pandoc --wrap=none " .. output .. ".md -o" .. output)
 end
 
 COMPLETER = {bool=":bool:(true false)", string=":string: ", name=":name: ", tex=":tex: ",
@@ -166,14 +174,14 @@ function as_zsh_completion(t, groups)
 	return pre .. flag .. exclude .. option .. "[" .. t.help .. "]" .. completer .. quote
 end
 
-function build_zsh_complete(opts)
+function build_zsh_complete(opts, input, output)
 	local groups = {}
 	opts = imap(opts, as_zsh_completion, groups)
 	local options_zsh = table.concat(opts, "\n\t\t") .. "\n\t\t# Completion groups\n\t\t" .. table.concat(groups, "\n\t\t")
 
-	local zcmp = loaddata("zsh-completion.sh")
+	local zcmp = loaddata(input)
 	zcmp = string.gsub(zcmp, "!!!OPTIONS!!!", options_zsh, 1)
-	savedata("_pdfjam", zcmp)
+	savedata(output, zcmp)
 end
 
 function loaddata(f) return io.loaddata(f) or error("File not found: " .. f) end
@@ -191,12 +199,12 @@ function surround_concat(t, pre, mid, post)
 	return pre .. table.concat(t, (post or "") .. (mid or "") .. pre) .. (post or "")
 end
 
-function make_examples(opts)
+function make_examples(opts, input, output)
 	dir.makedirs("in")
 	local targets = imap(opts, make_example)
 	imap(opts, make_example)
-	local make = "targets = " .. table.concat(targets, " \\\n") .. "\n\n" .. loaddata("Makefile.in")
-	savedata("Makefile", make)
+	local make = "targets = " .. table.concat(targets, " \\\n") .. "\n\n" .. loaddata(input)
+	savedata(output, make)
 end
 
 function flatten_groups(opts)
@@ -213,6 +221,12 @@ function flatten_groups(opts)
 	return result
 end
 
+function link_files(files, to)
+	for _, f in ipairs(files) do
+		lfs.link(dir.expandname(f), file.join(to, file.basename(f)), true)
+	end
+end
+
 HEADER = [[
 ![GitHub CI](https://github.com/pdfjam/pdfjam/actions/workflows/ci.yml/badge.svg)
 
@@ -221,28 +235,28 @@ HEADER = [[
 _Markus Kurtz_ <_anything_ at mgkurtz.de>]]
 
 function main()
-	local build = string.find(dir.current(), "build/doc$")
-	if not build then lfs.chdir(file.dirname(arg[0])) end
+	local isbuild = string.find(dir.current(), "build/doc$")
+	if not isbuild then
+		lfs.chdir(file.dirname(arg[0]))
+		dir.makedirs("build")
+		lfs.link("../pdfjam", "build/pdfjam")
+		link_files({"README.in.md", "opts.lua", "zsh-completion.sh", "Makefile.in", "pdfjam.tex"}, "build")
+		link_files(dir.glob("examples/*.pdf"), "build")
+		lfs.chdir("build")
+	end
 
 	local opts = require"opts"
 	local flattened_opts = flatten_groups(opts)
 
-	build_markdown(flattened_opts)
-	build_tex_md(flattened_opts)
-	os.execute("pandoc --wrap=none options.tex.md -o " .. "options.tex")
-	os.execute("pandoc --wrap=none --toc -o p.tex README.md")
-	local main_readme = (build and "" or "../") .. "README.md"
-	os.execute("pandoc --columns=80 --standalone --toc --shift-heading-level-by=1 --from=markdown-smart --to=gfm README-out.md -o README-gfm.md")
-	local header = lpeg.Cs(("---" * (1 - lpeg.P"---")^0 * "---")/HEADER * lpeg.P(1)^0)
-	savedata(main_readme, header:match(loaddata("README-gfm.md")))
-	build_zsh_complete(opts)
-	make_examples(flattened_opts)
+	write_markdown(flattened_opts, "README.in.md", (isbuild and "" or "../../") .. "README.md")
+	build_zsh_complete(opts, "zsh-completion.sh", "_pdfjam")
 
-	if build then
-		os.execute("make -j8")
-	else
-		os.execute("make -C examples -j8")
-	end
+	build_tex_options(flattened_opts, "options.tex")
+	os.execute("pandoc --wrap=none --toc README.in.md -o p.tex")
+
+	make_examples(flattened_opts, "Makefile.in", "Makefile")
+	os.execute("make -j8")
+
 	os.execute("latexmk pdfjam.tex")
 end
 

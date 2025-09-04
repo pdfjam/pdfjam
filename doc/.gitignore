@@ -1,16 +1,1 @@
 build/
-examples/in/
-examples/out/
-examples/small/
-examples/cropped/
-examples/Makefile
-_pdfjam
-in/
-README-out.md
-pdfjam.pdf
-options.tex
-options.tex.md
-p.tex
-.aux
-Makefile
-README-gfm.md
