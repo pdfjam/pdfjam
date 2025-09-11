@@ -94,6 +94,145 @@ For the `--keepinfo` option, you need `pdfinfo` available by installing [poppler
 
 \input{options.tex}
 
+# Usage examples
+
+## Batch 2-upping of documents
+
+Consider converting each of two documents to a side-by-side "2-up" format.
+Since we want the two documents to be processed separately, we'll use the
+`--batch` option:
+
+```sh
+pdfjam --batch --nup 2x1 --suffix 2up --landscape file1.pdf file2.pdf
+```
+
+This will produce new files `file1-2up.pdf` and `file2-2up.pdf` in the current
+working directory.
+
+## Merging pages from 2 documents
+
+Suppose we want a single new document which puts together selected pages from two different files:
+
+```sh
+pdfjam file1.pdf '{},2-' file2.pdf '10,3-6' --outfile ../myNewFile.pdf
+```
+
+The new file `myNewFile.pdf`, in the parent directory of the current one,
+contains an empty page, followed by all pages of `file1.pdf` except the first,
+followed by pages 10, 3, 4, 5 and 6 from `file2.pdf`.
+
+The resulting PDF page size will be whatever is the default paper size for
+you at your site. If instead you want to preserve the page size of
+(the first included page from) `file1.pdf`, use the option `--fitpaper true`.
+
+**All pages in an output file from `pdfjam` will have the same size and
+orientation.**  For joining together PDF files while preserving _different_ page
+sizes and orientations, `pdfjam` is not the tool to use.
+
+## A 4-up document with frames
+
+To make a portrait-oriented 4-up file from the pages of three input files,
+with a thin-line frame around the input pages:
+
+```sh
+pdfjam file1.pdf file2.pdf file3.pdf --no-landscape --frame true --nup 2x2 --suffix 4up --outfile ~/Documents
+```
+
+Here a _directory_ was specified at `--outfile`: the resultant file in this
+case will be `~/Documents/file3-4up.pdf`.
+(Note that **if there's a writeable file with that name already, it will be
+overwritten**: no check is made, and no warning given.)
+
+## Convert a 'US letter' document to A4
+
+Suppose we have a document made up of 'US letter' size pages,
+and we want to convert it to A4:
+
+```sh
+pdfjam 'my US letter file.pdf' --a4paper --outfile 'my A4 file.pdf'
+```
+
+## Handouts from presentation slides
+
+A useful application of `pdfjam` is for producing a handout from a file of
+presentation slides. For slides made with the standard 4:3 aspect ratio a
+nice 6-up handout on A4 paper can be made by
+
+```sh
+pdfjam --nup 2x3 --frame true --noautoscale false --delta "0.2cm 0.3cm" --scale 0.95 myslides.pdf --outfile myhandout.pdf
+```
+
+The `--delta` option here comes from the pdfpages package; the `--scale`
+option is passed to LaTeX's `\includegraphics` command.
+
+Slides made by LaTeX's _beamer_ package, using the `handout` class option,
+work especially nicely with this! The example wrapper scripts `pdfjam-slides3up`
+and `pdfjam-slides6up`, in the
+[pdfjam-extras](https://github.com/pdfjam/pdfjam-extras) repository,
+are for 3-up and 6-up handouts, respectively.
+
+## Trimming pages; and piped output
+
+Suppose we want to trim the pages of our input file prior to n-upping.
+This can be done by using a pipe:
+
+```sh
+pdfjam myfile.pdf --trim '1cm 2cm 1cm 2cm' --clip true --outfile /dev/stdout | pdfjam --nup 2x1 --frame true --outfile myoutput.pdf
+```
+
+The `--trim` option specifies an amount to trim from the left, bottom, right and
+top sides respectively; to work as intended here it needs also `--clip true`.
+These (i.e., `trim` and `clip`) are in fact options to LaTeX's
+`\includegraphics` command (in the standard _graphics_ package).
+
+Thanks go to Christophe Lange and Christian Lohmaier for suggesting
+an example on this.
+
+## Output pages suitable for binding
+
+To offset the content of double-sided printed pages so that they are
+suitable for binding with a
+[Heftstreifen](https://de.wikipedia.org/wiki/Heftstreifen), use
+the `--twoside` option:
+
+```sh
+pdfjam --twoside myfile.pdf --offset '1cm 0cm' --suffix 'offset'
+```
+
+## Input file with nonstandard name
+
+To use PDF input files whose names do not end in '`.pdf`', you will need to use
+the `--checkfiles` option. This depends on the availability of the `file`
+utility, with support for the options `-Lb`; this can be checked by trying
+
+```sh
+file -Lb 'my PDF file'
+```
+
+where `'my PDF file'` is the name of a PDF file on your system.
+The result should be something like '`PDF document, version 1.4`'
+(possibly with a different version number).
+
+With '`file -Lb`' available, we can use PDF files whose names lack the usual
+'`.pdf`' extension.  For example,
+
+```sh
+pdfjam --nup 2x1 --checkfiles 'my PDF file'
+```
+
+will result in a file named '`my PDF file-2x1.pdf`'
+in the current working directory.
+
+## Rotate every 2nd page
+
+If you want to print a landscape-oriented PDF document on both sides of the paper,
+using a duplex printer that does not have 'tumble' capability, make a new version
+with every second page rotated for printing:
+
+```sh
+pdfjam --landscape --doublepagestwistodd true my-landscape-document.pdf
+```
+
 # Configuration
 
 You can configure pdfjam to your needs by putting a file called `pdfjam.conf`
