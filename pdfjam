@@ -109,7 +109,7 @@ embrace() {
 to_papersize() {
 	value="$1"
 	case "$value" in
-		\{*\}) value="${value#\{}"; value="${value%\}}"
+		\{*\}) value="$(printf %s "$value" | sed 's/^{//; s/}$//')"
 	esac
 	printf %s "$value" | sed -E 's/([0-9]{1,}\.{0,1}[0-9]*)(,|$)/\1bp\2/g'
 }
@@ -137,7 +137,7 @@ get_extension() {
 		esac
 	elif test -f "$1" && test -r "$1"; then
 		case "$1" in *.*)
-			case "$(printf %s "${1##*.}" | tr A-Z a-z)" in
+			case "$(printf %s "$1" | grep -o '[^.]*$' | tr A-Z a-z)" in
 				pdf) extension=pdf ;;
 				jpg|jpeg) extension=jpg ;;
 				png) extension=png ;;
@@ -295,7 +295,7 @@ paperformats=:a0:a1:a2:a3:a4:a5:a6:b0:b1:b2:b3:b4:b5:b6:c0:c1:c2:c3:c4:c5:c6\
 to_paper() {
 	printf %s "$1"|grep -q '^[A-Za-z0-9]*$' || return 2 # make sure input is harmless
 	paper=$(echo "$1" | tr A-Z a-z)
-	paper=${paper%paper}
+	paper=$(printf %s "$paper" | sed 's/paper$//')
 	echo $paperformats|grep -q ":$paper:" || return 1
 	case $paper in
 	b?j) ;;
@@ -308,7 +308,7 @@ if test -z "$paper"; then
 	if command -v paper >/dev/null; then  ## provided by libpaper>=2
 		paperspec=$(paper)
 		if echo "$paperspec" | grep -q ': '; then
-			if ! paper=$(to_paper "${paperspec%%: *}"); then
+			if ! paper=$(to_paper "$(printf %s "$paperspec" | grep -o '^[^:]*')"); then
 				paperdimensions=$(echo "$paperspec" | cut -f 2 -d " ")
 				paperunit=$(echo "$paperspec" | cut -f 3 -d " ")
 				if test "$paperunit" = "pt"; then paperunit=bp; fi
@@ -522,7 +522,7 @@ while test -n "$1$2"; do
 			--templatesize)  ##  provide more friendly syntax
 				case "$2" in
 					\{*\}) value="$2" ;;
-					*) value="{${2%%,*}}{${2#*,}}" ;;
+					*) value=$(printf %s "$2" | sed 's/\(.*\),\(.*\)/{\1}{\2}/') ;;
 				esac
 				miscOptions="$miscOptions,${1#--}=$value"
 				callOptions="$callOptions ${1} $(enquote "$2")"
@@ -569,7 +569,7 @@ while test -n "$1$2"; do
 				--false) error_exit "Input file expected, but '$1' does not even exist in your file system." $E_NOINPUT ;;
 			esac
 			case "$valid_input-$valid_pagespec-$pageSpecAwaited" in  ##  The 6=3+3 working combinations
-				*-pagespec-true) fileSpec="${fileSpec%|awaited}|$1"; pageSpecAwaited=false ;;
+				*-pagespec-true) fileSpec="$(printf %s "$fileSpec" | sed "s/|awaited$/|$1/")"; pageSpecAwaited=false ;;
 				input-*-*) fileSpec="$fileSpec$newline$1|$extension|awaited"; pageSpecAwaited=true ;;
 			esac
 		esac
@@ -606,7 +606,7 @@ fi
 if [ -n "$papersize" ]; then
 	if [ -n "$landscape" ]; then
 		## geometry package ignores landscape, thus swap x,y → y,x manually
-		papersize="${papersize#*,},${papersize%%,*}"
+		papersize=$(printf %s "$papersize" | sed 's/\(.*\),\(.*\)/\2,\1/')
 	fi
 	papersize="papersize={$papersize}"
 fi
@@ -790,7 +790,7 @@ if test "$batch" = true; then
 	fi
 	IFS="$newline"
 	for k in $fileSpec; do # TODO
-		sourcePath=$(enquote "${k%|*|*}")
+		sourcePath=$(enquote "$(printf %s "$k" | sed 's/|[^|]*|[^|]*$//')")
 		pageSpec=${k##*|}
 		callNumber=$((PDFJAM_CALL_NUMBER + 1))
 		prattle "--"
@@ -826,7 +826,7 @@ else
 	filePageSpec=""
 	IFS="$newline"
 	for k in $fileSpec; do
-		sourcePath=$(enquote "${k%|*|*}")
+		sourcePath=$(enquote "$(printf %s "$k" | sed 's/|[^|]*|[^|]*$//')")
 		pageSpec=${k##*|}
 		filePageSpec="$filePageSpec$sourcePath $pageSpec "
 	done
@@ -851,7 +851,7 @@ counter=0  ## for name generation for non-harmless names
 stdinUnread=true
 IFS="$newline"
 for k in ${fileSpec}; do
-	sourcePath="${k%|*|*}"
+	sourcePath="$(printf %s "$k" | sed 's/|[^|]*|[^|]*$//')"
 	pageSpec=${k##*|}
 	if ! is_valid_pagespec "$pageSpec"; then
 		error_exit "Bug: Somehow an invalid page spec got here: $pageSpec" $E_SOFTWARE
@@ -877,15 +877,15 @@ for k in ${fileSpec}; do
 		fi
 		;;
 	*)
-		extension="${k%|*}"
+		extension="$(printf %s "$k" | sed 's/|[^|]*$//')"
 		extension="${extension##*|}"
 		case "$extension" in
 			pdf|eps|jpg|png) ;;
-			*) error_exit "Bug: Somehow an invalid extension got here." $E_SOFTWARE
+			*) error_exit "Bug: Somehow an invalid extension $extension from $k got here." $E_SOFTWARE
 		esac
 		sourceFullPath="$(realpath -- "$sourcePath")"
 		tmpName="$(basename -- "$sourcePath")"
-		tmpName="${tmpName%.*}"
+		tmpName="$(printf %s "$tmpName" | sed 's/\.[^.]*$//')"
 		if is_harmless "$tmpName" && [ -n "${filePageList##*,"$tmpName".*}" ]; then
 			uniqueName="$tmpName.$extension"
 		else
