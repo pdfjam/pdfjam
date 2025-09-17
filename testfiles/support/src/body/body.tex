@@ -1,0 +1,22 @@
+\usepackage{tikz}
+
+\pagestyle{empty}
+
+\input{body/colors.tex}
+
+\def\dopage{%
+    \null
+    \begin{tikzpicture}[remember picture,overlay]
+		\path [fill=color\arabic{page}] (current page.south west) rectangle (current page.north east);
+		\node[font=\sffamily\huge,scale=15,text depth=.2pt] at (current page) {\thepage};
+    \end{tikzpicture}%
+    \clearpage
+}
+
+\begin{document}
+
+\ExplSyntaxOn
+\int_step_inline:nn { 24 } { \dopage }
+\ExplSyntaxOff
+
+\end{document}
