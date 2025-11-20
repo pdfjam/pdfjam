@@ -61,6 +61,10 @@ end
 
 read_file = function(name)
 	f = io.open(name)
+	if not f then
+		print("Could not read " .. name)
+		return
+	end
 	s = f:read("a")
 	f:close()
 	return s
@@ -68,6 +72,7 @@ end
 
 function compare_completions(difffile, reffile, genfile, cleanup, name, engine)
 	s = read_file(reffile)
+	if not s then return 1 end
 	ref = io.open(reffile .. ".multi", "w")
 	gen = io.open(genfile)
 	for l in gen:lines() do
@@ -87,6 +92,7 @@ end
 
 function rewrite_multi_to_single_ref(reffile)
 	s = read_file(reffile)
+	if not s then return 1 end
 	_, begin_first_ref = string.find(s, "^>>> [^\n]*%.%.%.\n")
 	if not begin_first_ref then
 		print("Reference file " .. reffile .. " must start with >>> before rewriting.")
@@ -122,10 +128,14 @@ test_types = {
 		rewrite = function(source, normalized, engine)
 			local dir=source .. ".d/" .. engine .. "/"
 			local f = io.open(normalized, "w")
-			f:write("%%% a.tex\n", read_file(dir.."a.tex"),
-				"\n%%% call.txt\n", rewrite_test_dir(read_file(dir.."call.txt")),
+			local atex = read_file(dir.."a.tex")
+			local calltxt = read_file(dir.."call.txt")
+			local messagestxt = read_file(dir.."messages.txt")
+			if not (atex and calltxt and messagestxt) then return 1 end
+			f:write("%%% a.tex\n", atex,
+				"\n%%% call.txt\n", rewrite_test_dir(calltxt),
 				"\n%%% messages.txt\n",
-				rewrite_version(rewrite_test_dir(read_file(dir.."messages.txt"))))
+				rewrite_version(rewrite_test_dir(messagestxt)))
 			f:close()
 		end
 	},
