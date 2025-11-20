@@ -9,8 +9,8 @@
 \end{document}
 
 %%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir nastynames.d/dryrun --outfile nastynames.pdf -- - {} 1-2.pdf ,,, _.pdf last '{}' - --fantasy - -- - 
+cd $BUILDDIR/test
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir nastynames.d/dryrun --outfile nastynames.pdf -- - {} 1-2.pdf ,,, _.pdf last '{}' - --fantasy - -- - 
 
 %%% messages.txt
           ----
@@ -21,6 +21,6 @@ cd <TESTDIR>
   pdfjam: Ambiguous argument 'last' interpreted as pagespec. If you meant the file, please write './last' instead.
   pdfjam: Dubious argument '{}' interpreted as file due to its position. (Write './{}' for extra clarity.)
   pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir nastynames.d/dryrun --outfile nastynames.pdf -- - {} 1-2.pdf ,,, _.pdf last '{}' - --fantasy - -- - 
-  pdfjam: Calling <TESTDIR>/engine...
+          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir nastynames.d/dryrun --outfile nastynames.pdf -- - {} 1-2.pdf ,,, _.pdf last '{}' - --fantasy - -- - 
+  pdfjam: Calling $BUILDDIR/test/engine...
   pdfjam: Finished.  Output was written to 'nastynames.pdf'.

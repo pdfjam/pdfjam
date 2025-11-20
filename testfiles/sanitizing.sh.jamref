@@ -9,8 +9,8 @@
 \end{document}
 
 %%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir sanitizing.sh.d/dryrun --outfile sanitizing.sh.pdf --picturecommand '\put(20,20){Letters.\quad What'\''s $9\cdot6$?}' -- a4.pdf -
+cd $BUILDDIR/test
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir sanitizing.sh.d/dryrun --outfile sanitizing.sh.pdf --picturecommand '\put(20,20){Letters.\quad What'\''s $9\cdot6$?}' -- a4.pdf -
 
 %%% messages.txt
           ----
@@ -24,6 +24,6 @@ cd <TESTDIR>
   pdfjam:     This is pdfjam version N.NN.
   pdfjam:     Ambiguous argument '-' interpreted as pagespec. If you meant the file, please write './-' instead.
   pdfjam:     Effective call for this run of pdfjam:
-              ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir sanitizing.sh.d/dryrun --outfile sanitizing.sh.pdf --picturecommand '\put(20,20){Letters.\quad What'\''s $9\cdot6$?}' -- a4.pdf -
-  pdfjam:     Calling <TESTDIR>/engine...
+              ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir sanitizing.sh.d/dryrun --outfile sanitizing.sh.pdf --picturecommand '\put(20,20){Letters.\quad What'\''s $9\cdot6$?}' -- a4.pdf -
+  pdfjam:     Calling $BUILDDIR/test/engine...
   pdfjam:     Finished.  Output was written to 'sanitizing.sh.pdf'.

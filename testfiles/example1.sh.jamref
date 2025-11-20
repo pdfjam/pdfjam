@@ -9,8 +9,8 @@
 \end{document}
 
 %%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example1.sh.d/dryrun --outfile example1.sh.pdf --nup 2x1 --outfile <TESTDIR> --suffix 2up --landscape -- file1.pdf -
+cd $BUILDDIR/test
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir example1.sh.d/dryrun --outfile example1.sh.pdf --nup 2x1 --outfile $BUILDDIR/test --suffix 2up --landscape -- file1.pdf -
 
 %%% messages.txt
           ----
@@ -24,9 +24,9 @@ cd <TESTDIR>
   pdfjam:     This is pdfjam version N.NN.
   pdfjam:     Ambiguous argument '-' interpreted as pagespec. If you meant the file, please write './-' instead.
   pdfjam:     Effective call for this run of pdfjam:
-              ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example1.sh.d/dryrun --outfile example1.sh.pdf --nup 2x1 --outfile <TESTDIR> --suffix 2up --landscape -- file1.pdf -
-  pdfjam:     Calling <TESTDIR>/engine...
-  pdfjam:     Finished.  Output was written to '<TESTDIR>/file1-2up.pdf'.
+              ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir example1.sh.d/dryrun --outfile example1.sh.pdf --nup 2x1 --outfile $BUILDDIR/test --suffix 2up --landscape -- file1.pdf -
+  pdfjam:     Calling $BUILDDIR/test/engine...
+  pdfjam:     Finished.  Output was written to '$BUILDDIR/test/file1-2up.pdf'.
   pdfjam: --
   pdfjam: Processing file 2: file2.pdf ...
   pdfjam: Page spec is '-'.
@@ -34,6 +34,6 @@ cd <TESTDIR>
   pdfjam:     This is pdfjam version N.NN.
   pdfjam:     Ambiguous argument '-' interpreted as pagespec. If you meant the file, please write './-' instead.
   pdfjam:     Effective call for this run of pdfjam:
-              ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example1.sh.d/dryrun --outfile example1.sh.pdf --nup 2x1 --outfile <TESTDIR> --suffix 2up --landscape -- file2.pdf -
-  pdfjam:     Calling <TESTDIR>/engine...
-  pdfjam:     Finished.  Output was written to '<TESTDIR>/file2-2up.pdf'.
+              ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir example1.sh.d/dryrun --outfile example1.sh.pdf --nup 2x1 --outfile $BUILDDIR/test --suffix 2up --landscape -- file2.pdf -
+  pdfjam:     Calling $BUILDDIR/test/engine...
+  pdfjam:     Finished.  Output was written to '$BUILDDIR/test/file2-2up.pdf'.

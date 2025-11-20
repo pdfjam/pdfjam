@@ -12,8 +12,8 @@
 \end{document}
 
 %%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir booklet2.d/dryrun --outfile booklet2.pdf --pagecolor 238,232,213 --signature 4 -- beamer.pdf 1-6 a4.pdf 1-3 
+cd $BUILDDIR/test
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir booklet2.d/dryrun --outfile booklet2.pdf --pagecolor 238,232,213 --signature 4 -- beamer.pdf 1-6 a4.pdf 1-3 
 
 %%% messages.txt
           ----
@@ -21,6 +21,6 @@ cd <TESTDIR>
   pdfjam: Called with '--vanilla': no user or site configuration
           files will be read.
   pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir booklet2.d/dryrun --outfile booklet2.pdf --pagecolor 238,232,213 --signature 4 -- beamer.pdf 1-6 a4.pdf 1-3 
-  pdfjam: Calling <TESTDIR>/engine...
+          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir booklet2.d/dryrun --outfile booklet2.pdf --pagecolor 238,232,213 --signature 4 -- beamer.pdf 1-6 a4.pdf 1-3 
+  pdfjam: Calling $BUILDDIR/test/engine...
   pdfjam: Finished.  Output was written to 'booklet2.pdf'.

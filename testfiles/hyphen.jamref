@@ -9,8 +9,8 @@
 \end{document}
 
 %%% call.txt
-cd <TESTDIR>
-./pdfjam --checkfiles --latex <TESTDIR>/engine --vanilla --builddir hyphen.d/dryrun --outfile hyphen.pdf --paper a0paper -- -hyphen - 
+cd $BUILDDIR/test
+./pdfjam --checkfiles --latex $BUILDDIR/test/engine --vanilla --builddir hyphen.d/dryrun --outfile hyphen.pdf --paper a0paper -- -hyphen - 
 
 %%% messages.txt
           ----
@@ -18,6 +18,6 @@ cd <TESTDIR>
   pdfjam: Called with '--vanilla': no user or site configuration
           files will be read.
   pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --checkfiles --latex <TESTDIR>/engine --vanilla --builddir hyphen.d/dryrun --outfile hyphen.pdf --paper a0paper -- -hyphen - 
-  pdfjam: Calling <TESTDIR>/engine...
+          ./pdfjam --checkfiles --latex $BUILDDIR/test/engine --vanilla --builddir hyphen.d/dryrun --outfile hyphen.pdf --paper a0paper -- -hyphen - 
+  pdfjam: Calling $BUILDDIR/test/engine...
   pdfjam: Finished.  Output was written to 'hyphen.pdf'.

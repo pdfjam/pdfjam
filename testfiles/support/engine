@@ -19,7 +19,8 @@ out="$job.pdf"
 dir="$job.d/$1"
 
 testdir=$(realpath -- "$(dirname "$0")")
-export PATH="$testdir/../bin:$testdir"
+basedir=$(realpath -- "$testdir/..")
+export PATH="$basedir/bin:$testdir"
 
 # Choose operation mode, set variables for setting pdfjam
 case "$1" in
@@ -31,7 +32,7 @@ pdftex|xetex|luatex)
 dryrun)
 	latex=$(realpath "$0")
 	case "$in" in
-		*.sh) source "$in" | sed "s=$testdir=<TESTDIR>=g" >"$job.dryrun.log"; exit ;;
+		*.sh) source "$in" | sed "s=$basedir=\$BUILDDIR=g" >"$job.dryrun.log"; exit ;;
 		*.jam) ;;
 		*) echo "Wrong usage of $0"; exit 1 ;;
 	esac

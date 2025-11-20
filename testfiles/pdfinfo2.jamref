@@ -21,8 +21,8 @@
 \end{document}
 
 %%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir pdfinfo2.d/dryrun --outfile pdfinfo2.pdf --keepinfo --enc UTF-8 --pdftitle  --pdfkeywords ' tab	nl
+cd $BUILDDIR/test
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir pdfinfo2.d/dryrun --outfile pdfinfo2.pdf --keepinfo --enc UTF-8 --pdftitle  --pdfkeywords ' tab	nl
 "!@$^&,}]{[\|:~`crash?ሴ🙄🏳️‍🌈finally ☺️' --keepinfo -- /dev/stdin - 
 
 %%% messages.txt
@@ -32,8 +32,8 @@ cd <TESTDIR>
           files will be read.
   pdfjam: No PDF/EPS/JPG/PNG source specified: input is from stdin.
   pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir pdfinfo2.d/dryrun --outfile pdfinfo2.pdf --keepinfo --enc UTF-8 --pdftitle  --pdfkeywords ' tab	nl
+          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir pdfinfo2.d/dryrun --outfile pdfinfo2.pdf --keepinfo --enc UTF-8 --pdftitle  --pdfkeywords ' tab	nl
           "!@$^&,}]{[\|:~`crash?ሴ🙄🏳️‍🌈finally ☺️' --keepinfo -- /dev/stdin - 
-  pdfjam: Calling <TESTDIR>/../bin/pdfinfo...
-  pdfjam: Calling <TESTDIR>/engine...
+  pdfjam: Calling $BUILDDIR/bin/pdfinfo...
+  pdfjam: Calling $BUILDDIR/test/engine...
   pdfjam: Finished.  Output was written to 'pdfinfo2.pdf'.

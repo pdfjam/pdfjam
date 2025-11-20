@@ -9,7 +9,7 @@
 \end{document}
 
 %%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example1.sh.d/dryrun --outfile example1.sh.pdf --nup 2x1 --outfile <TESTDIR> --suffix 2up --landscape -- file2.pdf -
+cd $BUILDDIR/test
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir example1.sh.d/dryrun --outfile example1.sh.pdf --nup 2x1 --outfile $BUILDDIR/test --suffix 2up --landscape -- file2.pdf -
 
 %%% messages.txt

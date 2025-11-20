@@ -21,8 +21,8 @@
 \end{document}
 
 %%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir pdfinfo3.d/dryrun --outfile pdfinfo3.pdf --enc UTF-8 --pdfauthor 'Dæmon'\''s pact 😈' --pdfsubject Witchcraft -- a4.pdf - 
+cd $BUILDDIR/test
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir pdfinfo3.d/dryrun --outfile pdfinfo3.pdf --enc UTF-8 --pdfauthor 'Dæmon'\''s pact 😈' --pdfsubject Witchcraft -- a4.pdf - 
 
 %%% messages.txt
           ----
@@ -30,6 +30,6 @@ cd <TESTDIR>
   pdfjam: Called with '--vanilla': no user or site configuration
           files will be read.
   pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir pdfinfo3.d/dryrun --outfile pdfinfo3.pdf --enc UTF-8 --pdfauthor 'Dæmon'\''s pact 😈' --pdfsubject Witchcraft -- a4.pdf - 
-  pdfjam: Calling <TESTDIR>/engine...
+          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir pdfinfo3.d/dryrun --outfile pdfinfo3.pdf --enc UTF-8 --pdfauthor 'Dæmon'\''s pact 😈' --pdfsubject Witchcraft -- a4.pdf - 
+  pdfjam: Calling $BUILDDIR/test/engine...
   pdfjam: Finished.  Output was written to 'pdfinfo3.pdf'.

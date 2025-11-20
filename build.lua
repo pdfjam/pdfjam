@@ -41,7 +41,6 @@ end
 ---- Constants
 -- Defaults are set later. Hence define all values we explicitly use here.
 builddir = "build"
-testdir = builddir .. "/test"
 
 -- used for l3build install
 installfiles = {"pdfjam"} -- also used by l3build check
@@ -54,7 +53,7 @@ local escape_pattern = function(s)
 	return string.gsub(s,"[][^$()%%.*+?-]", "%%%0")
 end
 local rewrite_test_dir = function(s)
-	return (string.gsub(s, escape_pattern(abspath(testdir)), "<TESTDIR>"))
+	return (string.gsub(s, escape_pattern(abspath(builddir)), "$BUILDDIR"))
 end
 local rewrite_version = function(s)
 	return (string.gsub(s, "pdfjam version [%x.gN-]+", "pdfjam version N.NN."))

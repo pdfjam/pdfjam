@@ -9,8 +9,8 @@
 \end{document}
 
 %%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example7.d/dryrun --outfile example7.pdf --twoside --offset 1cm\ 0cm -- file1.pdf - 
+cd $BUILDDIR/test
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir example7.d/dryrun --outfile example7.pdf --twoside --offset 1cm\ 0cm -- file1.pdf - 
 
 %%% messages.txt
           ----
@@ -18,6 +18,6 @@ cd <TESTDIR>
   pdfjam: Called with '--vanilla': no user or site configuration
           files will be read.
   pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example7.d/dryrun --outfile example7.pdf --twoside --offset 1cm\ 0cm -- file1.pdf - 
-  pdfjam: Calling <TESTDIR>/engine...
+          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir example7.d/dryrun --outfile example7.pdf --twoside --offset 1cm\ 0cm -- file1.pdf - 
+  pdfjam: Calling $BUILDDIR/test/engine...
   pdfjam: Finished.  Output was written to 'example7.pdf'.

@@ -9,8 +9,8 @@
 \end{document}
 
 %%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example5.d/dryrun --outfile example5.pdf --nup 2x3 --frame true --noautoscale false --delta 0.2cm\ 0.3cm --scale 0.95 -- beamer.pdf - 
+cd $BUILDDIR/test
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir example5.d/dryrun --outfile example5.pdf --nup 2x3 --frame true --noautoscale false --delta 0.2cm\ 0.3cm --scale 0.95 -- beamer.pdf - 
 
 %%% messages.txt
           ----
@@ -18,6 +18,6 @@ cd <TESTDIR>
   pdfjam: Called with '--vanilla': no user or site configuration
           files will be read.
   pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example5.d/dryrun --outfile example5.pdf --nup 2x3 --frame true --noautoscale false --delta 0.2cm\ 0.3cm --scale 0.95 -- beamer.pdf - 
-  pdfjam: Calling <TESTDIR>/engine...
+          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir example5.d/dryrun --outfile example5.pdf --nup 2x3 --frame true --noautoscale false --delta 0.2cm\ 0.3cm --scale 0.95 -- beamer.pdf - 
+  pdfjam: Calling $BUILDDIR/test/engine...
   pdfjam: Finished.  Output was written to 'example5.pdf'.

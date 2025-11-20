@@ -9,8 +9,8 @@
 \end{document}
 
 %%% call.txt
-cd <TESTDIR>
-./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example6.sh.d/dryrun --outfile example6.sh.pdf --nup 2x1 --frame true -- /dev/stdin - 
+cd $BUILDDIR/test
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir example6.sh.d/dryrun --outfile example6.sh.pdf --nup 2x1 --frame true -- /dev/stdin - 
 
 %%% messages.txt
           ----
@@ -19,6 +19,6 @@ cd <TESTDIR>
           files will be read.
   pdfjam: No PDF/EPS/JPG/PNG source specified: input is from stdin.
   pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex <TESTDIR>/engine --vanilla --builddir example6.sh.d/dryrun --outfile example6.sh.pdf --nup 2x1 --frame true -- /dev/stdin - 
-  pdfjam: Calling <TESTDIR>/engine...
+          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir example6.sh.d/dryrun --outfile example6.sh.pdf --nup 2x1 --frame true -- /dev/stdin - 
+  pdfjam: Calling $BUILDDIR/test/engine...
   pdfjam: Finished.  Output was written to 'example6.sh.pdf'.
