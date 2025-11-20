@@ -67,9 +67,15 @@ OIFS="$IFS"
 ##
 pwd=$(pwd)
 ##
+## For zsh, activate splitting of variables in words as in `for i in $var`
+##
+if extratrap=$(set +o | grep shwordsplit 2>/dev/null); then
+	set -o shwordsplit
+fi
+##
 ##  Trap interrupts so that they kill everything:
 ##
-trap 'IFS=$OIFS; exit 1' HUP INT TERM
+trap 'IFS=$OIFS; $extratrap; exit 1' HUP INT TERM
 ##
 ##  The following will be useful for readability of the script:
 ##
