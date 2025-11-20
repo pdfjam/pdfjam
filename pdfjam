@@ -569,7 +569,7 @@ while test -n "$1$2"; do
 				--false) error_exit "Input file expected, but '$1' does not even exist in your file system." $E_NOINPUT ;;
 			esac
 			case "$valid_input-$valid_pagespec-$pageSpecAwaited" in  ##  The 6=3+3 working combinations
-				*-pagespec-true) fileSpec="${fileSpec%|awaited}|$1"; pageSpecAwaited=false ;;
+				*-pagespec-true) fileSpec="${fileSpec%\|awaited}|$1"; pageSpecAwaited=false ;;
 				input-*-*) fileSpec="$fileSpec$newline$1|$extension|awaited"; pageSpecAwaited=true ;;
 			esac
 		esac
@@ -790,8 +790,8 @@ if test "$batch" = true; then
 	fi
 	IFS="$newline"
 	for k in $fileSpec; do # TODO
-		sourcePath=$(enquote "${k%|*|*}")
-		pageSpec=${k##*|}
+		sourcePath=$(enquote "${k%\|*\|*}")
+		pageSpec=${k##*\|}
 		callNumber=$((PDFJAM_CALL_NUMBER + 1))
 		prattle "--"
 		prattle "Processing file ${callNumber}: $sourcePath ..."
@@ -826,8 +826,8 @@ else
 	filePageSpec=""
 	IFS="$newline"
 	for k in $fileSpec; do
-		sourcePath=$(enquote "${k%|*|*}")
-		pageSpec=${k##*|}
+		sourcePath=$(enquote "${k%\|*\|*}")
+		pageSpec=${k##*\|}
 		filePageSpec="$filePageSpec$sourcePath $pageSpec "
 	done
 	IFS="$OIFS"
@@ -851,8 +851,8 @@ counter=0  ## for name generation for non-harmless names
 stdinUnread=true
 IFS="$newline"
 for k in ${fileSpec}; do
-	sourcePath="${k%|*|*}"
-	pageSpec=${k##*|}
+	sourcePath="${k%\|*\|*}"
+	pageSpec=${k##*\|}
 	if ! is_valid_pagespec "$pageSpec"; then
 		error_exit "Bug: Somehow an invalid page spec got here: $pageSpec" $E_SOFTWARE
 	fi
@@ -877,8 +877,8 @@ for k in ${fileSpec}; do
 		fi
 		;;
 	*)
-		extension="${k%|*}"
-		extension="${extension##*|}"
+		extension="${k%\|*}"
+		extension="${extension##*\|}"
 		case "$extension" in
 			pdf|eps|jpg|png) ;;
 			*) error_exit "Bug: Somehow an invalid extension got here." $E_SOFTWARE
