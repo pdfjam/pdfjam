@@ -1058,6 +1058,8 @@ if test -f "$fileName".pdf; then ## if LaTeX didn't choke
 		pdfName="$pdfName$separator$suffix".pdf
 		outFile="$outFile/$pdfName"
 	fi
+else
+	error_exit "$latex did not create the expected pdf file." $E_OSFILE
 fi
 if test -f "$outFile" && test ! -w "$outFile"; then
 	## file exists and we can't over-write it
