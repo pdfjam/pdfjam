@@ -70,6 +70,8 @@ pwd=$(pwd)
 ## For zsh, activate splitting of variables in words as in `for i in $var`
 ##
 if extratrap=$(set +o | grep shwordsplit 2>/dev/null); then
+	# Set non-POSIX option after we checked for its existence, thus:
+	# shellcheck disable=SC3040
 	set -o shwordsplit
 fi
 ##
