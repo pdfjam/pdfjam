@@ -1,0 +1,23 @@
+%%% a.tex
+\batchmode
+\documentclass[a4paper,]{article}
+\usepackage[]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{pdfpages}
+\begin{document}
+\includepdfmerge[]{a4.pdf,2,a4numbers.pdf,2}
+\end{document}
+
+%%% call.txt
+cd $BUILDDIR/test
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir manyfilesonepagespec.d/dryrun --outfile manyfilesonepagespec.pdf -- a4.pdf 2 a4numbers.pdf 2 
+
+%%% messages.txt
+          ----
+  pdfjam: This is pdfjam version N.NN.
+  pdfjam: Called with '--vanilla': no user or site configuration
+          files will be read.
+  pdfjam: Effective call for this run of pdfjam:
+          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir manyfilesonepagespec.d/dryrun --outfile manyfilesonepagespec.pdf -- a4.pdf 2 a4numbers.pdf 2 
+  pdfjam: Calling $BUILDDIR/test/engine...
+  pdfjam: Finished.  Output was written to 'manyfilesonepagespec.pdf'.
