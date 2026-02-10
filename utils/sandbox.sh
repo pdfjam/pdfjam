@@ -3,7 +3,7 @@ cd "$(dirname "$0")/.."
 
 rm -rf build/bin
 mkdir -p build/bin
-for i in awk basename cat cp cut dirname extractbb file grep gs iconv kpsewhich ln lualatex mkdir mv od paperconf pdfinfo pdflatex realpath repstopdf rungs rm sed tee texlua tr tty uname xelatex; do
+for i in awk basename bash cat cp cut dirname extractbb file grep gs iconv kpsewhich ksh ln lualatex mkdir mv od paperconf pdfinfo pdflatex realpath repstopdf rungs rm sed sh tee texlua tr tty uname xelatex zsh; do
 	ln -s "$(command -v "$i")" "build/bin/$i" || { echo "No $i command found. Something is seriously amiss."; error=1; }
 done
 [ -n "$error" ] && exit 1

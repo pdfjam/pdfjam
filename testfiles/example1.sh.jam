@@ -3,7 +3,7 @@ set -e
 eval "$pdfjam --batch --nup 2x1 --outfile '$(pwd)' --suffix 2up --landscape file1.pdf file2.pdf"
 mv file1-2up.pdf example1.sh.pdf
 mv file2-2up.pdf example1.zz.sh.pdf
-zz=${dir/example1.sh/example1.zz.sh}
+zz=$(printf %s "$dir" | sed 's/example1\.sh/example1.zz.sh/')
 mkdir -p "$zz"
 cp -Tr "$dir/file1" "$dir"
 cp -Tr "$dir/file2" "$zz"

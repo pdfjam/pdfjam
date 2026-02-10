@@ -42,17 +42,17 @@ papersize mock/paper/foo
 papersize mock/paper/foo:mock/paperconf/foo
 
 # with config
-echo ===== Using config =====
+echo '===== Using config ====='
 echo paper=a5paper|tee ~/.pdfjam.conf
 papersize
 papersize mock/paper/letter
 
-echo ===== Using config =====
+echo '===== Using config ====='
 echo papersize=10cm,30cm|tee ~/.pdfjam.conf
 papersize
 papersize mock/paper/letter
 
-echo ===== Using config =====
+echo '===== Using config ====='
 echo 'paper=a5paper
 papersize=10cm,30cm'|tee ~/.pdfjam.conf
 papersize

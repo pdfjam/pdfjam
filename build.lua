@@ -55,6 +55,9 @@ end
 local rewrite_test_dir = function(s)
 	return (string.gsub(s, escape_pattern(abspath(builddir)), "$BUILDDIR"))
 end
+local rewrite_subdir = function(engine, s)
+	return (string.gsub(s, "( --builddir [^ ]+%.d)/" .. escape_pattern(engine) .. " ", "%1/dryrun "))
+end
 local rewrite_version = function(s)
 	return (string.gsub(s, "pdfjam version [%x.gN-]+", "pdfjam version N.NN."))
 end
@@ -105,7 +108,7 @@ function rewrite_multi_to_single_ref(reffile)
 end
 
 target_list.save.func = function(a)
-	if stdengine == "zsh" then
+	if stdengine == "completion_zsh" then
 		local errorlevel = 0
 		errorlevel = save(a)
 		for i,name in ipairs(a) do
@@ -124,18 +127,18 @@ test_types = {
 	jam = {
 		test = ".jam",
 		reference = ".jamref",
-		generated = "", -- it gets an implicit .dryrun anyway
+		generated = "", -- it gets an implicit .engine anyway
 		rewrite = function(source, normalized, engine)
 			local dir=source .. ".d/" .. engine .. "/"
 			local f = io.open(normalized, "w")
 			local atex = read_file(dir.."a.tex")
 			local calltxt = read_file(dir.."call.txt")
 			local messagestxt = read_file(dir.."messages.txt")
-			if not (atex and calltxt and messagestxt) then return 1 end
+			if not (f and atex and calltxt and messagestxt) then return 1 end
 			f:write("%%% a.tex\n", atex,
-				"\n%%% call.txt\n", rewrite_test_dir(calltxt),
+				"\n%%% call.txt\n", rewrite_subdir(engine, rewrite_test_dir(calltxt)),
 				"\n%%% messages.txt\n",
-				rewrite_version(rewrite_test_dir(messagestxt)))
+				rewrite_subdir(engine, rewrite_version(rewrite_test_dir(messagestxt))))
 			f:close()
 		end
 	},
@@ -145,7 +148,7 @@ test_types = {
 		generated = ".log",
 		rewrite = function(source, normalized) cp(source, ".", normalized) end
 	},
-	zsh = { -- for completion tests
+	completion_zsh = {
 		test = ".in",
 		reference = ".ref",
 		generated = ".out",
@@ -155,14 +158,17 @@ test_types = {
 }
 
 specialformats = { latex = {
-	dryrun = { binary = "./engine dryrun" },
+	sh = { binary = "./engine sh" },
+	bash = { binary = "./engine bash" },
+	ksh = { binary = "./engine ksh" },
+	zsh = { binary = "./engine zsh" },
 	pdftex = { binary = "./engine pdftex" },
 	xetex = { binary = "./engine xetex" },
 	luatex = { binary = "./engine luatex" },
-	zsh = { binary = "./complete zsh" },
+	completion_zsh = { binary = "./complete zsh" },
 } }
 
-checkengines = {"dryrun"}
+checkengines = {"sh", "bash", "ksh", "zsh"}
 checkconfigs = {"build"}
 lvtext = ".jam" -- Used in check-tex; cannot be overridden there (for whatever reason)
 test_order = {"jam", "sh"}
