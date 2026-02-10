@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/zsh --interactive
 
 # https://unix.stackexchange.com/questions/668618/how-to-write-automated-tests-for-zsh-completion
 
