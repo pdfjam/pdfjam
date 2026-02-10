@@ -342,7 +342,7 @@ Insert every page twice: for odd pages, the second copy is upside down; for even
 pages, the first copy.
 
 <span id="duplicatepages"/>**--duplicatepages** number  
-Insert every page NUM times.
+Insert every page multiple times.
 
 #### Run LaTeX commands
 

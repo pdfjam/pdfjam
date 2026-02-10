@@ -121,8 +121,8 @@ COMPLETER = {bool=":bool:(true false)", string=":string: ", name=":name: ", tex=
 	num4=":signature size:compadd -o nosort $(seq 4 4 96)",
 	dim=function(as) return ":"..as[1]..":_dimen "..as[1] end,
 	num=function(as) local a=as and as[1] or "number"; return ":"..a..':_numbers -l 1 "'..a..'"' end,
-	["dims-comma"]=function(as) local a=table.concat(as, ","); return ":"..a..":_dimens , "..a end,
-	["dims-space"]=function(as) return ":"..table.concat(map(as, space_to_hyphen), " ")..':_dimens " " '..table.concat(as, ",") end,
+	["dims-comma"]=function(as) local a=table.concat(map(as, space_to_hyphen), ","); return ":"..a..":_dimens , "..a end,
+	["dims-space"]=function(as) return ":"..table.concat(map(as, space_to_hyphen), " ")..':_dimens " " '..table.concat(map(as, space_to_hyphen), ",") end,
 }
 
 function as_zsh_completion_group(t)
@@ -239,8 +239,8 @@ function main()
 	if not isbuild then
 		lfs.chdir(file.dirname(arg[0]))
 		dir.makedirs("build")
-		lfs.link("../pdfjam", "build/pdfjam")
-		link_files({"README.in.md", "opts.lua", "zsh-completion.sh", "Makefile.in", "pdfjam.tex"}, "build")
+		lfs.link("../../pdfjam", "build/pdfjam", true)
+		link_files({"README.in.md", "opts.lua", "zsh-completion.in.sh", "Makefile.in", "pdfjam.tex"}, "build")
 		link_files(dir.glob("examples/*.pdf"), "build")
 		lfs.chdir("build")
 	end
@@ -249,7 +249,7 @@ function main()
 	local flattened_opts = flatten_groups(opts)
 
 	write_markdown(flattened_opts, "README.in.md", (isbuild and "" or "../../") .. "README.md")
-	build_zsh_complete(opts, "zsh-completion.sh", "_pdfjam")
+	build_zsh_complete(opts, "zsh-completion.in.sh", "_pdfjam")
 
 	build_tex_options(flattened_opts, "options.tex")
 	os.execute("pandoc --wrap=none --toc README.in.md -o p.tex")
@@ -260,5 +260,7 @@ function main()
 	os.execute("latexmk pdfjam.tex")
 end
 
--- test()
-main()
+-- if we can not access four levels of stack, we assume to be executed directly
+if not pcall(debug.getlocal, 4, 1) then
+	main()
+end

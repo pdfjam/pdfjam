@@ -69,7 +69,7 @@ return {
 		{'doublepagestwistodd', argtype = 'bool', help = 'Insert every page twice: once normally and once upside down.', example = '--doublepagestwistodd true --landscape --nup 2x1 a4.pdf 1-3'},
 		{'doublepagestwist*', argtype = 'bool', help = 'Insert every page twice: for odd pages, the first copy is upside down; for even pages, the second copy.', example = '--doublepagestwist\\* true --landscape --nup 2x1 a4.pdf 1-3'},
 		{'doublepagestwistodd*', argtype = 'bool', help = 'Insert every page twice: for odd pages, the second copy is upside down; for even pages, the first copy.', example = '--doublepagestwistodd\\* true --landscape --nup 2x1 a4.pdf 1-3'},
-		{'duplicatepages', argtype = 'num', help = 'Insert every page NUM times.', example = '--duplicatepages 3 a4.pdf 1-2'},
+		{'duplicatepages', argtype = 'num', help = 'Insert every page multiple times.', example = '--duplicatepages 3 a4.pdf 1-2'},
 	},
 	'## Run LaTeX commands',
 	{'pagecommand', argtype = 'tex', help = 'Declare LaTeX commands, which are executed on each sheet of paper.', example = "--pagecommand '\\section{Hi}\\thispagestyle{empty}' a4.pdf 1-3 a4text.pdf 1-3"},
