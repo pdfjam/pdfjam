@@ -21,6 +21,7 @@ export dir="$job.d/$1"
 testdir=$(realpath -- "$(dirname "$0")")
 basedir=$(realpath -- "$testdir/..")
 export PATH="$basedir/bin:$testdir"
+SH=sh
 
 # Choose operation mode, set variables for setting pdfjam
 case "$1" in
@@ -29,7 +30,7 @@ pdftex|xetex|luatex)
 		|| { echo Command "'${1%tex}latex'" not found; exit 1; }
 	preamble=" --preamble '"'\input{regression-test.tex}\AtBeginDocument{\START}'\'
 	;;
-*sh)
+sh|bash|ksh|zsh)
 	SH="$1"
 	latex=$(realpath "$0")
 	case "$in" in
