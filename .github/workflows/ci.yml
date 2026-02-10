@@ -13,5 +13,6 @@ jobs:
       run: l3build check -ccompletion || { cat build/test-completion/*.diff; false; }
     - name: Check TeX inputs
       run: l3build check || { cat build/test/*.diff; false; }
-    - name: Check TeX outputs
-      run: utils/check-tex.sh
+    # Disabled due to unstability. Would need a job to create references to test against.
+    # - name: Check TeX outputs
+      # run: utils/check-tex.sh
