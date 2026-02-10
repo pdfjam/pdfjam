@@ -577,7 +577,7 @@ while test -n "$1$2"; do
 				--false) error_exit "Input file expected, but '$1' does not even exist in your file system." $E_NOINPUT ;;
 			esac
 			case "$valid_input-$valid_pagespec-$pageSpecAwaited" in  ##  The 6=3+3 working combinations
-				*-pagespec-true) fileSpec="${fileSpec%\|awaited}|$1"; pageSpecAwaited=false ;;
+				*-pagespec-true) fileSpec="$(printf %s "$fileSpec" | sed "s/|awaited$/|$1/")"; pageSpecAwaited=false ;;
 				input-*-*) fileSpec="$fileSpec$newline$1|$extension|awaited"; pageSpecAwaited=true ;;
 			esac
 		esac
