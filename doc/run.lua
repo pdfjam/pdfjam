@@ -99,7 +99,7 @@ end
 function as_tex_option(t)
 	local a = markdown_option(t)
 	if type(a) ~= "table" then return a end
-	local result = "`\\begin{tcolorbox}[title={`{=tex}" .. a[1] .. "`}, hypertarget={" .. t[1] .. "}]`{=tex}\n" .. a[2] .. "\n`"
+	local result = "`\\begin{tcolorbox}[title={`{=tex}" .. a[1] .. "`}, phantomlabel={" .. t[1] .. "}]`{=tex}\n" .. a[2] .. "\n`"
 	local name = P.x_asterisk:match(t[1])
 	if type(t.example) == "table" then
 		result = result .. "\\tcblower"

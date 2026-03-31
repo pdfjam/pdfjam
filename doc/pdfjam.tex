@@ -76,17 +76,9 @@
 
 \usepackage{graphicx}
 \usepackage{tcolorbox,hyperref}
-\ExplSyntaxOn
-\newcommand\option[4]{
-	\begin { tcolorbox } [ title = { #1 }, hypertarget = { #1 } ]
-		#2
-		\tl_map_function:nN { #3 }
-		{ \tcblower #4 \par \includegraphics [ width = \linewidth ] { cropped/#3.pdf } }
-	\end { tcolorbox }
-}
-\ExplSyntaxOff
 
 \begin{document}
+
 \maketitle
 
 \tableofcontents

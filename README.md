@@ -403,7 +403,7 @@ Required height. The graphic is scaled to this height.
 Do not distort figure if both width and height are given.
 
 <span id="scale"/>**--scale** float  
-Scale factor.
+Scale factor. Applied after automatic scaling.
 
 <span id="clip"/>**--clip** bool  
 Clip the graphic to the viewport.

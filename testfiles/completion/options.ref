@@ -65,7 +65,7 @@
 --reflect*: Reflect input pages.
 --rotateoversize: Rotate oversized pages.
 --runs: Run latex N times, for each output document made.
---scale: Scale factor.
+--scale: Scale factor. Applied after automatic scaling.
 --signature: Create booklets by rearranging pages into signatures of N (the argument) pages each.
 --signature*: Similar to signature, but for right-edge binding.
 --suffix: Suffix for output, when file name is not given explicitly.
