@@ -10,9 +10,9 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get -y --no-install-recommends install ksh zsh texlive-latex-extra poppler-utils texlive-luatex pandoc ghostscript latexmk # texlive-xetex texlive-font-utils
     - name: Check completions
-      run: l3build check -ccompletion || { cat build/test-completion/*.diff; false; }
+      run: MINIMAL_BUILD=2 l3build check -ccompletion || { cat build/test-completion/*.diff; false; }
     - name: Check TeX inputs
-      run: l3build check || { cat build/test/*.diff; false; }
+      run: MINIMAL_BUILD=2 l3build check || { cat build/test/*.diff; false; }
     # Disabled due to unstability. Would need a job to create references to test against.
     # - name: Check TeX outputs
       # run: utils/check-tex.sh

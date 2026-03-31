@@ -6,11 +6,16 @@ cd "$(dirname "$0")/.."
 target=build/pdfjam
 version="$1"
 
-if command -v texlua >/dev/null && command -v latexmk >/dev/null && command -v ghostscript >/dev/null; then
+if [ "$MINIMAL_BUILD" != 1 ]; then
 	(cd testfiles/support/src && latexmk && ghostscript -o a4+square.pdf -sDEVICE=pdfwrite -sPageList=1 a4.pdf square.pdf)
-	doc/run.lua
-else
-	echo "Warning: TexLua, LatexMk and Ghostscript needed for complete build"
+	if [ "$MINIMAL_BUILD" = 2 ]; then
+		doc/make-completion.lua
+	else
+		doc/run.lua
+	fi
+fi
+if [ -n "$MINIMAL_BUILD" ]; then
+	echo 'Not building documentation; expect `cp` to fail'
 	set +e
 fi
 

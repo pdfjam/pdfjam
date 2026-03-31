@@ -5,6 +5,8 @@ all: $(addprefix cropped/,$(addsuffix .pdf,$(targets)))
 PREAMBLE=
 ifeq ($(shell kpsewhich PTMono.sty >/dev/null)$(.SHELLSTATUS), 0)
 	PREAMBLE=--preamble '\usepackage[scaled=10]{PTSerifCaption,PTMono}'
+else
+	$(warning No PT font family installed, output for pagecommand will be pretty tiny.)
 endif
 
 out/%.pdf : in/% | out
