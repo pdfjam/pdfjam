@@ -5,12 +5,12 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[]{a4numbers.pdf,1-2}
+\includepdfmerge[]{a4abc.pdf,1-2}
 \end{document}
 
 %%% call.txt
 cd $BUILDDIR/test
-./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir papersize6.d/dryrun --outfile papersize6.pdf --papersize 72bp,144bp -- a4numbers.pdf 1-2 
+./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir papersize6.d/dryrun --outfile papersize6.pdf --papersize 72bp,144bp -- a4abc.pdf 1-2 
 
 %%% messages.txt
           ----
@@ -18,6 +18,6 @@ cd $BUILDDIR/test
   pdfjam: Called with '--vanilla': no user or site configuration
           files will be read.
   pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir papersize6.d/dryrun --outfile papersize6.pdf --papersize 72bp,144bp -- a4numbers.pdf 1-2 
+          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir papersize6.d/dryrun --outfile papersize6.pdf --papersize 72bp,144bp -- a4abc.pdf 1-2 
   pdfjam: Calling $BUILDDIR/test/engine...
   pdfjam: Finished.  Output was written to 'papersize6.pdf'.

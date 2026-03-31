@@ -34,7 +34,7 @@ _Markus Kurtz_ <_anything_ at mgkurtz.de>
 - [Developing](#developing)
 - [The History of *pdfjam*](#the-history-of-pdfjam)
 
-Website: <https://github.com/pdfjam/pdfjam>  
+Website: <https://github.com/pdfjam/pdfjam>\
 License: [GPL 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 
 Pdfjam assembles a list of documents (pdf, ps, eps, jpg or png) into a single

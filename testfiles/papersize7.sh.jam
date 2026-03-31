@@ -1,1 +1,1 @@
-eval "PATH='../bin/libpaper:$PATH' PAPERSIZE=a10 $pdfjam --a5paper a4numbers.pdf"
+eval "PATH='../bin/libpaper:$PATH' PAPERSIZE=a10 $pdfjam --a5paper a4abc.pdf"
