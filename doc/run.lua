@@ -280,7 +280,7 @@ function main()
 	os.execute("pandoc --wrap=none --toc README.in.md -o p.tex")
 
 	make_examples(flattened_opts, "Makefile.in", "Makefile")
-	os.execute("make -j8")
+	os.execute("make -j8 || { cat out/pdfjam.log; cat small/pdfjam.log; cat cropped/pdfcrop.log; }")
 
 	os.execute("latexmk pdfjam.tex")
 end
