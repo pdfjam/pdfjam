@@ -2,8 +2,13 @@ PDFJAM = ./pdfjam
 
 all: $(addprefix cropped/,$(addsuffix .pdf,$(targets)))
 
+PREAMBLE=
+ifeq ($(shell kpsewhich PTMono.sty >/dev/null)$(.SHELLSTATUS), 0)
+	PREAMBLE=--preamble '\usepackage[scaled=10]{PTSerifCaption,PTMono}'
+endif
+
 out/%.pdf : in/% | out
-	$(PDFJAM) --preamble '\usepackage[scaled=10]{PTSerifCaption,PTMono}' --outfile '$@' $(file < $<) 2>>out/pdfjam.log
+	$(PDFJAM) $(PREAMBLE) --outfile '$@' $(file < $<) 2>>out/pdfjam.log
 
 small/% : out/% | small
 	$(PDFJAM) --papersize 400cm,400cm --noautoscale true --nup 8x8 --delta '1cm 1cm' --frame true --outfile '$@' '$<' 2>>small/pdfjam.log

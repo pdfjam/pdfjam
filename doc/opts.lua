@@ -73,7 +73,7 @@ return {
 	},
 	'## Run LaTeX commands',
 	{'pagecommand', argtype = 'tex', help = 'Declare LaTeX commands, which are executed on each sheet of paper. Default: `\\thispagestyle{empty}`.', example = "--pagecommand '\\section{Hi}\\thispagestyle{empty}' \\\n  a4.pdf a4abc.pdf 1-3"},
-	{'pagecommand*', argtype = 'tex', help = 'Declare LaTeX commands, which are executed on the very first page only.', example = "--pagecommand\\* '\\section{:D}' a4.pdf 1-3 a4abc.pdf 1-3"},
+	{'pagecommand*', argtype = 'tex', help = 'Declare LaTeX commands, which are executed on the very first page only.', example = "--pagecommand\\* '\\section{:D}' a4.pdf a4abc.pdf 1-3"},
 	{'picturecommand', argtype = 'tex', help = 'Similar to pagecommand, but executed within a picture environment with base point at the lower left page corner.', example = "--picturecommand '\\put(72,72){P. \\thepage}' \\\n  a4.pdf a4abc.pdf 1-3"},
 	{'picturecommand*', argtype = 'tex', help = 'Similar to picturecommand, but for very first page only.', example = "--picturecommand\\* '\\put(72,72){:D}' a4.pdf a4abc.pdf 1-3"},
 	'## Add hyperlinks',
