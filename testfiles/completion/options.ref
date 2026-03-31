@@ -42,13 +42,13 @@
 --noautoscale: Suppress automatic scaling of pages.
 --nup: Put multiple logical pages onto each sheet of paper.
 --offset: Displace the origin of the inserted pages.
---openright: Put an empty page before the first logical page.
+--openright: Put an empty page before the very first logical page.
 --openrighteach: Put an empty page before the first logical page of each file.
 --otheredge: Rotate every odd page by 180 degrees.
 --outfile --output -o: File or directory name for output(s).
 --pagebox: Specify which PDF bounding box specification to read.
 --pagecolor: Background color.
---pagecommand: Declare LaTeX commands, which are executed on each sheet of paper.
+--pagecommand: Declare LaTeX commands, which are executed on each sheet of paper. Default: `\thispagestyle{empty}`.
 --pagecommand*: Declare LaTeX commands, which are executed on the very first page only.
 --pagetemplate: Declare page to be used as a template. All other pages are scaled such that they match within its size.
 --paper: Paper format.
@@ -66,7 +66,7 @@
 --rotateoversize: Rotate oversized pages.
 --runs: Run latex N times, for each output document made.
 --scale: Scale factor.
---signature: Create booklets by rearranging pages into signatures of 2 pages each.
+--signature: Create booklets by rearranging pages into signatures of N (the argument) pages each.
 --signature*: Similar to signature, but for right-edge binding.
 --suffix: Suffix for output, when file name is not given explicitly.
 --templatesize: Specify size of page template. All pages are scaled such that they match within this size.
