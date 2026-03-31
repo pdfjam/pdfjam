@@ -6,7 +6,7 @@ jobs:
   code-analysis:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get -y --no-install-recommends install shellcheck devscripts groff mandoc
     - name: Unpack
