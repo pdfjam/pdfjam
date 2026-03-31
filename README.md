@@ -298,7 +298,8 @@ Reflect input pages.
 #### Create signatures
 
 <span id="signature"/>**--signature** multiple-of-4  
-Create booklets by rearranging pages into signatures of 2 pages each.
+Create booklets by rearranging pages into signatures of N (the argument) pages
+each.
 
 <span id="signature*"/>**--signature\*** multiple-of-4  
 Similar to signature, but for right-edge binding.
@@ -317,7 +318,7 @@ parallel) to signature binding edge. Has same result as `otheredge`.
 #### Add blank pages
 
 <span id="openright"/>**--openright** bool  
-Put an empty page before the first logical page.
+Put an empty page before the very first logical page.
 
 <span id="openrighteach"/>**--openrighteach** bool  
 Put an empty page before the first logical page of each file.
@@ -347,7 +348,8 @@ Insert every page multiple times.
 #### Run LaTeX commands
 
 <span id="pagecommand"/>**--pagecommand** tex  
-Declare LaTeX commands, which are executed on each sheet of paper.
+Declare LaTeX commands, which are executed on each sheet of paper. Default:
+`\thispagestyle{empty}`.
 
 <span id="pagecommand*"/>**--pagecommand\*** tex  
 Declare LaTeX commands, which are executed on the very first page only.

@@ -7,8 +7,12 @@
 \def\dopage{%
     \null
     \begin{tikzpicture}[remember picture,overlay]
-		\path [fill=color\arabic{page}] (current page.south west) rectangle (current page.north east);
-		\node[font=\sffamily\huge,scale=15,text depth=.2pt] at (current page) {\thepage};
+		\ifpaintbg
+			\path [fill=color\arabic{page}] (current page.south west) rectangle (current page.north east);
+			\node[font=\sffamily\huge,scale=15,text depth=.2pt] at (current page) {\thepage};
+		\else
+			\node[font=\sffamily\huge,scale=15,text depth=.2pt,color=color\arabic{page}] at (current page) {\thepage};
+		\fi
     \end{tikzpicture}%
     \clearpage
 }
@@ -16,6 +20,8 @@
 \begin{document}
 
 \ExplSyntaxOn
+\newif \ifpaintbg
+\cs_if_exist:NF \nobackground { \paintbgtrue }
 \int_step_inline:nn { 24 } { \dopage }
 \ExplSyntaxOff
 

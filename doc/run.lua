@@ -12,7 +12,7 @@ P = {
 	singlequote_first_word = lpeg.Cs(lpeg.Cc"'" * (1 - lpeg.P" ")^0 * lpeg.Cc"'" * lpeg.P(1)^0),
 	x_asterisk = lpeg.Cs((lpeg.P"*"/"X" + 1)^0),
 	alternatives = lpeg.Ct("(" * lpeg.C((1 - lpeg.S" )")^1) * (" " * lpeg.C((1 - lpeg.S" )")^1))^0 * ")"),
-	tex_angle = lpeg.Cs((lpeg.P"⟨"/"$\\langle$" + lpeg.P"⟩"/"$\\rangle$" + 1)^0)
+	tex_angle = lpeg.Cs((lpeg.P"⟨"/"$\\langle$" + lpeg.P"⟩"/"$\\rangle$" + 1)^0),
 }
 
 function singlequote(s) return "'" .. P.escape_squote:match(s) .. "'" end
@@ -157,6 +157,7 @@ function as_zsh_completion(t, groups)
 		local compl = COMPLETER[t.argtype]
 		completer = type(compl) == "function" and compl(t.argnames) or compl and compl or error("Unknown argtype: "..t.argtype)
 	end
+	help = string.gsub(t.help, "\\", "\\\\")
 	if flag_with_no then
 		local exclude1 = "--no-" .. t[1]
 		local exclude2 = option
@@ -168,10 +169,10 @@ function as_zsh_completion(t, groups)
 			exclude1 = "(" .. exclude1 .. ")"
 			exclude2 = "(" .. exclude2 .. ")"
 		end
-		return "'" .. exclude1 .. option .. "[" .. t.help .. "]'" ..
-			"\n\t\t'" .. exclude2 .. "--no-" .. t[1] .. "[Do not " .. lower_first(t.help) .. "]'"
+		return "'" .. exclude1 .. option .. "[" .. help .. "]'" ..
+			"\n\t\t'" .. exclude2 .. "--no-" .. t[1] .. "[Do not " .. lower_first(help) .. "]'"
 	end
-	return pre .. flag .. exclude .. option .. "[" .. t.help .. "]" .. completer .. quote
+	return pre .. flag .. exclude .. option .. "[" .. help .. "]" .. completer .. quote
 end
 
 function build_zsh_complete(opts, input, output)

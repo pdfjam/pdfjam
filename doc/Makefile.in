@@ -6,7 +6,7 @@ out/%.pdf : in/% | out
 	$(PDFJAM) --preamble '\usepackage[scaled=10]{PTSerifCaption,PTMono}' --outfile '$@' $(file < $<) 2>>out/pdfjam.log
 
 small/% : out/% | small
-	$(PDFJAM) --a0paper --noautoscale true --scale .1 --nup 16x6 --delta '1mm 1mm' --frame true --outfile '$@' '$<' 2>>small/pdfjam.log
+	$(PDFJAM) --papersize 400cm,400cm --noautoscale true --nup 8x8 --delta '1cm 1cm' --frame true --outfile '$@' '$<' 2>>small/pdfjam.log
 
 cropped/% : small/% | cropped
 	pdfcrop '$<' '$@' >>cropped/pdfcrop.log
