@@ -456,7 +456,8 @@ To make a portrait-oriented 4-up file from the pages of three input files, with
 a thin-line frame around the input pages:
 
 ``` sh
-pdfjam file1.pdf file2.pdf file3.pdf --no-landscape --frame true --nup 2x2 --suffix 4up --outfile ~/Documents
+pdfjam file1.pdf file2.pdf file3.pdf --frame true --nup 2x2 \
+  --suffix 4up --outfile ~/Documents
 ```
 
 Here a *directory* was specified at `--outfile`: the resultant file in this case
@@ -480,7 +481,8 @@ presentation slides. For slides made with the standard 4:3 aspect ratio a nice
 6-up handout on A4 paper can be made by
 
 ``` sh
-pdfjam --nup 2x3 --frame true --noautoscale false --delta "0.2cm 0.3cm" --scale 0.95 myslides.pdf --outfile myhandout.pdf
+pdfjam --nup 2x3 --frame true --noautoscale false --delta '0.2cm 0.3cm' \
+  --scale 0.95 myslides.pdf --outfile myhandout.pdf
 ```
 
 The `--delta` option here comes from the pdfpages package; the `--scale` option
@@ -498,7 +500,9 @@ Suppose we want to trim the pages of our input file prior to n-upping. This can
 be done by using a pipe:
 
 ``` sh
-pdfjam myfile.pdf --trim '1cm 2cm 1cm 2cm' --clip true --outfile /dev/stdout | pdfjam --nup 2x1 --frame true --outfile myoutput.pdf
+pdfjam myfile.pdf --trim '1cm 2cm 1cm 2cm' --clip true \
+  --outfile /dev/stdout \
+  | pdfjam --nup 2x1 --frame true --outfile myoutput.pdf
 ```
 
 The `--trim` option specifies an amount to trim from the left, bottom, right and
@@ -584,7 +588,8 @@ For setting the default paper size, also consider configuring (or installing)
   if this happens, is to include additionally (in the call to `pdfjam`):
 
   ``` sh
-  --preamble '\let\mypdfximage\pdfximage \def\pdfximage{\immediate\mypdfximage}'
+  --preamble '\let\mypdfximage\pdfximage
+  \def\pdfximage{\immediate\mypdfximage}'
   ```
 
 - Minor details of the font got missing in the output. Why?
