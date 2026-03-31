@@ -41,6 +41,15 @@ function lower_first(s) return string.lower(string.sub(s, 1, 1)) .. string.sub(s
 
 function imap(t, f, ...)
 	local a = {}
+	for i, x in ipairs(t) do
+		local y = f(i, x, ...)
+		if y then table.insert(a, y) end
+	end
+	return a
+end
+
+function amap(t, f, ...)
+	local a = {}
 	for _, x in ipairs(t) do
 		local y = f(x, ...)
 		if y then table.insert(a, y) end
@@ -89,15 +98,23 @@ end
 
 function as_tex_option(t)
 	local a = markdown_option(t)
-	local d = "`}{`{=tex}"
-	return type(a) == "table" and
-		"`\\option{`{=tex}" .. P.tex_angle:match(a[1] .. d .. a[2]) .. d .. (t.example and
-			"`" .. P.x_asterisk:match(t[1]) .. "}{`{=tex}" .. "`pdfjam " .. t.example .. "`{.sh}"
-		or d) .. "`}`{=tex}" or a
+	if type(a) ~= "table" then return a end
+	local result = "`\\begin{tcolorbox}[title={`{=tex}" .. a[1] .. "`}, hypertarget={" .. t[1] .. "}]`{=tex}\n" .. a[2] .. "\n`"
+	local name = P.x_asterisk:match(t[1])
+	if type(t.example) == "table" then
+		result = result .. "\\tcblower"
+		for i, v in ipairs(t.example) do
+			result = result .. "`{=tex}\n```sh\npdfjam " .. v .. "\n```\n`\\includegraphics[width=\\linewidth]{cropped/" .. name .. i .. "}"
+		end
+	elseif type(t.example) == "string" then
+		result = result .. "\\tcblower`{=tex}\n```sh\npdfjam " .. t.example .. "\n```\n`\\includegraphics[width=\\linewidth]{cropped/" .. name .. "}"
+	end
+	result = result .. "\\end{tcolorbox}`{=tex}"
+	return P.tex_angle:match(result)
 end
 
 function build_markdown(opts, input, output)
-	local options = "Also see the [manual]() which contains the same list with example output added.\n\n" .. table.concat(imap(opts, as_markdown_option), "\n\n")
+	local options = "Also see the [manual]() which contains the same list with example output added.\n\n" .. table.concat(amap(opts, as_markdown_option), "\n\n")
 	local readme = loaddata(input)
 	readme = string.gsub(readme, "\\input{options.tex}", options, 1)
 	io.savedata(output, readme)
@@ -111,7 +128,7 @@ function write_markdown(flattened_opts, input, output)
 end
 
 function build_tex_options(opts, output)
-	local options = table.concat(imap(opts, as_tex_option), "\n\n")
+	local options = table.concat(amap(opts, as_tex_option), "\n\n")
 	io.savedata(output .. ".md", options)
 	os.execute("pandoc --wrap=none " .. output .. ".md -o" .. output)
 end
@@ -138,7 +155,7 @@ function as_zsh_completion(t, groups)
 	if t[0] then table.insert(groups, as_zsh_completion_group(t)); return end
 	local quote = t.quote or "'"
 	local pre = quote
-	local exclude = t.exclude and "(" .. surround_concat(imap(t.exclude, escape_asterisk), "--", " ") .. ")" or ""
+	local exclude = t.exclude and "(" .. surround_concat(amap(t.exclude, escape_asterisk), "--", " ") .. ")" or ""
 	local flag_with_no = t.flag == "+"
 	local flag = t.flag == "=" and "(- :)" or t.flag == "*" and "*" or ""
 	local option = "--" .. escape_asterisk(t[1])
@@ -177,7 +194,7 @@ end
 
 function build_zsh_complete(opts, input, output)
 	local groups = {}
-	opts = imap(opts, as_zsh_completion, groups)
+	opts = amap(opts, as_zsh_completion, groups)
 	local options_zsh = table.concat(opts, "\n\t\t") .. "\n\t\t# Completion groups\n\t\t" .. table.concat(groups, "\n\t\t")
 
 	local zcmp = loaddata(input)
@@ -191,9 +208,17 @@ function savedata(f, s) if io.loaddata(f) ~= s then io.savedata(f, s) end end
 function make_example(t)
 	if not t.example then return end
 	-- Argh: `make` just hates files with `*` in them in pattern recipes, thus replace it by `x`.
-	local name = P.x_asterisk:match(t[1])
-	savedata("in/"..name, t.example)
-	return name
+	if type(t.example) == "table" then
+		return imap(t.example, function(i, v)
+			local name = P.x_asterisk:match(t[1]) .. i
+			savedata("in/" .. name, v)
+			return name
+		end)
+	else
+		local name = P.x_asterisk:match(t[1])
+		savedata("in/"..name, t.example)
+		return {name}
+	end
 end
 
 function surround_concat(t, pre, mid, post)
@@ -202,8 +227,7 @@ end
 
 function make_examples(opts, input, output)
 	dir.makedirs("in")
-	local targets = imap(opts, make_example)
-	imap(opts, make_example)
+	local targets = table.flattened(amap(opts, make_example))
 	local make = "targets = " .. table.concat(targets, " \\\n") .. "\n\n" .. loaddata(input)
 	savedata(output, make)
 end

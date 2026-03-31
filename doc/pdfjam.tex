@@ -80,7 +80,7 @@
 \newcommand\option[4]{
 	\begin { tcolorbox } [ title = { #1 }, hypertarget = { #1 } ]
 		#2
-		\tl_if_empty:nF { #3 }
+		\tl_map_function:nN { #3 }
 		{ \tcblower #4 \par \includegraphics [ width = \linewidth ] { cropped/#3.pdf } }
 	\end { tcolorbox }
 }
