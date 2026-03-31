@@ -6,13 +6,12 @@ cd "$(dirname "$0")/.."
 target=build/pdfjam
 version="$1"
 
-if command -v latexmk >/dev/null && command -v ghostscript >/dev/null; then
-	(cd testfiles/support/src && latexmk && pdfjam --a4paper beamer.pdf; ghostscript -o a4+square.pdf -sDEVICE=pdfwrite -sPageList=1 a4.pdf square.pdf)
+if command -v texlua >/dev/null && command -v latexmk >/dev/null && command -v ghostscript >/dev/null; then
+	(cd testfiles/support/src && latexmk && ghostscript -o a4+square.pdf -sDEVICE=pdfwrite -sPageList=1 a4.pdf square.pdf)
+	doc/run.lua
 else
-	echo "Warning: LatexMk and Ghostscript needed to create example files"
+	echo "Warning: TexLua, LatexMk and Ghostscript needed for complete build"
 fi
-
-doc/run.lua
 
 rm -fr build/unpacked "$target"
 mkdir -p build/local "$target/bin" "$target/man" "$target/shell-completion/zsh" build/unpacked build/release
