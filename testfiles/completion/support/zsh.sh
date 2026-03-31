@@ -4,14 +4,11 @@
 
 usage() { echo "Usage: $0 [ -p prefix] [-s file] [--] input [input ...]"; exit 1; }
 
-# Set up completions
-autoload -U compinit
-compinit
-
 prefix=
+source=
 while :; do
 	case "$1" in
-		-s) source "$2" && shift 2 || usage ;;
+		-s) source="$2" && shift 2 || usage ;;
 		-p) prefix="$2" && shift 2 || usage ;;
 		--) shift ;&
 		*) break ;;
@@ -19,6 +16,9 @@ while :; do
 done
 
 compfake () {
+	autoload -U compinit
+	compinit
+	[ -n "$source" ] && source "$source"
 	zstyle ':completion:*' list-prompt '<irrelevant>'
 	# matches print as "Xmatch^D", where X=^A for normal text and ^F for all kinds of files; alignment spaces start with ^B
 	zstyle ':completion:*' list-colors $'no=\CA' lc= rc= $'ec=\CD' $'sp=\CB' \
@@ -39,7 +39,7 @@ compfake () {
 
 comptest() {
 	zmodload zsh/zpty  # Load the pseudo terminal module.
-	zpty pty compfake   # Create a new pty and run our function in it.
+	zpty pty compfake  # Create a new pty and run our function in it.
 	zpty -w pty "BEGIN_COMMAND_MARKER= $@"$'\v'  # Write into vared
 	(zpty -r pty) | # Read from pty using a subshell, ...
 		grep -E $'\CA|\CF|<HEADER>' | # ... filter for relevant lines ...
