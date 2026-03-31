@@ -1,8 +1,8 @@
-#!/bin/zsh --interactive
+#!/bin/zsh -fi
 
 # https://unix.stackexchange.com/questions/668618/how-to-write-automated-tests-for-zsh-completion
 
-usage() { echo "Usage: $0 [ -p prefix] [-s file] input [input ...]"; exit 1; }
+usage() { echo "Usage: $0 [ -p prefix] [-s file] [--] input [input ...]"; exit 1; }
 
 # Set up completions
 autoload -U compinit
@@ -13,13 +13,16 @@ while :; do
 	case "$1" in
 		-s) source "$2" && shift 2 || usage ;;
 		-p) prefix="$2" && shift 2 || usage ;;
+		--) shift ;&
 		*) break ;;
 	esac
 done
 
 compfake () {
 	zstyle ':completion:*' list-prompt '<irrelevant>'
-	zstyle ':completion:*' list-colors $'no=\CA' lc= rc= $'ec=\CD' $'sp=\CB' $'fi=\CF'
+	# matches print as "Xmatch^D", where X=^A for normal text and ^F for all kinds of files; alignment spaces start with ^B
+	zstyle ':completion:*' list-colors $'no=\CA' lc= rc= $'ec=\CD' $'sp=\CB' \
+		$'fi=\CF' $'ln=\CF' $'pi=\CF' $'so=\CF' $'bd=\CF' $'cd=\CF' $'or=\CF' $'mi=\CF' $'su=\CF' $'su=\CF' $'sg=\CF' $'tw=\CF' $'ow=\CF' $'sa=\CF' $'st=\CF' $'ex=\CF'
 	zstyle ':completion:*' list-separator '<DESCRIPTION>'
 	zstyle ':completion:*:descriptions' format '<HEADER>%d</HEADER>'
 	zstyle ':completion:*' force-list always
@@ -37,10 +40,11 @@ compfake () {
 comptest() {
 	zmodload zsh/zpty  # Load the pseudo terminal module.
 	zpty pty compfake   # Create a new pty and run our function in it.
-	zpty -w pty "$@"$'\v'  # Write into vared
+	zpty -w pty "BEGIN_COMMAND_MARKER= $@"$'\v'  # Write into vared
 	(zpty -r pty) | # Read from pty using a subshell, ...
 		grep -E $'\CA|\CF|<HEADER>' | # ... filter for relevant lines ...
 		sed -E $' # ... and parse into a format of our liking.
+	s/(\e[[0-9;]*[A-Za-z]|\r)*BEGIN_COMMAND_MARKER=.*//
 	s/\e\\[J//g
 	s/(\CB? +\CD)?\r$//
 	s/\CA<DESCRIPTION>/:/
