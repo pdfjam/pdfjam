@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 target=build/pdfjam
 version="$1"
 
-(cd testfiles/support/src && latexmk && pdfjam --a4paper beamer.pdf)
+(cd testfiles/support/src && latexmk && pdfjam --a4paper beamer.pdf; ghostscript -o a4+square.pdf -sDEVICE=pdfwrite -sPageList=1 a4.pdf square.pdf)
 
 doc/run.lua
 

@@ -47,7 +47,7 @@ return {
 	{'noautoscale', argtype = 'bool', help = 'Suppress automatic scaling of pages.', example = '--noautoscale true a5.pdf square.pdf 1-3'},
 	{'fitpaper', argtype = 'bool', help = 'Adjust the paper size to the size of the inserted document.', example = '--fitpaper true square.pdf a4.pdf 1-3'},
 	{'turn', argtype = 'bool', help = 'Tell PDF viewer to display landscape pages in landscape orientation. On by default.'},
-	{'pagetemplate', argtype = 'num', argnames = {'pagenumber'}, help = 'Declare page to be used as a template. All other pages are scaled such that they match within its size.', example = '--pagetemplate 2 a4.pdf square.pdf a5.pdf beamer.pdf letter.pdf 1'}, -- FIXME: Needs input with different sized pages
+	{'pagetemplate', argtype = 'num', argnames = {'pagenumber'}, help = 'Declare page to be used as a template. All other pages are scaled such that they match within its size.', example = '--pagetemplate 2 a4+square.pdf - beamer.pdf letter.pdf 1'},
 	{'templatesize', argtype = 'dims-comma', argnames = {'width', 'height'}, help = 'Specify size of page template. All pages are scaled such that they match within this size.', example = "--templatesize '30cm,20cm' a4.pdf a4landscape.pdf a5.pdf square.pdf beamer.pdf letter.pdf 1"},
 	{'rotateoversize', argtype = 'bool', help = 'Rotate oversized pages.', example = '--rotateoversize true a5.pdf a4.pdf a4landscape.pdf 1-2'}, -- FIXME: pdfpages isn’t always sensible here
 	'## Mirror pages',
