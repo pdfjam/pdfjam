@@ -61,6 +61,7 @@ function enquote(s)
 end
 
 -- argument massage --
+
 -- Give a common way to enter multi-value arguments, also used for page specs.
 -- The underlying LaTeX packages expect them either by spaces or by commas with spaces stripped of.
 -- We accept both and transform any run of separators into a single space respectively comma.
@@ -73,9 +74,9 @@ end
 
 do
 	sep = lpeg.S"\t\n\v\f\r ,"
-	local normaltoken = "\\" * lpeg.S"\\{}" + (1 - lpeg.S"{}")
-	token = lpeg.P{normaltoken + "{" * lpeg.V(1)^0 * "}"}
-	local group = "{" * token^0 * "}"
+	local normaltoken = "\\" * ((lpeg.R"AZ" + lpeg.R"az" + lpeg.S":@_")^1 + 1) + (1 - lpeg.S"{}")
+	textoken = lpeg.P{normaltoken + "{" * lpeg.V(1)^0 * "}"}
+	local group = "{" * textoken^0 * "}"
 	local x = normaltoken - sep + group
 	local unbalanced = -1 + lpeg.P( function(s, i)
 		err("Unbalanced braces in '"..string.sub(s, 1, i).."<--here "..string.sub(s, i+1) .. "'")
@@ -472,12 +473,12 @@ do
 	do -- overly complex pattern to match the most common ways to specify the papersize
 		local s = lpeg.S"\t\n\v\f\r "
 		local blank = s^0/""
-		local tex_unit = lpeg.P"pc" + "in" + "bp" + "cm" + "mm" + "dd" + "cc" + "sp" + "em" + "ex"
+		local tex_unit = lpeg.P"pt" + "pc" + "in" + "bp" + "cm" + "mm" + "dd" + "cc" + "sp" + "em" + "ex"
 		local digit = patterns.digit
 		local tex_number = (lpeg.S"+-" * blank)^0 * (digit^1 * ("." * digit^0)^-1 + "." * digit^1)
-		local dimen = lpeg.Cs(tex_number * (blank * tex_unit + lpeg.P(true)/"bp")) + lpeg.C(token^0)
+		local dimen = lpeg.Cs(tex_number * (blank * tex_unit + lpeg.P(true)/"bp") + (textoken - ",")^0)
 		papersize_pattern = lpeg.Ct("{" * s^0 * dimen * s^0 * "," * s^0 * dimen * s^0 * "}" * -1
-			+ sep^0 * dimen * lpeg.S" ,"^1 * dimen * (sep + -1))
+			+ sep^0 * dimen * lpeg.S" ,"^1 * dimen * (sep + -1)) + lpeg.C(lpeg.P(1)^0)
 	end
 
 	function show_help(_, _, t) print("This is how to use it.") provide_default_paper(t) table.print(t) exit() end -- TODO
