@@ -55,6 +55,9 @@ comptest() {
 	zpty -d pty  # Delete the pty.
 }
 
+echo '>>> ZSH OPTIONS'
+comptest 'zsh -'
+
 for input; do
 	echo -E ">>> $prefix$input..."
 	comptest "$prefix$input"
