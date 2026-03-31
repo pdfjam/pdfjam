@@ -6,7 +6,11 @@ cd "$(dirname "$0")/.."
 target=build/pdfjam
 version="$1"
 
-(cd testfiles/support/src && latexmk && pdfjam --a4paper beamer.pdf; ghostscript -o a4+square.pdf -sDEVICE=pdfwrite -sPageList=1 a4.pdf square.pdf)
+if command -v latexmk &>/dev/null && command -v ghostscript &>/dev/null; then
+	(cd testfiles/support/src && latexmk && pdfjam --a4paper beamer.pdf; ghostscript -o a4+square.pdf -sDEVICE=pdfwrite -sPageList=1 a4.pdf square.pdf)
+else
+	echo "Warning: LatexMk and Ghostscript needed to create example files"
+fi
 
 doc/run.lua
 
