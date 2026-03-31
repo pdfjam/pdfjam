@@ -6,6 +6,8 @@ cd "$(dirname "$0")/.."
 target=build/pdfjam
 version="$1"
 
+(cd testfiles/support/src && latexmk && pdfjam --a4paper beamer.pdf)
+
 doc/run.lua
 
 rm -fr build/unpacked "$target"
