@@ -11,6 +11,7 @@ if command -v texlua >/dev/null && command -v latexmk >/dev/null && command -v g
 	doc/run.lua
 else
 	echo "Warning: TexLua, LatexMk and Ghostscript needed for complete build"
+	set +e
 fi
 
 rm -fr build/unpacked "$target"
