@@ -6,5 +6,7 @@ case "$1" in
 	*) exit 1 ;;
 esac
 
+:>completion.log
+
 mapfile -t <"$in"
-./zsh.sh -p 'pdfjam ' -s '_pdfjam' "${MAPFILE[@]}" >"$out"
+./zsh.sh -p 'pdfjam ' -s '_pdfjam' -d completion.log "${MAPFILE[@]}" >"$out"

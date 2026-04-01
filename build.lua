@@ -96,6 +96,8 @@ function compare_completions(difffile, reffile, genfile, cleanup, name, engine)
 		.. normalize_path(reffile .. ".multi " .. genfile .. " > " .. difffile))
 	if errorlevel == 0 or cleanup then
 		os.remove(difffile)
+	else
+		print(read_file("completion.log"))
 	end
 	return errorlevel
 end

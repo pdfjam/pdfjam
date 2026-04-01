@@ -2,14 +2,16 @@
 
 # https://unix.stackexchange.com/questions/668618/how-to-write-automated-tests-for-zsh-completion
 
-usage() { echo "Usage: $0 [ -p prefix] [-s file] [--] input [input ...]"; exit 1; }
+usage() { echo "Usage: $0 [ -p prefix] [-s file] [-d debuglog] [--] input [input ...]"; exit 1; }
 
 prefix=
 source=
+debug=cat
 while :; do
 	case "$1" in
 		-s) source="$2" && shift 2 || usage ;;
 		-p) prefix="$2" && shift 2 || usage ;;
+		-d) debug=(tee -a "$2") && shift 2 || usage ;;
 		--) shift ;&
 		*) break ;;
 	esac
@@ -42,17 +44,17 @@ comptest() {
 	zpty pty compfake  # Create a new pty and run our function in it.
 	zpty -w pty "BEGIN_COMMAND_MARKER= $@"$'\v'  # Write into vared
 	(zpty -r pty) | # Read from pty using a subshell, ...
-		cat
-	# 	grep -E $'\CA|\CF|<HEADER>' | # ... filter for relevant lines ...
-	# 	sed -E $' # ... and parse into a format of our liking.
-	# s/(\e[[0-9;]*[A-Za-z]|\r)*BEGIN_COMMAND_MARKER=.*//
-	# s/\e\\[J//g
-	# s/(\CB? +\CD)?\r$//
-	# s/\CA<DESCRIPTION>/:/
-	# s/(^|( )(\CD))[\CA\CF]([^\CD]+)\CD/\\3\\2\\4/g
-	# s/\CB *\CD//g
-	# s/\CA\CD//g
-	# '
+		$debug | # ... append to log for debugging, ...
+		grep -E $'\CA|\CF|<HEADER>' | # ... filter for relevant lines, ...
+		sed -E $' # ... and parse into a format of our liking.
+	s/(\e[[0-9;]*[A-Za-z]|\r)*BEGIN_COMMAND_MARKER=.*//
+	s/\e\\[J//g
+	s/(\CB? +\CD)?\r$//
+	s/\CA<DESCRIPTION>/:/
+	s/(^|( )(\CD))[\CA\CF]([^\CD]+)\CD/\\3\\2\\4/g
+	s/\CB *\CD//g
+	s/\CA\CD//g
+	'
 	zpty -d pty  # Delete the pty.
 }
 
