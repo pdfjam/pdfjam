@@ -16,8 +16,8 @@ while :; do
 done
 
 compfake () {
-	autoload -U compinit
-	compinit
+	autoload -Uz compinit
+	compinit -D
 	[ -n "$source" ] && source "$source"
 	zstyle ':completion:*' list-prompt '<irrelevant>'
 	# matches print as "Xmatch^D", where X=^A for normal text and ^F for all kinds of files; alignment spaces start with ^B
@@ -42,21 +42,19 @@ comptest() {
 	zpty pty compfake  # Create a new pty and run our function in it.
 	zpty -w pty "BEGIN_COMMAND_MARKER= $@"$'\v'  # Write into vared
 	(zpty -r pty) | # Read from pty using a subshell, ...
-		grep -E $'\CA|\CF|<HEADER>' | # ... filter for relevant lines ...
-		sed -E $' # ... and parse into a format of our liking.
-	s/(\e[[0-9;]*[A-Za-z]|\r)*BEGIN_COMMAND_MARKER=.*//
-	s/\e\\[J//g
-	s/(\CB? +\CD)?\r$//
-	s/\CA<DESCRIPTION>/:/
-	s/(^|( )(\CD))[\CA\CF]([^\CD]+)\CD/\\3\\2\\4/g
-	s/\CB *\CD//g
-	s/\CA\CD//g
-	'
+		cat
+	# 	grep -E $'\CA|\CF|<HEADER>' | # ... filter for relevant lines ...
+	# 	sed -E $' # ... and parse into a format of our liking.
+	# s/(\e[[0-9;]*[A-Za-z]|\r)*BEGIN_COMMAND_MARKER=.*//
+	# s/\e\\[J//g
+	# s/(\CB? +\CD)?\r$//
+	# s/\CA<DESCRIPTION>/:/
+	# s/(^|( )(\CD))[\CA\CF]([^\CD]+)\CD/\\3\\2\\4/g
+	# s/\CB *\CD//g
+	# s/\CA\CD//g
+	# '
 	zpty -d pty  # Delete the pty.
 }
-
-echo '>>> ZSH OPTIONS'
-comptest 'zsh -'
 
 for input; do
 	echo -E ">>> $prefix$input..."
