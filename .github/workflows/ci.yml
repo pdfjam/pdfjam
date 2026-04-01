@@ -9,6 +9,8 @@ jobs:
     - uses: actions/checkout@v6
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get -y --no-install-recommends install ksh zsh texlive-latex-extra poppler-utils texlive-luatex pandoc ghostscript latexmk # texlive-xetex texlive-font-utils
+    - name: Fixup file ownership
+      run: sudo chown -Rc root /usr/share/zsh; sudo chmod -Rc a-w a+X /usr/share/zsh
     - name: Check completions
       run: MINIMAL_BUILD=2 l3build check -ccompletion || { cat build/test-completion/*.diff; false; }
     - name: Check TeX inputs

@@ -17,8 +17,7 @@ done
 
 compfake () {
 	autoload -Uz compinit
-	# on CI server, /usr/bin/zsh and /usr/bin/zsh/vendor-completions have nasty ownership
-	compinit -D -u
+	compinit
 	[ -n "$source" ] && source "$source"
 	zstyle ':completion:*' list-prompt '<irrelevant>'
 	# matches print as "Xmatch^D", where X=^A for normal text and ^F for all kinds of files; alignment spaces start with ^B
