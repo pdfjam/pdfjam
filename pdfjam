@@ -26,8 +26,13 @@ function exit(code) collectgarbage() os.exit(code, true) end
 
 function err(s, ...)
 	if not s then return end
+	explicit_error=true
 	collectgarbage()
-	error(string.format("Error: " .. s .. ".", ...))
+	local dbg = debug.getinfo(2, "nSl")
+	local source = " [" .. dbg.short_src .. ":" .. dbg.currentline .. " " .. dbg.name .. "]"
+	s = string.gsub(s, "%f[?!.]$", ".")
+	print(string.format("PDFjam: Error: " .. s .. source, ...))
+	error()
 end
 function warn(s, ...)
 	if not s then return end
@@ -100,8 +105,10 @@ function file_copy(oldname, newname)
 	if oldname and newname then
 		local data
 		if oldname == "" then
-			io.input():seek"set"
-			data = io.input():read"a"
+			if os.which"test" and os.execute"test -t 0" == 0 then
+				err("No input file given.")
+			end
+			data = io.stdin:read"a"
 		else data = io.loaddata(oldname)
 		end
 		if data and data ~= "" then
@@ -906,7 +913,7 @@ function main(args)
 	end
 end
 
-success, msg = xpcall(main, debug.traceback)
+success, msg = xpcall(main, function(msg) return explicit_error and "" or debug.traceback(msg) end)
 
 collectgarbage()
 if not success then
