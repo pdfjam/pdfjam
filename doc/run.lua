@@ -257,7 +257,10 @@ HEADER = [[
 
 # pdfjam
 
-_Markus Kurtz_ <_anything_ at mgkurtz.de>]]
+_David Firth_ (inactive),
+_Reuben Thomas_ (inactive),
+_Markus Kurtz_
+]]
 
 function main()
 	local isbuild = string.find(dir.current(), "build/doc$")

@@ -1,9 +1,12 @@
 ---
 title: pdfjam
-author: Markus Kurtz <anything at mgkurtz.de>
+author:
+- David Firth (http://warwick.ac.uk/dfirth)
+- Reuben Thomas (https://rrt.sc3d.org)
+- Markus Kurtz (https://mgkurtz.de)
 ---
 
-Website: <https://github.com/pdfjam/pdfjam>  
+Website: <https://github.com/pdfjam/pdfjam>\
 License: [GPL 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 
 Pdfjam assembles a list of documents (pdf, ps, eps, jpg or png) into a single pdf.
