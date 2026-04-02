@@ -37,8 +37,7 @@ make_next_version = function(a)
 		next_version = version
 		return version
 	end
-	local part = 'minor'
-	if a then part = a[1] end
+	local part = a and a[1] or 'minor'
 	next_version = step_version(version, part)
 	return next_version
 end
