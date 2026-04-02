@@ -7,13 +7,17 @@ module = "pdfjam"
 -- For releasing, run `l3build release`, for major releases `l3build release major`.
 
 ---- Version information from git tag
-version = io.popen("git describe --tags --match 'v?.*' 2>/dev/null"):read()
-if version then
-	version = string.sub(version, 2)
-	isprerelease = string.match(version, "-") ~= nil
-else -- As for shallow clones, e.g. in GitHub workflow
-	version = "N.NN"
+make_version = function()
+	version = io.popen("git describe --tags --match 'v?.*' 2>/dev/null"):read()
+	if version then
+		version = string.sub(version, 2)
+		isprerelease = string.match(version, "-") ~= nil
+	else -- As for shallow clones, e.g. in GitHub workflow
+		version = "N.NN"
+	end
+	return version
 end
+make_version()
 -- Step version in tag target etc.
 step_version = function(version, part)
 	principal_version = string.match(version, '[%d%.]+')
@@ -188,9 +192,10 @@ checkinit_hook = function(_)
 end
 
 ---- Overwrite unpacking (used by most targets)
-bundleunpack = function()
-	if not version then return 1 end
-	return os.execute("utils/build.sh " .. version)
+bundleunpack = function(v)
+	v = v or version
+	if not v then return 1 end
+	return os.execute("utils/build.sh " .. v)
 end
 
 ---- Self-made targets
@@ -199,8 +204,9 @@ ctanzip = "build/release/pdfjam-ctan"
 target_list.release = { func = function(a)
 	if not make_next_version(a) then return 1 end
 	if isprerelease then target_list.tag.func(a) end
-	target_list.ctan.func()
+	bundleunpack(next_version)
 	if options["dry-run"] then
+		os.execute("utils/github.sh " .. next_version .. " echo")
 		return 0
 	else
 		os.execute("utils/github.sh " .. next_version)
@@ -218,12 +224,12 @@ target_list.tag = { func = function(a)
 	end
 	mkdir(builddir .. "/release")
 	local s = read_file("CHANGELOG.md")
-	local _, i = string.find(s, '# Version ' .. next_version .. "\n")
+	local _, i = string.find(s, '# Version ' .. next_version .. "\n+")
 	if i then
 		s = string.sub(s, i+1)
 	else
 		local c = io.open("CHANGELOG.md", 'w')
-		c:write("# Version " .. next_version .. "\n" .. s)
+		c:write("# Version " .. next_version .. "\n\n" .. s)
 		c:close()
 		if not options["dry-run"] then
 			os.execute("git commit --message='Version " .. next_version .. "' CHANGELOG.md")
@@ -249,7 +255,7 @@ uploadconfig = {
 	announcement_file = builddir .. "/release/ANNOUNCEMENT.md",
 	author = "David Firth; Reuben Thomas; Markus Kurtz",
 	uploader = "Markus Kurtz",
-	note = "Please note, that this package contains no PDF documentation, but a comprehensive man page and --help output instead.", -- Note necessary for automatic validation to accept package without PDF documentation.
+	note = "On public and your wish, this package finally comes with a PDF documentation: pdfjam.pdf. You are welcome :)",
 	license = "gpl2+",
 	summary = "Shell script interface to pdfpages",
 	ctanPath = "/support/pdfjam",
