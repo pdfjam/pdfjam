@@ -1,12 +1,24 @@
+# Version 4.3
+
+* Add a PDF manual with lots of illustrated examples.
+* List all applicable options in the manual, the README, etc.
+* Add the more common `--output` as alias for `--outfile`.
+* Fix quoting of `|` for ksh compatibility and word splitting for zsh.
+* Run tests for dash, bash, ksh and zsh in CI pipeline.
+
 # Version 4.2
+
 * Expand some character ranges for compatibility with BSD sed (#94).
+
 # Version 4.1
+
 * Man page now contains actual information.
 * Add zsh completion file with completions for all relevant options.
 * Improve support for non-pdf input files (eps, jpg, png).
 * Keep original filenames if they consist of [A-Za-z0-9.-] only and are unique.
 
 # Version 4.0
+
 * Major version bumped to 4.00 to reflect major refactoring, and some minor
   backwards-incompatible changes.
 * New co-maintainer.
