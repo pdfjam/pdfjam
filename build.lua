@@ -192,11 +192,13 @@ checkinit_hook = function(_)
 end
 
 ---- Overwrite unpacking (used by most targets)
-bundleunpack = function(v)
+build = function(v)
 	v = v or version
 	if not v then return 1 end
 	return os.execute("utils/build.sh " .. v)
 end
+
+bundleunpack = function() build() end
 
 ---- Self-made targets
 ctanzip = "build/release/pdfjam-ctan"
@@ -204,7 +206,7 @@ ctanzip = "build/release/pdfjam-ctan"
 target_list.release = { func = function(a)
 	if not make_next_version(a) then return 1 end
 	if isprerelease then target_list.tag.func(a) end
-	bundleunpack(next_version)
+	build(next_version)
 	if options["dry-run"] then
 		os.execute("utils/github.sh " .. next_version .. " echo")
 		return 0

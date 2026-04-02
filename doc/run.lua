@@ -282,6 +282,7 @@ function main()
 	make_examples(flattened_opts, "Makefile.in", "Makefile")
 	os.execute("make -j8 || { cat out/pdfjam.log; cat small/pdfjam.log; cat cropped/pdfcrop.log; }")
 
+	io.savedata("version.tex", "\\date{" .. (arg[1] or "vN.NN") .. " -- " .. os.date("%F") .. "}")
 	os.execute("latexmk pdfjam.tex")
 end
 

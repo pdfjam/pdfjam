@@ -11,7 +11,7 @@ if [ "$MINIMAL_BUILD" != 1 ]; then
 	if [ "$MINIMAL_BUILD" = 2 ]; then
 		doc/make-completion.lua
 	else
-		doc/run.lua
+		doc/run.lua "v$version"
 	fi
 fi
 if [ -n "$MINIMAL_BUILD" ]; then
