@@ -55,8 +55,8 @@ textfiles = {"COPYING"}
 -- used for l3build doc
 typesetexe = "./run.lua"
 supportdir = "doc"
-typesetsuppfiles = { "run.lua", "opts.lua", "README.in.md", "Makefile.in", "pdfjam.tex", "zsh-completion.in.sh", "examples/*.pdf" }
-typesetfiles = { "pdfjam" }
+typesetsuppfiles = { "run.lua", "opts.lua", "README.in.md", "Makefile.in", "pdfjam.tex", "zsh-completion.in.sh", "version.tex", "examples/*.pdf" }
+typesetfiles = { "pdfjam", "pdfjam.x" } -- the `pdfjam` gets copied and the pdfjam.x makes `l3build install --full` install the .pdf
 
 ---- Test setup
 local escape_pattern = function(s)
@@ -191,13 +191,11 @@ checkinit_hook = function(_)
 end
 
 ---- Overwrite unpacking (used by most targets)
-build = function(v)
-	v = v or version
-	if not v then return 1 end
-	return os.execute("utils/build.sh " .. v)
+build = function(version)
+	return os.execute("utils/build.sh " .. version)
 end
 
-bundleunpack = function() build() end
+bundleunpack = function() return build(version) end
 
 ---- Self-made targets
 ctanzip = "build/release/pdfjam-ctan"

@@ -11,7 +11,9 @@ if [ "$MINIMAL_BUILD" != 1 ]; then
 	if [ "$MINIMAL_BUILD" = 2 ]; then
 		doc/make-completion.lua
 	else
-		doc/run.lua "v$version"
+		mkdir -p doc
+		echo "\\date{v$version -- $(date +%F)}" > doc/version.tex
+		doc/run.lua
 	fi
 fi
 if [ -n "$MINIMAL_BUILD" ]; then
