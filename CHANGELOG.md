@@ -1,3 +1,7 @@
+# Version 4.3.1
+
+* Minor documentation corrections.
+
 # Version 4.3
 
 * Add a PDF manual with lots of illustrated examples.
