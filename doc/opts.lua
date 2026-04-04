@@ -9,7 +9,7 @@ return {
 	{'vanilla', help = 'Suppress the reading of any pdfjam configuration files.'},
 	{'enc', description = 'encoding', completer = '_enc', help = 'Command-line encoding as understood by `iconv`.'},
 	'# Define where to put files',
-	{'outfile', alias = 'output', short = 'o', flag = '=', description = 'output', completer = '_output', help = 'File or directory name for output(s).'},
+	{'outfile', alias = 'output', short = 'o', description = 'output', completer = '_output', help = 'File or directory name for output(s).'},
 	{'suffix', argtype = 'string', help = 'Suffix for output, when file name is not given explicitly.'},
 	{'tidy', flag = '+', exclude = {"builddir"}, help = 'Clean temporary build directory. On by default.'},
 	{'builddir', exclude = {"tidy", "no-tidy"}, description = 'directory', completer = '_files -/', help = 'Set build directory.'},
