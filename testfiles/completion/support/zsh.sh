@@ -2,6 +2,8 @@
 
 # https://unix.stackexchange.com/questions/668618/how-to-write-automated-tests-for-zsh-completion
 
+# BUG: In an _alternative, this script only catches the completion of the last alternative.
+
 usage() { echo "Usage: $0 [ -p prefix] [-s file] [-d debuglog] [--] input [input ...]"; exit 1; }
 
 prefix=
@@ -22,9 +24,12 @@ compfake () {
 	compinit
 	[ -n "$source" ] && source "$source"
 	zstyle ':completion:*' list-prompt '<irrelevant>'
-	# matches print as "Xmatch^D", where X=^A for normal text and ^F for all kinds of files; alignment spaces start with ^B
-	zstyle ':completion:*' list-colors $'no=\CA' lc= rc= $'ec=\CD' $'sp=\CB' \
-		$'fi=\CF' $'ln=\CF' $'pi=\CF' $'so=\CF' $'bd=\CF' $'cd=\CF' $'or=\CF' $'mi=\CF' $'su=\CF' $'su=\CF' $'sg=\CF' $'tw=\CF' $'ow=\CF' $'sa=\CF' $'st=\CF' $'ex=\CF'
+	# matches print as "Xmatch^D", where
+	#   X=^A for normal text, X=^F for all kinds of files and directories
+	#   alignment spaces start with ^S, a directory has a trailing ^T/^D
+	zstyle ':completion:*' list-colors $'no=\CA' lc= rc= tc=$'\CT' $'ec=\CD' $'sp=\CS' \
+		$'fi=\CF' $'di=\CF' $'ln=\CF' $'pi=\CF' $'so=\CF' $'bd=\CF' $'cd=\CF' $'or=\CF' $'mi=\CF' \
+		$'su=\CF' $'su=\CF' $'sg=\CF' $'tw=\CF' $'ow=\CF' $'sa=\CF' $'st=\CF' $'ex=\CF'
 	zstyle ':completion:*' list-separator '<DESCRIPTION>'
 	zstyle ':completion:*:descriptions' format '<HEADER>%d</HEADER>'
 	zstyle ':completion:*' force-list always
@@ -49,10 +54,11 @@ comptest() {
 		sed -E $' # ... and parse into a format of our liking.
 	s/(\e[[0-9;]*[A-Za-z]|\r)*BEGIN_COMMAND_MARKER=.*//
 	s/\e\\[J//g
-	s/(\CB? +\CD)?\r$//
+	s/(\CS? +\CD)?\r$//
 	s/\CA<DESCRIPTION>/:/
+	s/\CD\CT//g
 	s/(^|( )(\CD))[\CA\CF]([^\CD]+)\CD/\\3\\2\\4/g
-	s/\CB *\CD//g
+	s/\CS *\CD//g
 	s/\CA\CD//g
 	'
 	zpty -d pty  # Delete the pty.
