@@ -55,7 +55,7 @@ textfiles = {"COPYING"}
 -- used for l3build doc
 typesetexe = "./run.lua"
 supportdir = "doc"
-typesetsuppfiles = { "run.lua", "opts.lua", "README.in.md", "Makefile.in", "pdfjam.tex", "zsh-completion.in.sh", "version.tex", "examples/*.pdf" }
+typesetsuppfiles = { "run.lua", "opts.lua", "README.in.md", "Makefile.in", "pdfjam.tex", "zsh-completion.in.sh", "build/version.tex", "examples/*.pdf" }
 typesetfiles = { "pdfjam", "pdfjam.x" } -- the `pdfjam` gets copied and the pdfjam.x makes `l3build install --full` install the .pdf
 
 ---- Test setup
