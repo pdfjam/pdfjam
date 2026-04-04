@@ -59,19 +59,6 @@ typesetsuppfiles = { "run.lua", "opts.lua", "README.in.md", "Makefile.in", "pdfj
 typesetfiles = { "pdfjam", "pdfjam.x" } -- the `pdfjam` gets copied and the pdfjam.x makes `l3build install --full` install the .pdf
 
 ---- Test setup
-local escape_pattern = function(s)
-	return string.gsub(s,"[][^$()%%.*+?-]", "%%%0")
-end
-local rewrite_test_dir = function(s)
-	return (string.gsub(s, escape_pattern(abspath(builddir)), "$BUILDDIR"))
-end
-local rewrite_subdir = function(engine, s)
-	return (string.gsub(s, "( --builddir [^ ]+%.d)/" .. escape_pattern(engine) .. " ", "%1/dryrun "))
-end
-local rewrite_version = function(s)
-	return (string.gsub(s, "pdfjam version [%x.gN-]+", "pdfjam version N.NN."))
-end
-
 read_file = function(name)
 	f = io.open(name)
 	if not f then
