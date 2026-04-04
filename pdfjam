@@ -166,8 +166,8 @@ function popen(exe, ...)
 	return exe and io.popen(exe .. table.concat({"", ...}, " "))
 end
 function execute(exe, ...)
-	exe = executable(exe)
-	return exe and os.execute(exe .. table.concat({"", ...}, " "))
+	exe = executable(exe) or err("Command '" .. exe .. "' not found")
+	return os.execute(exe .. table.concat({"", ...}, " "))
 end
 
 -- option parser
@@ -183,7 +183,7 @@ function getopt(arg)
 	local options, t = define_options(), define_initial()
 	local a
 	if not vanilla then
-		local p = ConfigParser:new({options = options, t = t})
+		local p = ConfigParser:new({options = options, default_handler = numberedopt, t = t})
 		for _, d in ipairs(configpath) do p:parse(file.join(d, "pdfjam.conf")) end
 		if home then p:parse(file.join(home, ".pdfjam.conf")) end
 		t = p.t
@@ -191,19 +191,36 @@ function getopt(arg)
 	local parser = Parser:new({
 		options = options,
 		short_options = short_options,
+		default_handler = numberedopt,
 		t = t,
 	})
 	a, t = parser:parse(arg)
 	t.vanilla = nil
-	debugprint("args: %T\nopts: %T", a, t)
+	debugprint("Positional parameters: %T", a)
+	if DEBUG then io.stderr:write(table.serialize(t, "Options")) end
 	return Interpreter:new({a=a, t=t, options=options})
 end
 
+--- @class Option
+--- @field argument? boolean If set, defines whether an argument is required/forbidden. Used by Parser.
+--- @field func? fun(v:string, a:string, t:table): string|table Used by Parser for figuring out what to set in t
+--- @field show? fun(v:any, t:table): any Used by Interpreter to translate the value set by `func`
+--- @field retrieve? fun(v:any, t:table): string Used by Interpreter to translate the value returned by `show`
+
+--- Prototype for parsing
+--- @class Parser
+--- @field options {[string]: string|Option} Input map of option names to their respective parsers/handlers
+--- @field short_options {[string]: string} Input map of short aliases for long options
+--- @field default_handler Option Default option parser/handler
+--- @field t table<integer|string, string|table> Output of the parsed options and their order
+--- @field a string[] Output of the positional arguments
+--- @field private i integer current word counter, stepped by 1 or 2 for options
 Parser = {}
 function Parser:new(obj)
-	local obj = obj or {}
+	obj = obj or {}
 	obj.options = obj.options or {}
 	obj.short_options = obj.short_options or {}
+	obj.default_handler = obj.default_handler or {}
 	obj.t = obj.t or {}
 	self.__index = self
 	setmetatable(obj, self)
@@ -260,7 +277,7 @@ function Parser:set_option(a, v)
 		if v then self:error("unsetting expects no value") end
 		return
 	end
-	local o = self.options[a] or pdfpagesopt
+	local o = self.options[a] or self.default_handler
 	if type(o) == "string" then -- alias
 		return self:set_option(o, v)
 	end
@@ -288,9 +305,9 @@ function Parser:set(a, value) if value ~= nil then self.t[a] = value end end
 function Parser:unset(a) self.t[a] = nil end
 function Parser:word(n) return self._args[self.i + (n or 0)] end
 
--- Read argument `w`.
--- If `options` is given, only read `w` if `options[w]` exists.
--- If `w` could be an option (starts with -), throw error.
+--- Read argument `w`.
+--- If `options` is given, only read `w` if `options[w]` exists.
+--- If `w` could be an option (starts with -), throw error.
 function Parser:argument(options)
 	assert(options==nil or type(options) == "table")
 	local w
@@ -397,34 +414,32 @@ function Interpreter:list(...)
 	return r or ""
 end
 
-function Interpreter:pdfpagesoptions()
-	local r = ""
-	for i, a in recall_numbered do
-		r = r .. "," .. self:retrieve(a)
+function Interpreter:numberedoptions()
+	local r
+	for i, option in ipairs(self.t) do
+		self.t[i] = nil
+		r = (r and r .. "," or "") .. self:retrieve(option)
 	end
-	return string.sub(r, 2)
+	return r or ""
 end
 
 -- pdfjam options --
 
-do -- overhead to keep the order of options although tables are unordered
-	local pos = {}
-	function numbered(v, a, t)
-		if t and t[a] then table.remove(pos, table.contains(pos, a)) end
-		table.insert(pos, a)
-		return v
-	end
-	function recall_numbered(_, i)
-		i = (i or 0) + 1
-		if pos[i] then return i, pos[i]
-		else debugprint("pdfpagesoptsorder: %,T", pos) return nil end
-	end
+---Insert `a` into the sequential part of `t`, deleting a previous entry
+---@generic K, V
+---@param a K Key
+---@param t table<integer, K> Lookup table
+---@param v V Value
+---@return V v
+function numbered(v, a, t)
+	local pos = table.contains(t, a)
+	if pos then table.remove(t, pos) end
+	table.insert(t, a)
+	return v
 end
+numberedopt = {func = numbered}
 
 do
-	-- TODO: Warn about unknown options to pdfpages
-	pdfpagesopt = {func = numbered}
-
 	local bool_prose = {["true"]="true", yes="true", on="true", ["false"]="false", no="false", off="false"}
 	local boolopt = {
 		argument = bool_prose,
@@ -460,6 +475,29 @@ do
 		"landscape", "twoside", "checkfiles", "batch"
 	}
 
+	do -- overly complex pattern to match the most common ways to specify papersize/templatesize/offset/delta
+		local s = lpeg.S"\t\n\v\f\r "
+		local blank = s^0/""
+		local tex_unit = lpeg.P"pt" + "pc" + "in" + "bp" + "cm" + "mm" + "dd" + "cc" + "sp" + "em" + "ex"
+		local digit = patterns.digit
+		local tex_number = (lpeg.S"+-" * blank)^0 * (digit^1 * ("." * digit^0)^-1 + "." * digit^1)
+		local dimen = lpeg.Cs(tex_number * (blank * tex_unit + lpeg.P(true)/"bp") + (textoken - ",")^0)
+		size_pattern = lpeg.Ct(
+			"{" * s^0 * dimen * s^0 * "," * s^0 * dimen * s^0 * "}" * -1
+			+ "{" * s^0 * dimen * s^0 * "}" * s^0 * "{" * dimen * s^0 * "}" * -1
+			+ sep^0 * dimen * lpeg.S" ,"^1 * dimen * (sep + -1)
+		) + lpeg.C(lpeg.P(1)^0)
+	end
+	local sizefunc = function(v, a, t) return numbered(size_pattern:match(v), a, t) end
+	local sizeshow = function(f) return function(v, t) return type(v) == "table" and f(v, t) or v end end
+
+	local size_options = {
+		papersize = function(v, t) return t.landscape and v[2]..","..v[1] or v[1]..","..v[2] end,
+		templatesize = function(v, _) return "{" .. v[1] .. "}{" .. v[2] .. "}" end,
+		delta = function(v, _) return v[1] .. " " .. v[2] end,
+		offset = function(v, _) return v[1] .. " " .. v[2] end,
+	}
+
 	local paperopt = {
 		argument = false,
 		func = function(_, a, t) t.paper = a t.papersize = nil end
@@ -476,16 +514,6 @@ do
 	local function to_paper(a)
 		a = string.lower(a)
 		return paper_hash[a] and a or paper_hash[a .. "paper"] and a .. "paper"
-	end
-	do -- overly complex pattern to match the most common ways to specify the papersize
-		local s = lpeg.S"\t\n\v\f\r "
-		local blank = s^0/""
-		local tex_unit = lpeg.P"pt" + "pc" + "in" + "bp" + "cm" + "mm" + "dd" + "cc" + "sp" + "em" + "ex"
-		local digit = patterns.digit
-		local tex_number = (lpeg.S"+-" * blank)^0 * (digit^1 * ("." * digit^0)^-1 + "." * digit^1)
-		local dimen = lpeg.Cs(tex_number * (blank * tex_unit + lpeg.P(true)/"bp") + (textoken - ",")^0)
-		papersize_pattern = lpeg.Ct("{" * s^0 * dimen * s^0 * "," * s^0 * dimen * s^0 * "}" * -1
-			+ sep^0 * dimen * lpeg.S" ,"^1 * dimen * (sep + -1)) + lpeg.C(lpeg.P(1)^0)
 	end
 
 	function show_help(_, _, t) print("This is how to use it.") provide_default_paper(t) table.print(t) exit() end -- TODO
@@ -516,6 +544,7 @@ do
 		for _, o in ipairs(flag_options) do options[o] = flagopt end
 		for _, o in ipairs(paper_options) do options[o] = paperopt end
 		for o, f in pairs(mode_options) do options[o] = {argument = false, func = f} end
+		for o, f in pairs(size_options) do options[o] = {func = sizefunc, show = sizeshow(f)} end
 		for o, s in pairs(multi_options) do add_multioption(options, o, s) end
 		for o, a in pairs(alias_options) do options[o] = a end
 		options.paper = {
@@ -527,14 +556,6 @@ do
 				end
 			end,
 			retrieve = identity
-		}
-		options.papersize = {
-			func = function(v, _, t)
-				return papersize_pattern:match(v)
-			end,
-			show = function(v, t)
-				return type(v) == "string" and v or t.landscape and v[2]..","..v[1] or v[1]..","..v[2]
-			end
 		}
 		options.pagecolor = {
 			func = identity,
@@ -861,7 +882,7 @@ function run(tab, d, outfile, infofile)
 	local pattern = lpeg.Cs((lpeg.P"$" * lpeg.C(lpeg.R"az" ^ 1) / tab + 1) ^ 0)
 	local content = pattern:match(template)
 	io.savedata("a.tex", content)
-	for _ = 1, tab.runs do execute(tab.latex .. tab.latexopts, "a.tex", ">/dev/null") end
+	for _ = 1, tab.runs do execute(tab.latex, tab.latexopts, "a.tex", ">/dev/null") end
 	file_copy("a.pdf", outfile)
 end
 
@@ -885,7 +906,7 @@ function main(args)
 		preamble = x:retrieve"preamble",
 		merge = "merge",
 		pages = x:retrieve"pages",
-		options = x:pdfpagesoptions(),
+		options = x:numberedoptions(),
 		-- `rawinfo`, `comma` and `filepagelist` set later
 	}
 	if not x:pop"keepinfo" then tab.pdfinfo = nil end
