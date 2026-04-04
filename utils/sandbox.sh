@@ -7,6 +7,9 @@ mkdir -p build/bin
 for i in awk basename bash cat cp cut dirname extractbb file grep gs iconv kpsewhich ksh ln lualatex mkdir mv od paperconf pdfinfo pdflatex realpath rm sed sh tee texlua tr tty uname zsh; do
 	ln -s "$(command -v "$i")" "build/bin/$i" || { echo "No $i command found. Something is seriously amiss."; error=1; }
 done
+for i in repstopdf rungs xelatex; do # optional: required for xelatex: rungs repstopdf xelatex
+	ln -s "$(command -v "$i")" "build/bin/$i"
+done
 [ -n "$error" ] && exit 1
 
 mkdir build/bin/libpaper
