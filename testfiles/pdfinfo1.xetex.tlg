@@ -3,8 +3,6 @@ Don't change this file in any respect.
 File: beamer.pdf Graphic file (type pdf)
 <use beamer.pdf>
 File: beamer.pdf Graphic file (type pdf)
-<use beamer.pdf>
-File: beamer.pdf Graphic file (type pdf)
 <use beamer.pdf, page 3>
 File: beamer.pdf Graphic file (type pdf)
 <use beamer.pdf, page 3>
@@ -29,8 +27,9 @@ File: beamer.pdf Graphic file (type pdf)
 File: beamer.pdf Graphic file (type pdf)
 <use beamer.pdf, page 1>
 [3](a.aux)
-Title:           On the Complexity of SNP Block Partitioning Under the Perfect Phylogeny Model
-Author:           Jens Gramm, Tzvika Hartman, Till Nierhoff, Roded Sharan, Till Tantau 
+Title:           Presenting the numbers
+Keywords:         number pride, 🏳‍🌈 
+Author:           space guy 
 Creator:         TeX
 Producer:        TeXengine
 CreationDate:    Fri May 20 09:00:00 2016 UTC
@@ -47,4 +46,4 @@ Page size:       595.28 x 841.89 pts (A4)
 Page rot:        0
 File size:       0000 bytes
 Optimized:       no
-PDF version:     1.5
+PDF version:     1.7

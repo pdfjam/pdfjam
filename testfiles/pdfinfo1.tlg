@@ -5,10 +5,6 @@ File: beamer.pdf Graphic file (type pdf)
 <use beamer.pdf>
 Package pdftex.def Info: beamer.pdf  used on input line ....
 (pdftex.def)             Requested size: 364.194pt x 273.145pt.
-File: beamer.pdf Graphic file (type pdf)
-<use beamer.pdf>
-Package pdftex.def Info: beamer.pdf  used on input line ....
-(pdftex.def)             Requested size: 364.194pt x 273.145pt.
 <beamer.pdf, id=00, page=3, 364.195pt x 273.146pt>
 File: beamer.pdf Graphic file (type pdf)
 <use beamer.pdf, page 3>
@@ -59,8 +55,9 @@ File: beamer.pdf Graphic file (type pdf)
 Package pdftex.def Info: beamer.pdf , page1 used on input line ....
 (pdftex.def)             Requested size: 597.823pt x 448.367pt.
 [3<./beamer.pdf>](a.aux)
-Title:           On the Complexity of SNP Block Partitioning Under the Perfect Phylogeny Model
-Author:           Jens Gramm, Tzvika Hartman, Till Nierhoff, Roded Sharan, Till Tantau 
+Title:           Presenting the numbers
+Keywords:         number pride, 🏳‍🌈 
+Author:           space guy 
 Creator:         TeX
 Producer:        TeXengine
 Custom Metadata: no
@@ -76,4 +73,4 @@ Page size:       595.276 x 841.89 pts (A4)
 Page rot:        0
 File size:       0000 bytes
 Optimized:       no
-PDF version:     1.5
+PDF version:     1.7

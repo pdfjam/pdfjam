@@ -3,5 +3,5 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[pages=-]{a4numbers.pdf,1-2}
+\includepdfmerge[pages=-]{a4abc.pdf,1-2}
 \end{document}

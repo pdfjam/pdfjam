@@ -102,12 +102,66 @@ File: stdin.pdf Graphic file (type pdf)
 File: stdin.pdf Graphic file (type pdf)
 <use stdin.pdf, page 15>
 File: stdin.pdf Graphic file (type pdf)
-<use stdin.pdf, page 1>
+<use stdin.pdf, page 16>
 File: stdin.pdf Graphic file (type pdf)
-<use stdin.pdf, page 1>
+<use stdin.pdf, page 16>
 File: stdin.pdf Graphic file (type pdf)
 <use stdin.pdf, page 15>
-[8](a.aux)
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 16>
+[8]
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 17>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 17>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 18>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 18>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 17>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 18>
+[9]
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 19>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 19>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 20>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 20>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 19>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 20>
+[10]
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 21>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 21>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 22>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 22>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 21>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 22>
+[11]
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 23>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 23>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 24>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 24>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 23>
+File: stdin.pdf Graphic file (type pdf)
+<use stdin.pdf, page 24>
+[12](a.aux)
 Creator:         TeX
 Producer:        TeXengine
 CreationDate:    Fri May 20 09:00:00 2016 UTC
@@ -118,10 +172,10 @@ UserProperties:  no
 Suspects:        no
 Form:            none
 JavaScript:      no
-Pages:           8
+Pages:           12
 Encrypted:       no
 Page size:       595.28 x 841.89 pts (A4)
 Page rot:        0
 File size:       0000 bytes
 Optimized:       no
-PDF version:     1.5
+PDF version:     1.7

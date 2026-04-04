@@ -6,11 +6,15 @@ jobs:
   code-analysis:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get -y --no-install-recommends install groff mandoc
+      run: sudo apt-get update && sudo apt-get -y --no-install-recommends install shellcheck devscripts groff mandoc
     - name: Unpack
-      run: utils/build.sh N.NN
+      run: MINIMAL_BUILD=1 utils/build.sh N.NN
+    - name: Shellcheck
+      run: shellcheck build/pdfjam/bin/pdfjam.sh
+    - name: Check Bash-isms
+      run: checkbashisms -xp build/pdfjam/bin/pdfjam.sh
     - name: Check man page (groff)
       run: groff -mandoc -t -K utf8 -b -rCHECKSTYLE=10 -ww -z build/pdfjam/man/pdfjam.1
     - name: Check man page (nroff)

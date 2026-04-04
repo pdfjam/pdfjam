@@ -1,0 +1,7 @@
+\documentclass[a4paper]{article}
+\usepackage[]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{pdfpages}
+\begin{document}
+\includepdfmerge[pages=-]{a4.pdf,2,a4abc.pdf,2,a4landscape.pdf,2}
+\end{document}

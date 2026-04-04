@@ -1,0 +1,29 @@
+PDFJAM = ./pdfjam
+
+all: $(addprefix cropped/,$(addsuffix .pdf,$(targets)))
+
+PREAMBLE=
+ifeq ($(shell kpsewhich PTMono.sty >/dev/null)$(.SHELLSTATUS), 0)
+	PREAMBLE=--preamble '\usepackage[scaled=10]{PTSerifCaption,PTMono}'
+else
+	$(warning No PT font family installed, output for pagecommand will be pretty tiny.)
+endif
+
+out/%.pdf : in/% | out
+	$(PDFJAM) $(PREAMBLE) --outfile '$@' $(file < $<) 2>>out/pdfjam.log
+
+small/% : out/% | small
+	$(PDFJAM) --papersize 400cm,400cm --noautoscale true --nup 8x8 --delta '1cm 1cm' --frame true --outfile '$@' '$<' 2>>small/pdfjam.log
+
+cropped/% : small/% | cropped
+	pdfcrop '$<' '$@' >>cropped/pdfcrop.log
+
+out: ; mkdir -p out
+
+small: ; mkdir -p small
+
+cropped: ; mkdir -p cropped
+
+clean: ; rm -fr out small cropped
+
+.PHONY: all clean

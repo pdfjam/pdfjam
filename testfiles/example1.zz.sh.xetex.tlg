@@ -83,7 +83,85 @@ File: file2.pdf Graphic file (type pdf)
 <use file2.pdf, page 11>
 File: file2.pdf Graphic file (type pdf)
 <use file2.pdf, page 12>
-[6](a.aux)
+[6]
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 13>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 13>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 14>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 14>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 13>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 14>
+[7]
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 15>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 15>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 16>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 16>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 15>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 16>
+[8]
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 17>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 17>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 18>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 18>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 17>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 18>
+[9]
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 19>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 19>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 20>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 20>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 19>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 20>
+[10]
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 21>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 21>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 22>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 22>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 21>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 22>
+[11]
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 23>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 23>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 24>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 24>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 23>
+File: file2.pdf Graphic file (type pdf)
+<use file2.pdf, page 24>
+[12](a.aux)
 Creator:         TeX
 Producer:        TeXengine
 CreationDate:    Fri May 20 09:00:00 2016 UTC
@@ -94,10 +172,10 @@ UserProperties:  no
 Suspects:        no
 Form:            none
 JavaScript:      no
-Pages:           6
+Pages:           12
 Encrypted:       no
 Page size:       841.89 x 595.28 pts (A4)
 Page rot:        0
 File size:       0000 bytes
 Optimized:       no
-PDF version:     1.5
+PDF version:     1.7

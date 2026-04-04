@@ -43,18 +43,18 @@ else
 	trap 'rm ~/.pdfjam.conf' EXIT
 fi
 
-echo ===== Using config =====
+echo '===== Using config ====='
 vanilla=
 echo paper=a5paper|tee ~/.pdfjam.conf
 papersize
 papersize mock/paper/letter
 
-echo ===== Using config =====
+echo '===== Using config ====='
 echo papersize=10cm,30cm|tee ~/.pdfjam.conf
 papersize
 papersize mock/paper/letter
 
-echo ===== Using config =====
+echo '===== Using config ====='
 echo $'papersize=10cm,30cm\npaper=a5paper'|tee ~/.pdfjam.conf
 papersize
 papersize mock/paper/letter

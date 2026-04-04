@@ -6,10 +6,25 @@ cd "$(dirname "$0")/.."
 target=build/pdfjam
 version="$1"
 
+if [ "$MINIMAL_BUILD" != 1 ]; then
+	(cd testfiles/support/src && latexmk && ghostscript -o a4+square.pdf -sDEVICE=pdfwrite -sPageList=1 a4.pdf square.pdf)
+	if [ "$MINIMAL_BUILD" = 2 ]; then
+		doc/make-completion.lua
+	else
+		mkdir -p doc
+		echo "\\date{v$version -- $(date +%F)}" > doc/version.tex
+		doc/run.lua
+	fi
+fi
+if [ -n "$MINIMAL_BUILD" ]; then
+	echo 'Not building documentation; expect `cp` to fail'
+	set +e
+fi
+
 rm -fr build/unpacked "$target"
 mkdir -p build/local "$target/bin" "$target/man" "$target/shell-completion/zsh" build/unpacked build/release
-cp COPYING doc/pdfjam.conf README.md "$target"
-cp doc/shell-completion/zsh/_pdfjam "$target/shell-completion/zsh/"
+cp COPYING doc/pdfjam.conf doc/build/pdfjam.pdf README.md "$target"
+cp doc/build/_pdfjam "$target/shell-completion/zsh/"
 <doc/pdfjam.1 sed "1s/N\\.NN/${version}/"'
 s+\$repository+https://github.com/pdfjam/pdfjam+' >"$target/man/pdfjam.1"
 

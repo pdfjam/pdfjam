@@ -1,0 +1,294 @@
+#!/usr/bin/env texlua
+
+---@diagnostic disable: lowercase-global
+
+kpse.set_program_name("kpsewhich")
+require "lualibs"
+
+P = {
+	space_to_hyphen = lpeg.Cs((lpeg.P" "/"-" + 1)^0),
+	escape_asterisk = lpeg.Cs((lpeg.P"*"/"\\*" + 1)^0),
+	escape_squote = lpeg.Cs((lpeg.P"'"/"\\'" + 1)^0),
+	singlequote_first_word = lpeg.Cs(lpeg.Cc"'" * (1 - lpeg.P" ")^0 * lpeg.Cc"'" * lpeg.P(1)^0),
+	x_asterisk = lpeg.Cs((lpeg.P"*"/"X" + 1)^0),
+	alternatives = lpeg.Ct("(" * lpeg.C((1 - lpeg.S" )")^1) * (" " * lpeg.C((1 - lpeg.S" )")^1))^0 * ")"),
+	tex_angle = lpeg.Cs((lpeg.P"⟨"/"$\\langle$" + lpeg.P"⟩"/"$\\rangle$" + 1)^0),
+}
+
+function singlequote(s) return "'" .. P.escape_squote:match(s) .. "'" end
+function singlequote_first_word(s) return P.singlequote_first_word:match(s) end
+function escape_asterisk(s) return P.escape_asterisk:match(s) end
+
+function serialize(t)
+	if type(t) == "table" then
+		io.write"{"
+		local seen_sth = false
+		for _,v in ipairs(t) do
+			if seen_sth then io.write", " else seen_sth = true end
+			serialize(v)
+		end
+		io.write"}"
+	elseif type(t) == "string" then
+		io.write(singlequote(t))
+	else
+		io.write(t)
+	end
+end
+
+function space_to_hyphen(a) return P.space_to_hyphen:match(a) end
+
+function lower_first(s) return string.lower(string.sub(s, 1, 1)) .. string.sub(s, 2) end
+
+function imap(t, f, ...)
+	local a = {}
+	for i, x in ipairs(t) do
+		local y = f(i, x, ...)
+		if y then table.insert(a, y) end
+	end
+	return a
+end
+
+function amap(t, f, ...)
+	local a = {}
+	for _, x in ipairs(t) do
+		local y = f(x, ...)
+		if y then table.insert(a, y) end
+	end
+	return a
+end
+
+function map(t, f)
+	local a = {}
+	for k, v in pairs(t) do
+		a[k] = f(v)
+	end
+	return a
+end
+
+function format_arguments(option, arg) return "**--" .. escape_asterisk(option) .. "**" .. arg end
+
+function markdown_option(t)
+	if type(t) ~= "table" then return string.sub(t, 1, 1) == "#" and "#" .. t or nil end
+	local arguments = ""
+	if t.alternatives then
+		arguments = "(" .. table.concat(t.alternatives, " | ") .. ")"
+	elseif t.description then
+		arguments = space_to_hyphen(t.description)
+	elseif t.argnames then
+		local argnames = map(t.argnames, space_to_hyphen)
+		arguments = table.concat(argnames, t.argtype == "dims-comma" and "," or " ")
+		if t.argtype == "dims-space" then arguments = "'" .. arguments .. "'" end
+	elseif t.argtype then
+		local lookup = {bool="bool", string="string", name="name", tex="tex", num="number",
+			angle="angle", num4="multiple-of-4"}
+		arguments = lookup[t.argtype] or error("Unknown argtype: "..t.argtype)
+	end
+	if arguments ~= "" then arguments = " " .. arguments end
+	local header = (t.short and "**-" .. t.short .. "**" .. arguments .. ", " or "") ..
+		format_arguments(t[1], arguments) ..
+		(t.alias and ", " .. format_arguments(t.alias, arguments) or "")
+	if t.flag == "+" then header = header .. " _respectively_ **--no-" .. t[1] .. "**" end
+	return {header, t.help}
+end
+
+function as_markdown_option(t)
+	local a = markdown_option(t)
+	return type(a) == "table" and '<span id="' .. t[1] .. '"/>' .. a[1] .. "\n\n: " .. a[2] or a
+end
+
+function as_tex_option(t)
+	local a = markdown_option(t)
+	if type(a) ~= "table" then return a end
+	local result = "`\\begin{tcolorbox}[title={`{=tex}" .. a[1] .. "`}, phantomlabel={" .. t[1] .. "}]`{=tex}\n" .. a[2] .. "\n`"
+	local name = P.x_asterisk:match(t[1])
+	if type(t.example) == "table" then
+		result = result .. "\\tcblower"
+		for i, v in ipairs(t.example) do
+			result = result .. "`{=tex}\n```sh\npdfjam " .. v .. "\n```\n`\\includegraphics[width=\\linewidth]{cropped/" .. name .. i .. "}"
+		end
+	elseif type(t.example) == "string" then
+		result = result .. "\\tcblower`{=tex}\n```sh\npdfjam " .. t.example .. "\n```\n`\\includegraphics[width=\\linewidth]{cropped/" .. name .. "}"
+	end
+	result = result .. "\\end{tcolorbox}`{=tex}"
+	return P.tex_angle:match(result)
+end
+
+function build_markdown(opts, input, output)
+	local options = "Also see the [manual]() which contains the same list with example output added.\n\n" .. table.concat(amap(opts, as_markdown_option), "\n\n")
+	local readme = loaddata(input)
+	readme = string.gsub(readme, "\\input{options.tex}", options, 1)
+	io.savedata(output, readme)
+end
+
+function write_markdown(flattened_opts, input, output)
+	build_markdown(flattened_opts, input, "README-out.md")
+	os.execute("pandoc --columns=80 --standalone --toc --shift-heading-level-by=1 --from=markdown-smart --to=gfm README-out.md -o README-gfm.md")
+	local header = lpeg.Cs(("---" * (1 - lpeg.P"---")^0 * "---")/HEADER * lpeg.P(1)^0)
+	savedata(output, header:match(loaddata("README-gfm.md")))
+end
+
+function build_tex_options(opts, output)
+	local options = table.concat(amap(opts, as_tex_option), "\n\n")
+	io.savedata(output .. ".md", options)
+	os.execute("pandoc --wrap=none " .. output .. ".md -o" .. output)
+end
+
+COMPLETER = {bool=":bool:(true false)", string=":string: ", name=":name: ", tex=":tex: ",
+	angle=":angle:compadd -o nosort $(seq 0 15 345)",
+	num4=":signature size:compadd -o nosort $(seq 4 4 96)",
+	dim=function(as) return ":"..as[1]..":_dimen "..as[1] end,
+	num=function(as) local a=as and as[1] or "number"; return ":"..a..':_numbers -l 1 "'..a..'"' end,
+	["dims-comma"]=function(as) local a=table.concat(map(as, space_to_hyphen), ","); return ":"..a..":_dimens , "..a end,
+	["dims-space"]=function(as) return ":"..table.concat(map(as, space_to_hyphen), " ")..':_dimens " " '..table.concat(map(as, space_to_hyphen), ",") end,
+}
+
+function as_zsh_completion_group(t)
+	local result = t[0] .. "\n\t\t+ '(" .. t[1][1] .. ")'"
+	for i = 0, #t do
+		result = result .. "\n\t\t\t" .. as_zsh_completion(t[i])
+	end
+	return result
+end
+
+function as_zsh_completion(t, groups)
+	if type(t) ~= "table" then return t end
+	if t[0] then table.insert(groups, as_zsh_completion_group(t)); return end
+	local quote = t.quote or "'"
+	local pre = quote
+	local exclude = t.exclude and "(" .. surround_concat(amap(t.exclude, escape_asterisk), "--", " ") .. ")" or ""
+	local flag_with_no = t.flag == "+"
+	local flag = t.flag == "=" and "(- :)" or t.flag == "*" and "*" or ""
+	local option = "--" .. escape_asterisk(t[1])
+	if t.short or t.alias then
+		option = "{" .. (t.short and "-" .. t.short .. "," or "") .. option .. (t.alias and ",--" .. escape_asterisk(t.alias) or "") .. "}" .. pre
+		if flag == "" then pre = "" else flag = flag .. quote end
+	end
+	local completer = ""
+	if t.description then
+		completer = ":" .. t.description .. ":" .. (
+			t.completer and t.completer or
+			t.alternatives and "(" .. table.concat(t.alternatives, " ") .. ")" or
+			"_" .. t.description
+		)
+	elseif t.argtype then
+		local compl = COMPLETER[t.argtype]
+		completer = type(compl) == "function" and compl(t.argnames) or compl and compl or error("Unknown argtype: "..t.argtype)
+	end
+	help = string.gsub(t.help, "\\", "\\\\")
+	if flag_with_no then
+		local exclude1 = "--no-" .. t[1]
+		local exclude2 = option
+		if exclude ~= "" then
+			local exclud = string.sub(exclude, 1, -2) .. " "
+			exclude1 = exclud .. exclude1 .. ")"
+			exclude2 = exclud .. exclude2 .. ")"
+		else
+			exclude1 = "(" .. exclude1 .. ")"
+			exclude2 = "(" .. exclude2 .. ")"
+		end
+		return "'" .. exclude1 .. option .. "[" .. help .. "]'" ..
+			"\n\t\t'" .. exclude2 .. "--no-" .. t[1] .. "[Do not " .. lower_first(help) .. "]'"
+	end
+	return pre .. flag .. exclude .. option .. "[" .. help .. "]" .. completer .. quote
+end
+
+function build_zsh_complete(opts, input, output)
+	local groups = {}
+	opts = amap(opts, as_zsh_completion, groups)
+	local options_zsh = table.concat(opts, "\n\t\t") .. "\n\t\t# Completion groups\n\t\t" .. table.concat(groups, "\n\t\t")
+
+	local zcmp = loaddata(input)
+	zcmp = string.gsub(zcmp, "!!!OPTIONS!!!", options_zsh, 1)
+	savedata(output, zcmp)
+end
+
+function loaddata(f) return io.loaddata(f) or error("File not found: " .. f) end
+function savedata(f, s) if io.loaddata(f) ~= s then io.savedata(f, s) end end
+
+function make_example(t)
+	if not t.example then return end
+	-- Argh: `make` just hates files with `*` in them in pattern recipes, thus replace it by `x`.
+	if type(t.example) == "table" then
+		return imap(t.example, function(i, v)
+			local name = P.x_asterisk:match(t[1]) .. i
+			savedata("in/" .. name, v)
+			return name
+		end)
+	else
+		local name = P.x_asterisk:match(t[1])
+		savedata("in/"..name, t.example)
+		return {name}
+	end
+end
+
+function surround_concat(t, pre, mid, post)
+	return pre .. table.concat(t, (post or "") .. (mid or "") .. pre) .. (post or "")
+end
+
+function make_examples(opts, input, output)
+	dir.makedirs("in")
+	local targets = table.flattened(amap(opts, make_example))
+	local make = "targets = " .. table.concat(targets, " \\\n") .. "\n\n" .. loaddata(input)
+	savedata(output, make)
+end
+
+function flatten_groups(opts)
+	local result = {}
+	for _, t in ipairs(opts) do
+		if type(t) == "table" and t[0] then
+			for i = 0, #t do
+				table.insert(result, t[i])
+			end
+		else
+			table.insert(result, t)
+		end
+	end
+	return result
+end
+
+function link_files(files, to)
+	for _, f in ipairs(files) do
+		lfs.link(dir.expandname(f), file.join(to, file.basename(f)), true)
+	end
+end
+
+HEADER = [[
+![GitHub CI](https://github.com/pdfjam/pdfjam/actions/workflows/ci.yml/badge.svg)
+
+# pdfjam
+
+_David Firth_ (inactive),
+_Reuben Thomas_ (inactive),
+_Markus Kurtz_
+]]
+
+function main()
+	local isbuild = string.find(dir.current(), "build/doc$")
+	if not isbuild then
+		lfs.chdir(file.dirname(arg[0]))
+		dir.makedirs("build")
+		lfs.link("../../pdfjam", "build/pdfjam", true)
+		link_files({"README.in.md", "opts.lua", "zsh-completion.in.sh", "Makefile.in", "pdfjam.tex"}, "build")
+		link_files(dir.glob("examples/*.pdf"), "build")
+		lfs.chdir("build")
+	end
+
+	local opts = require"opts"
+	local flattened_opts = flatten_groups(opts)
+
+	write_markdown(flattened_opts, "README.in.md", (isbuild and "" or "../../") .. "README.md")
+	build_zsh_complete(opts, "zsh-completion.in.sh", "_pdfjam")
+
+	build_tex_options(flattened_opts, "options.tex")
+	os.execute("pandoc --wrap=none --toc README.in.md -o p.tex")
+
+	make_examples(flattened_opts, "Makefile.in", "Makefile")
+	os.execute("make -j8 || { cat out/pdfjam.log; cat small/pdfjam.log; cat cropped/pdfcrop.log; }")
+
+	os.execute("latexmk pdfjam.tex")
+end
+
+-- if we can not access four levels of stack, we assume to be executed directly
+if not pcall(debug.getlocal, 4, 1) then
+	main()
+end

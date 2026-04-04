@@ -3,16 +3,21 @@ module = "pdfjam"
 -- For testing, run `l3build check`.
 -- For testing tex outputs, run `l3build check -ccheck-tex`.
 -- For installing in TEXMFHOME/scripts/pdfjam/, run `l3build install`.
+-- For additionally installing documentation, run `l3build install --full`.
 -- For releasing, run `l3build release`, for major releases `l3build release major`.
 
 ---- Version information from git tag
-version = io.popen("git describe --tags --match 'v?.*' 2>/dev/null"):read()
-if version then
-	version = string.sub(version, 2)
-	isprerelease = string.match(version, "-") ~= nil
-else -- As for shallow clones, e.g. in GitHub workflow
-	version = "N.NN"
+make_version = function()
+	version = io.popen("git describe --tags --match 'v?.*' 2>/dev/null"):read()
+	if version then
+		version = string.sub(version, 2)
+		isprerelease = string.match(version, "-") ~= nil
+	else -- As for shallow clones, e.g. in GitHub workflow
+		version = "N.NN"
+	end
+	return version
 end
+make_version()
 -- Step version in tag target etc.
 step_version = function(version, part)
 	principal_version = string.match(version, '[%d%.]+')
@@ -32,8 +37,7 @@ make_next_version = function(a)
 		next_version = version
 		return version
 	end
-	local part = 'minor'
-	if a then part = a[1] end
+	local part = a and a[1] or 'minor'
 	next_version = step_version(version, part)
 	return next_version
 end
@@ -41,27 +45,39 @@ end
 ---- Constants
 -- Defaults are set later. Hence define all values we explicitly use here.
 builddir = "build"
-testdir = builddir .. "/test"
 
 -- used for l3build install
 installfiles = {"pdfjam"} -- also used by l3build check
 scriptfiles = {"pdfjam"}
 scriptmanfiles = {"build/pdfjam/man/pdfjam.1"}
-textfiles = {"COPYING", "README.md"}
+textfiles = {"COPYING"}
+
+-- used for l3build doc
+typesetexe = "./run.lua"
+supportdir = "doc"
+typesetsuppfiles = { "run.lua", "opts.lua", "README.in.md", "Makefile.in", "pdfjam.tex", "zsh-completion.in.sh", "version.tex", "examples/*.pdf" }
+typesetfiles = { "pdfjam", "pdfjam.x" } -- the `pdfjam` gets copied and the pdfjam.x makes `l3build install --full` install the .pdf
 
 ---- Test setup
 local escape_pattern = function(s)
 	return string.gsub(s,"[][^$()%%.*+?-]", "%%%0")
 end
 local rewrite_test_dir = function(s)
-	return (string.gsub(s, escape_pattern(abspath(testdir)), "<TESTDIR>"))
+	return (string.gsub(s, escape_pattern(abspath(builddir)), "$BUILDDIR"))
+end
+local rewrite_subdir = function(engine, s)
+	return (string.gsub(s, "( --builddir [^ ]+%.d)/" .. escape_pattern(engine) .. " ", "%1/dryrun "))
 end
 local rewrite_version = function(s)
 	return (string.gsub(s, "pdfjam version [%x.gN-]+", "pdfjam version N.NN."))
 end
 
 read_file = function(name)
-	f = io.open(name) or error("Could not open " .. name)
+	f = io.open(name)
+	if not f then
+		print("Could not read " .. name)
+		return
+	end
 	s = f:read("a")
 	f:close()
 	return s
@@ -69,6 +85,7 @@ end
 
 function compare_completions(difffile, reffile, genfile, cleanup, name, engine)
 	s = read_file(reffile)
+	if not s then return 1 end
 	ref = io.open(reffile .. ".multi", "w")
 	gen = io.open(genfile)
 	for l in gen:lines() do
@@ -82,12 +99,15 @@ function compare_completions(difffile, reffile, genfile, cleanup, name, engine)
 		.. normalize_path(reffile .. ".multi " .. genfile .. " > " .. difffile))
 	if errorlevel == 0 or cleanup then
 		os.remove(difffile)
+	else
+		print(read_file("completion.log"))
 	end
 	return errorlevel
 end
 
 function rewrite_multi_to_single_ref(reffile)
 	s = read_file(reffile)
+	if not s then return 1 end
 	_, begin_first_ref = string.find(s, "^>>> [^\n]*%.%.%.\n")
 	if not begin_first_ref then
 		print("Reference file " .. reffile .. " must start with >>> before rewriting.")
@@ -100,7 +120,7 @@ function rewrite_multi_to_single_ref(reffile)
 end
 
 target_list.save.func = function(a)
-	if stdengine == "zsh" then
+	if stdengine == "completion_zsh" then
 		local errorlevel = 0
 		errorlevel = save(a)
 		for i,name in ipairs(a) do
@@ -128,7 +148,7 @@ test_types = {
 		generated = ".log",
 		rewrite = function(source, normalized) cp(source, ".", normalized) end
 	},
-	zsh = { -- for completion tests
+	completion_zsh = {
 		test = ".in",
 		reference = ".ref",
 		generated = ".out",
@@ -138,14 +158,17 @@ test_types = {
 }
 
 specialformats = { latex = {
-	dryrun = { binary = "./engine dryrun" },
+	sh = { binary = "./engine sh" },
+	bash = { binary = "./engine bash" },
+	ksh = { binary = "./engine ksh" },
+	zsh = { binary = "./engine zsh" },
 	pdftex = { binary = "./engine pdftex" },
 	xetex = { binary = "./engine xetex" },
 	luatex = { binary = "./engine luatex" },
-	zsh = { binary = "./complete zsh" },
+	completion_zsh = { binary = "./complete zsh" },
 } }
 
-checkengines = {"dryrun"}
+checkengines = {"sh", "bash", "ksh", "zsh"}
 checkconfigs = {"build"}
 lvtext = ".jam" -- Used in check-tex; cannot be overridden there (for whatever reason)
 test_order = {"jam", "sh"}
@@ -156,25 +179,21 @@ checkinit_hook = function(_)
 end
 
 ---- Overwrite unpacking (used by most targets)
-bundleunpack = function()
-	if not version then return 1 end
+build = function(version)
 	return os.execute("utils/build.sh " .. version)
 end
 
+bundleunpack = function() return build(version) end
+
 ---- Self-made targets
 ctanzip = "build/release/pdfjam-ctan"
-target_list.ctan.func = function(a)
-	if not make_next_version(a) then return 1 end
-	os.execute("utils/build.sh " .. next_version)
-	os.remove(ctanzip .. '.zip')
-	return runcmd("zip -r release/pdfjam-ctan.zip pdfjam", builddir)
-end
 
 target_list.release = { func = function(a)
 	if not make_next_version(a) then return 1 end
 	if isprerelease then target_list.tag.func(a) end
-	target_list.ctan.func()
+	build(next_version)
 	if options["dry-run"] then
+		os.execute("utils/github.sh " .. next_version .. " echo")
 		return 0
 	else
 		os.execute("utils/github.sh " .. next_version)
@@ -192,12 +211,12 @@ target_list.tag = { func = function(a)
 	end
 	mkdir(builddir .. "/release")
 	local s = read_file("CHANGELOG.md")
-	local _, i = string.find(s, '# Version ' .. next_version .. "\n")
+	local _, i = string.find(s, '# Version ' .. next_version .. "\n+")
 	if i then
 		s = string.sub(s, i+1)
 	else
 		local c = io.open("CHANGELOG.md", 'w')
-		c:write("# Version " .. next_version .. "\n" .. s)
+		c:write("# Version " .. next_version .. "\n\n" .. s)
 		c:close()
 		if not options["dry-run"] then
 			os.execute("git commit --message='Version " .. next_version .. "' CHANGELOG.md")
@@ -223,7 +242,7 @@ uploadconfig = {
 	announcement_file = builddir .. "/release/ANNOUNCEMENT.md",
 	author = "David Firth; Reuben Thomas; Markus Kurtz",
 	uploader = "Markus Kurtz",
-	note = "Please note, that this package contains no PDF documentation, but a comprehensive man page and --help output instead.", -- Note necessary for automatic validation to accept package without PDF documentation.
+	note = "On public and your wish, this package finally comes with a PDF documentation: pdfjam.pdf. You are welcome :)",
 	license = "gpl2+",
 	summary = "Shell script interface to pdfpages",
 	ctanPath = "/support/pdfjam",

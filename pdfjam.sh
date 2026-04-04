@@ -67,9 +67,17 @@ OIFS="$IFS"
 ##
 pwd=$(pwd)
 ##
+## For zsh, activate splitting of variables in words as in `for i in $var`
+##
+if extratrap=$(set +o | grep shwordsplit 2>/dev/null); then
+	# Set non-POSIX option after we checked for its existence, thus:
+	# shellcheck disable=SC3040
+	set -o shwordsplit
+fi
+##
 ##  Trap interrupts so that they kill everything:
 ##
-trap 'IFS=$OIFS; exit 1' HUP INT TERM
+trap 'IFS=$OIFS; $extratrap; exit 1' HUP INT TERM
 ##
 ##  The following will be useful for readability of the script:
 ##
@@ -94,7 +102,7 @@ escape_quote() {  ## Put everything in '' and care for actual '
 	printf %s "'$(printf %s "$1" | sed "s/'/'\\\\''/g")'"
 }
 escape_chars() {  ## Prefix tricky characters with \
-	printf %s "$1" | sed 's/[	 !"#$&-*;<>?[-^`{|}~]/\\&/g'
+	printf %s "$1" | sed 's/[]	 !"#$&'\''()*;<>?[\\^`{|}~]/\\&/g'
 }
 ##  Put argument in {} if necessary for parsing inside a key value list
 embrace() {
@@ -569,7 +577,7 @@ while test -n "$1$2"; do
 				--false) error_exit "Input file expected, but '$1' does not even exist in your file system." $E_NOINPUT ;;
 			esac
 			case "$valid_input-$valid_pagespec-$pageSpecAwaited" in  ##  The 6=3+3 working combinations
-				*-pagespec-true) fileSpec="${fileSpec%|awaited}|$1"; pageSpecAwaited=false ;;
+				*-pagespec-true) fileSpec="$(printf %s "$fileSpec" | sed "s/|awaited$/|$1/")"; pageSpecAwaited=false ;;
 				input-*-*) fileSpec="$fileSpec$newline$1|$extension|awaited"; pageSpecAwaited=true ;;
 			esac
 		esac
@@ -790,8 +798,8 @@ if test "$batch" = true; then
 	fi
 	IFS="$newline"
 	for k in $fileSpec; do # TODO
-		sourcePath=$(enquote "${k%|*|*}")
-		pageSpec=${k##*|}
+		sourcePath=$(enquote "${k%\|*\|*}")
+		pageSpec=${k##*\|}
 		callNumber=$((PDFJAM_CALL_NUMBER + 1))
 		prattle "--"
 		prattle "Processing file ${callNumber}: $sourcePath ..."
@@ -826,8 +834,8 @@ else
 	filePageSpec=""
 	IFS="$newline"
 	for k in $fileSpec; do
-		sourcePath=$(enquote "${k%|*|*}")
-		pageSpec=${k##*|}
+		sourcePath=$(enquote "${k%\|*\|*}")
+		pageSpec=${k##*\|}
 		filePageSpec="$filePageSpec$sourcePath $pageSpec "
 	done
 	IFS="$OIFS"
@@ -851,8 +859,8 @@ counter=0  ## for name generation for non-harmless names
 stdinUnread=true
 IFS="$newline"
 for k in ${fileSpec}; do
-	sourcePath="${k%|*|*}"
-	pageSpec=${k##*|}
+	sourcePath="${k%\|*\|*}"
+	pageSpec=${k##*\|}
 	if ! is_valid_pagespec "$pageSpec"; then
 		error_exit "Bug: Somehow an invalid page spec got here: $pageSpec" $E_SOFTWARE
 	fi
@@ -877,8 +885,8 @@ for k in ${fileSpec}; do
 		fi
 		;;
 	*)
-		extension="${k%|*}"
-		extension="${extension##*|}"
+		extension="${k%\|*}"
+		extension="${extension##*\|}"
 		case "$extension" in
 			pdf|eps|jpg|png) ;;
 			*) error_exit "Bug: Somehow an invalid extension got here." $E_SOFTWARE
@@ -1052,6 +1060,8 @@ if test -f "$fileName".pdf; then ## if LaTeX didn't choke
 		pdfName="$pdfName$separator$suffix".pdf
 		outFile="$outFile/$pdfName"
 	fi
+else
+	error_exit "$latex did not create the expected pdf file." $E_OSFILE
 fi
 if test -f "$outFile" && test ! -w "$outFile"; then
 	## file exists and we can't over-write it
