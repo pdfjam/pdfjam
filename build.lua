@@ -100,7 +100,7 @@ function compare_completions(difffile, reffile, genfile, cleanup, name, engine)
 	if errorlevel == 0 or cleanup then
 		os.remove(difffile)
 	else
-		print(read_file("completion.log"))
+		print(read_file("build/test-completion/completion.log"))
 	end
 	return errorlevel
 end
