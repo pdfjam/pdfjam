@@ -1,0 +1,4 @@
+<HEADER>pdf</HEADER>
+a.pdf
+<HEADER>path</HEADER>
+_pdfjam a.PS a.pdf complete* pdfjam* zsh.sh*

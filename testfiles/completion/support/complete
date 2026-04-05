@@ -9,4 +9,4 @@ esac
 :>completion.log
 
 mapfile -t <"$in"
-./zsh.sh -p 'pdfjam ' -s '_pdfjam' -d completion.log "${MAPFILE[@]}" >"$out"
+./zsh.sh -p 'pdfjam ' -s '_pdfjam' -i '*.(in|out|ref(|.multi)|diff|log|tcx)' -d completion.log "${MAPFILE[@]}" >"$out"
