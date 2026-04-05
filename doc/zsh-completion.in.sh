@@ -64,7 +64,7 @@ _remove_comma() { # Remove comma which was likely added only accidentally. NB: W
 }
 
 _output() {
-	_alternative 'file:pdf:_files -g \*.pdf' 'directory:path:_files -/'
+	_alternative 'files:pdf:_files -g \*.pdf' 'directories:path:_files -/'
 }
 
 _dimen() {
