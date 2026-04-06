@@ -202,8 +202,27 @@ function build_zsh_complete(opts, input, output)
 	savedata(output, zcmp)
 end
 
+function build_bash_complete(opts, output)
+	local a = {}
+	for _, t in ipairs(opts) do
+		if type(t) == "table" then
+			table.insert(a, "--" .. t[1])
+			if t.alias then table.insert(a, "--" .. t.alias) end
+			if t.short then table.insert(a, "-" .. t.short) end
+		end
+	end
+	local s = [[complete -o bashdefault -G '*.@([Pp][Dd][Ff]|?([Ee])[Pp][Ss]|[Jj][Pp]?([Ee])[Gg]|[Pp][Nn][Gg])' -X '!&*' -W ']] ..
+		table.concat(a, " ") .. "' pdfjam"
+	savedata(output, s)
+end
+
 function loaddata(f) return io.loaddata(f) or error("File not found: " .. f) end
-function savedata(f, s) if io.loaddata(f) ~= s then io.savedata(f, s) end end
+function savedata(f, s)
+	if io.loaddata(f) ~= s then
+		dir.makedirs(file.pathpart(f))
+		io.savedata(f, s)
+	end
+end
 
 function make_example(t)
 	if not t.example then return end
@@ -265,7 +284,7 @@ _Markus Kurtz_
 function main()
 	local isbuild = string.find(dir.current(), "build/doc$")
 	if not isbuild then
-		lfs.chdir(file.dirname(arg[0]))
+		lfs.chdir(file.pathpart(arg[0]))
 		dir.makedirs("build")
 		lfs.link("../../pdfjam", "build/pdfjam", true)
 		link_files({"README.in.md", "opts.lua", "zsh-completion.in.sh", "Makefile.in", "pdfjam.tex"}, "build")
@@ -278,6 +297,7 @@ function main()
 
 	write_markdown(flattened_opts, "README.in.md", (isbuild and "" or "../../") .. "README.md")
 	build_zsh_complete(opts, "zsh-completion.in.sh", "_pdfjam")
+	build_bash_complete(flattened_opts, "bash/_pdfjam")
 
 	build_tex_options(flattened_opts, "options.tex")
 	os.execute("pandoc --wrap=none --toc README.in.md -o p.tex")

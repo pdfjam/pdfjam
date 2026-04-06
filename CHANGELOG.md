@@ -1,3 +1,7 @@
+# Version 4.4
+
+* Add simple bash completion.
+
 # Version 4.3.1
 
 * Minor documentation corrections.
