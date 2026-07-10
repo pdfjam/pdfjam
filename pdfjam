@@ -1,1085 +1,943 @@
-#!/bin/sh
-version=N.NN
-#########################################################################
-##                                                                     ##
-##  pdfjam: A shell-script interface to the "pdfpages" LaTeX package   ##
-##  ------                                                             ##
-##                                                                     ##
-##  Author: David Firth (https://warwick.ac.uk/dfirth)                 ##
-##  Maintainer: Markus Kurtz                                           ##
-##                                                                     ##
-##  Usage: see https://github.com/pdfjam/pdfjam                        ##
-##         or "pdfjam --help"                                          ##
-##                                                                     ##
-##  Relies on:                                                         ##
-##  -- pdflatex (or xelatex or lualatex)                               ##
-##  -- the 'pdfpages' package for LaTeX (ideally version >= 0.4f)      ##
-##                                                                     ##
-##  License: GPL version 2 or later.  This software comes with         ##
-##  ABSOLUTELY NO WARRANTY of fitness for any purpose at all; if you   ##
-##  do not accept that, then you must not use it.                      ##
-##                                                                     ##
-##  The path searched for site-wide configuration files can be set     ##
-##  by editing the following variable:                                 ##
-##                                                                     ##
-    configpath='/etc:/usr/share/etc:/usr/local/share:/usr/local/etc'   ##
-##                                                                     ##
-##  Nothing else in this file should need to be changed.               ##
-##                                                                     ##
-#########################################################################
-##
-##  PRELIMINARIES
-##
-##  First determine:
-##    --- whether verbose commentary should be provided (not if --quiet
-##        or --configpath was specified);
-##    --- whether this call to pdfjam is a "batch" call;
-##    --- whether just the help text is required;
-##    --- or whether all configuration files should be ignored.
-##
-verbose=true
-for arg; do
-	case $arg in
-	--quiet | -q | --configpath)
-		verbose=false;;
-	--version | -V)
-		echo "$version"
-		exit 0;;
-	--batch)
-		batch=true;;
-	--vanilla)
-		vanilla=true;;
-	*) ;;
-	esac
-done
-##
-##  Check to see whether this is a "secondary" call to pdfjam:
-##
-if test -z "$PDFJAM_CALL_NUMBER"; then ## not a secondary call
-	PDFJAM_CALL_NUMBER=0
-fi
-##
-##  Keep a copy of the internal file separator, so we can change it safely
-##
-OIFS="$IFS"
-##
-##  Record the full filename of the current working directory
-##
-pwd=$(pwd)
-##
-## For zsh, activate splitting of variables in words as in `for i in $var`
-##
-if extratrap=$(set +o | grep shwordsplit 2>/dev/null); then
-	# Set non-POSIX option after we checked for its existence, thus:
-	# shellcheck disable=SC3040
-	set -o shwordsplit
-fi
-##
-##  Trap interrupts so that they kill everything:
-##
-trap 'IFS=$OIFS; $extratrap; exit 1' HUP INT TERM
-##
-##  The following will be useful for readability of the script:
-##
-newline='
-'
-##
-##  Functions to massage input
-##
-##  Use '' to escape string with multiple tricky characters and \ otherwise
-enquote() {
-	case "$1" in
-	*$newline*) escape_quote "$1" ;;
-	'' | *)
-		if printf %s "$1"|grep -Eq '([	 !"#$&()*<>?\^`{|}~].*){2}'; then
-			escape_quote "$1"  ##    ^-- matched twice due to --^
-		else
-			escape_chars "$1"
-		fi
-	esac
-}
-escape_quote() {  ## Put everything in '' and care for actual '
-	printf %s "'$(printf %s "$1" | sed "s/'/'\\\\''/g")'"
-}
-escape_chars() {  ## Prefix tricky characters with \
-	printf %s "$1" | sed 's/[]	 !"#$&'\''()*;<>?[\\^`{|}~]/\\&/g'
-}
-##  Put argument in {} if necessary for parsing inside a key value list
-embrace() {
-	value="$1"
-	case "$value" in
-	\{*\}) ;;
-	*,* | *=* | *\]*) value="{$value}" ;;
-	esac
-	printf %s "$value"
-}
-##  Strip legacy surrounding {}; add bp if no units given
-to_papersize() {
-	value="$1"
-	case "$value" in
-		\{*\}) value="${value#\{}"; value="${value%\}}"
-	esac
-	printf %s "$value" | sed -E 's/([0-9]{1,}\.{0,1}[0-9]*)(,|$)/\1bp\2/g'
-}
-## Check whether string contains only harmless characters
-is_harmless() {
-	printf %s "$1" | grep -q '^[A-Za-z0-9.-]\+$'
-}
-##  Validate pagespec syntax
-is_valid_pagespec() {
-	# P = [0-9]*|last  is any or no page
-	# P(-P)?  is any or no page range (the latter being an implicit empty page)
-	# (P(-P)?|\{\})  is any page range or an implicit or explicit empty page
-	# (,(P(-P)?|\{\}))*  is any list of page ranges and empty pages separated by and beginning with a comma
-	printf %s ",$1" | grep -qE '^(,(([0-9]*|last)(-([0-9]*|last))?)|\{\})*$'
-}
-##  Get appropriate file extension if input is supported
-get_extension() {
-	extension=
-	if test -n "$checkfiles"; then
-		case "$(file -Lb "$(realpath -- "$1")")" in
-			'PDF document'*) extension=pdf ;;
-			'PostScript document'*) extension=eps ;;
-			'JPEG image data'*) extension=jpg ;;
-			'PNG image data'*) extension=png ;;
-		esac
-	elif test -f "$1" && test -r "$1"; then
-		case "$1" in *.*)
-			case "$(printf %s "${1##*.}" | tr A-Z a-z)" in
-				pdf) extension=pdf ;;
-				jpg|jpeg) extension=jpg ;;
-				png) extension=png ;;
-				ps|eps) extension=eps ;;
-			esac
-		esac
-	fi
-	[ -n "$extension" ] && echo "$extension"
-}
-##
-##  Define a function to output verbose comments:
-##
-prattle() { ## second argument here is non-null for continuation lines
-	if test $verbose = true; then
-		prefix1="  pdfjam:"
-		prefix2=$(printf "%s" "$prefix1" | sed 's/pdfjam:/       /')
-		indent=""
-		if test "$PDFJAM_CALL_NUMBER" -gt 0 && test "$batch" != true; then
-			indent="    "
-		fi
-		IFS="$newline"
-		lineCounter=0
-		for line in ${1}; do
-			lineCounter=$((lineCounter + 1))
-			if test $lineCounter -eq 1 && test ! -n "${2}"; then
-				if test -w "$PDFJAM_MESSAGES_FILE"; then
-					printf "$prefix1$indent %s\n" "$line" >> \
-						"$PDFJAM_MESSAGES_FILE"
-				else
-					messages="$messages$prefix1$indent $line$newline"
-					## msg file not made yet
-				fi
-			else
-				if test -w "$PDFJAM_MESSAGES_FILE"; then
-					printf "$prefix2$indent %s\n" "$line" >> \
-						"$PDFJAM_MESSAGES_FILE"
-				else
-					messages="$messages$prefix2$indent $line$newline"
-					## msg file not made yet
-				fi
-			fi
-		done
-		IFS="$OIFS"
-	fi
-	return
-}
-##
-##  And here's the first piece of verbose commentary:
-##
-prattle "----" 1
-prattle "This is pdfjam version ${version}."
-##
-#########################################################################
-##
-##  CONFIGURATION
-##
-##  THESE SETTINGS WILL BE OVERRIDDEN by any found in configuration
-##  files.  By default such files are found at any or all of
-##     /etc/pdfjam.conf
-##     /usr/share/etc/pdfjam.conf
-##     /usr/local/share/pdfjam.conf
-##     /usr/local/etc/pdfjam.conf
-##     $HOME/.pdfjam.conf
-##  (And they are read in that order; if a setting is made more than
-##  once, the last instance prevails.)
-##
-##  An example configuration file can be found at
-##     https://github.com/pdfjam/pdfjam
-##
-##  The path searched for site-wide configuration files can be changed
-##  by editing the variable 'configpath' at the top of this file.
-##
-##
-##  First get the full path (if it exists) to pdflatex:
-##
-latex=$(command -v pdflatex)
-if [ -z "$latex" ]; then latex="not found"; fi
-##
-##  Likewise for the pdfinfo and iconv (only needed for `--keepinfo'):
-##
-pdfinfo=$(command -v pdfinfo)
-if [ -z "$pdfinfo" ]; then pdfinfo="not found"; fi
-iconv=$(command -v iconv)
-if [ -z "$iconv" ]; then iconv="not found"; fi
-##  Sanity check the 'file -Lb' utility to identify files if it works;
-##  rely on the file extension otherwise.
-case "$(file -Lb "$0" 2>/dev/null)" in
-	'POSIX shell script'*) checkfiles=checkfiles ;;
-	*) checkfiles=
-esac
-##
-##  Defaults
-##
-outFile="$pwd"      ##  Output to the current working directory
-suffix=pdfjam       ##  Default filename suffix to be used when
-##                      --outfile is either (a) a directory, or (b)
-##                      not specified in a --batch call.
-keepinfo=           ##  Don't try to preserve "pdfinfo" data
-landscape=          ##  Use portrait./Do not switch width and height.
-twoside=            ##  No "twoside" option to documentclass
-tidy=tidy           ##  Delete all temporary files at the end
-runs=1              ##  Run latex just once
-builddir=           ##  Directory to use instead of temporary one
-enc=                ##  Have `iconv` guess command line encoding
-preamble=           ##  Default LaTeX preamble string.
-##  END OF SETTINGS MADE DIRECTLY WITHIN THE SCRIPT
-##
-##  Now read the site's or user's configuration file(s) if such exist,
-##  unless '--vanilla' was specified.
-##
-configpath="$configpath:${XDG_CONFIG_HOME:-$HOME/.config}"
-if test "$vanilla" != true; then
-	if test "$PDFJAM_CALL_NUMBER" = 0; then ## not a secondary call to pdfjam
-		configFiles=$(printf "%s" "$configpath" |
-			sed 's/:/\/pdfjam.conf:/g; s/$/\/pdfjam.conf/')
-		configFiles="${configFiles}:$HOME/.pdfjam.conf"
-		PDFJAM_CONFIG=""
-		prattle "Reading any site-wide or user-specific defaults..."
-		IFS=':'
-		for d in $configFiles; do
-			if test -f "$d"; then
-				change=$(sed '/^ *#.*/d ; s/ *#.*//; s/^ *//' "$d")
-				comment="## ${newline}## From ${d}: ${newline}##"
-				PDFJAM_CONFIG="$PDFJAM_CONFIG$comment$newline$change$newline"
-			fi
-		done
-		IFS="$OIFS"
-		PDFJAM_CONFIG=$(printf "%s" "$PDFJAM_CONFIG" | sed 's/^/    /')
-		if test "$batch" = true; then export PDFJAM_CONFIG; fi
-		if test -z "$PDFJAM_CONFIG"; then
-			prattle "(none found)" 1
-		else
-			prattle "$PDFJAM_CONFIG" 1
-		fi
-	fi
-	if test -n "$PDFJAM_CONFIG"; then eval "$PDFJAM_CONFIG"; fi
-else
-	if test "$PDFJAM_CALL_NUMBER" -eq 0; then
-		prattle "Called with '--vanilla': no user or site configuration"
-		prattle "files will be read." 1
-	fi
-fi
-if [ -n "$paper" ] && [ -n "$papersize" ]; then
-	prattle "Both paper and papersize configured, ignoring papersize" 1
-	papersize=
-fi
-## For backwards compatibility, check here for a $pdflatex setting in the config file
-if [ -n "${pdflatex:-}" ]; then latex="$pdflatex"; fi
-##
-##  If paper size is not set, get default paper size from libpaper if
-##  possible, otherwise guess A4.
-##
-paperformats=:a0:a1:a2:a3:a4:a5:a6:b0:b1:b2:b3:b4:b5:b6:c0:c1:c2:c3:c4:c5:c6\
-:ansia:ansib:ansic:ansid:ansie:letter:legal:executive:b0j:b1j:b2j:b3j:b4j:b5j:b6j:
-to_paper() {
-	printf %s "$1"|grep -q '^[A-Za-z0-9]*$' || return 2 # make sure input is harmless
-	paper=$(echo "$1" | tr A-Z a-z)
-	paper=${paper%paper}
-	echo $paperformats|grep -q ":$paper:" || return 1
-	case $paper in
-	b?j) ;;
-	*) paper="$paper"paper
-	esac
-	echo "$paper"
-}
-paperspec=
-if test -z "$paper"; then
-	if command -v paper >/dev/null; then  ## provided by libpaper>=2
-		paperspec=$(paper)
-		if echo "$paperspec" | grep -q ': '; then
-			if ! paper=$(to_paper "${paperspec%%: *}"); then
-				paperdimensions=$(echo "$paperspec" | cut -f 2 -d " ")
-				paperunit=$(echo "$paperspec" | cut -f 3 -d " ")
-				if test "$paperunit" = "pt"; then paperunit=bp; fi
-				paperwidth=$(echo "$paperdimensions" | cut -f 1 -d "x")
-				paperheight=$(echo "$paperdimensions" | cut -f 2 -d "x")
-				papersize="$paperwidth$paperunit,$paperheight$paperunit"
-			fi
-		else
-			prattle "The 'paper' program seems not to be working; not using it" 1
-		fi
-	fi
-	if test -z "$paper$papersize"; then
-		if command -v paperconf >/dev/null; then  ## provided by libpaper>=1
-			paper=$(to_paper "$(paperconf)") \
-				|| papersize=$(paperconf -s \
-				| sed -nE '1s/^([0-9]*(\.[0-9]+)?) ([0-9]*(\.[0-9]+)?)$/\1bp,\3bp/p')
-		fi  ## the above did not work
-		if test -z "$paper$papersize"; then
-			paper='a4paper' ## fallback paper size is ISO A4
-			papersize=''    ## clear papersize
-		fi
-	fi
-fi
-##
-##  END OF CONFIGURATION BLOCK
-##
-#########################################################################
-##
-##  HELP TEXT
-##
-##  Defines the output of 'pdfjam --help'
-##
-helptext="
-insert contents of pdfjam-help.txt here
-"
-##
-##  END OF HELP TEXT
-##
-#########################################################################
-#
-# If --help is given, print help and exit. We do this here so that the
-# configuration files have already been read, and default values can be
-# shown in the help
-for arg; do
-	case $arg in
-	--help | -u | -h)
-		printf "%s\n" "$helptext"
-		exit 0;;
-	*) ;;
-	esac
-done
-#########################################################################
-##
-##  ERROR CODES
-##
-E_USAGE=64           #  command line usage error
-E_NOINPUT=66         #  cannot open input
-E_UNAVAILABLE=69     #  service unavailable
-E_SOFTWARE=70        #  internal software error
-E_OSFILE=72          #  file does not exist or cannot be opened
-E_CANTCREATE=73      #  can't create (user) output file
-E_CONFIG=78          #  configuration error
-##
-##  Define a function to print an error message and exit:
-##
-error_exit() {
-	if [ -r "$PDFJAM_MESSAGES_FILE" ]; then
-		cat "$PDFJAM_MESSAGES_FILE" >&2
+#!/usr/bin/env texlua
+-- BUG: pdfjam --a4paper --landscape b 2 k b 3 k b 4 k b 5 k b 6 k b 7 k b 8 k b 9 k b 10 k b 11 k b 12 k b 13 k b 14 k b 15 k -o out.pdf
+-- does not produce any output (see badges)
+version="N.NN"
+kpse.set_program_name("kpsewhich")
+require "lualibs"
+patterns = lpeg.patterns
+
+DEBUG=true
+
+configpath = {"/etc", "/usr/share/etc", "/usr/local/share", "/usr/local/etc"}
+home = os.getenv("HOME")
+
+do
+	local a = os.type == "windows" and os.getenv("AppData")
+		or os.getenv("XDG_CONFIG_HOME")
+		or home and file.join(home, ".config")
+	if a then table.insert(configpath, a) end
+end
+
+-- utilities --
+
+function identity(x) return x end
+
+function exit(code) collectgarbage() os.exit(code, true) end
+
+function err(s, ...)
+	if not s then return end
+	explicit_error=true
+	collectgarbage()
+	local dbg = debug.getinfo(2, "nSl")
+	local source = " [" .. dbg.short_src .. ":" .. dbg.currentline .. " " .. dbg.name .. "]"
+	s = string.gsub(s, "%f[?!.]$", ".")
+	print(string.format("PDFjam: Error: " .. s .. source, ...))
+	error()
+end
+function warn(s, ...)
+	if not s then return end
+	print(string.format("Warning: " .. s, ...))
+end
+
+function debugprint(s, ...)
+	if not DEBUG then return end
+	io.stderr:write(string.formatters[s.."\n"](...))
+end
+
+-- string utilities --
+
+function embrace(s)
+	if string.find(s, "[],=]") and not
+		(string.sub(s, 1, 1) == "{" and string.sub(s, #s) == "}") then
+		return "{" .. s .. "}"
+	else return s
+	end
+end
+
+function unbrace(s)
+	if string.sub(s, 1, 1) == "{" and string.sub(s, #s) == "}" then
+		return string.sub(s, 2, #s-1)
+	else return s
+	end
+end
+
+function enquote(s)
+	return "'" .. string.gsub(s, "'", "'\\''") .. "'"
+end
+
+-- argument massage --
+
+-- Give a common way to enter multi-value arguments, also used for page specs.
+-- The underlying LaTeX packages expect them either by spaces or by commas with spaces stripped of.
+-- We accept both and transform any run of separators into a single space respectively comma.
+-- We also strip leading and trailing separators, thus leaving no empty entries.
+-- However, content in braces is left as is. (Especially you get an empty page via `{}`.)
+-- More than the necessary number of values are ignored by the packages, so we accept them likewise (we may give a warning, though).
+-- The values usually get expanded/assigned to dimens, so we need to accept TeX code in addition to numbers.
+-- The graphics package adds bp as a unit where no unit is given.
+-- We thus do the same for options to other packages.
+
+do
+	sep = lpeg.S"\t\n\v\f\r ,"
+	local normaltoken = "\\" * ((lpeg.R"AZ" + lpeg.R"az" + lpeg.S":@_")^1 + 1) + (1 - lpeg.S"{}")
+	textoken = lpeg.P{normaltoken + "{" * lpeg.V(1)^0 * "}"}
+	local group = "{" * textoken^0 * "}"
+	local x = normaltoken - sep + group
+	local unbalanced = -1 + lpeg.P( function(s, i)
+		err("Unbalanced braces in '"..string.sub(s, 1, i).."<--here "..string.sub(s, i+1) .. "'")
+	end )
+	local function tosep(d)
+		local pattern = lpeg.Cs(sep^0/"" * x^0 * (sep^1/d * x^1)^0 * (sep^0/"")) * unbalanced
+		return function(v) return lpeg.match(pattern, v) end
+	end
+	tocomma = tosep","
+	tospace = tosep" "
+end
+
+function optgroup_pattern(x)
+	return lpeg.P"{" * x * lpeg.P"}" + x
+end
+
+-- file utilities --
+
+-- variant of file.copy which works independently of /dev/stdin and /dev/stdout
+function file_copy(oldname, newname)
+	if oldname and newname then
+		local data
+		if oldname == "" then
+			if os.which"test" and os.execute"test -t 0" == 0 then
+				err("No input file given.")
+			end
+			data = io.stdin:read"a"
+		else data = io.loaddata(oldname)
+		end
+		if data and data ~= "" then
+			if newname == "" then io.write(data)
+			else io.savedata(newname, data) end
+		end
+	end
+end
+
+-- directory utilities --
+
+function rmdir(t) os.spawn({"rm", "-rf", t[1]}) end
+function mkdir(d)
+	local success
+	d, success = dir.makedirs(d)
+	if not success then err("Could not create directory " .. d) end
+	return file.collapsepath(d, true)
+end
+function gcdir(d)
+	local t = {d}
+	setmetatable(t, {__gc = rmdir})
+	return t
+end
+function providedir(d, tidy)
+	if d then
+		return mkdir(d)
 	else
-		printf "%s" "$messages" 1>&2
-	fi
-	printf "  pdfjam ERROR: %s\n" "$1" 1>&2
-	exit "$2"
-}
-##
-#########################################################################
-##
-##  READ AND PROCESS THE ARGUMENTS
-##
-##  In case of NO argument supplied, mention 'pdfjam --help':
-##
-if test $# -eq 0; then
-	prattle "No arguments supplied; continuing anyway. (See"
-	prattle "'pdfjam --help' for information on usage.)" 1
-fi
-##
-##  Now do the argument loop.
-##
-fileSpec=""
-miscOptions=""
-callOptions=""
-optionsFinished=""
-##
-##  First note any '--checkfiles' or '--no-checkfiles' option
-##
-for arg; do
-	case "$arg" in
-	--checkfiles)
-		checkfiles=checkfiles
-		callOptions="$callOptions $arg";;
-	--no-checkfiles)
-		checkfiles=
-		callOptions="$callOptions $arg";;
-	esac
-done
-while test -n "$1$2"; do
-	argUnmatched=""
-	if test "$optionsFinished" != true; then
-		case "$1" in
-		--) ## signals end of command-line options
-			optionsFinished=true
-			shift
-			continue
-			;;
-		--configpath)
-			printf "%s\n" "$configpath"
-			exit 0
-			;;
-		--* | -q | -o)
-			if test "$pageSpecAwaited" = true; then
-				## fill in any missing page specs before continuing
-				fileSpec=$(printf "%s" "$fileSpec" | sed 's/|awaited/|-/g')
-				pageSpecAwaited=false
-			fi
-			case "$1" in
-			--checkfiles | --no-checkfiles | --batch) ;;  ## already done above
-			--vanilla)
-				callOptions="$callOptions $1"
-				;;
-			--quiet | -q)
-				verbose=false
-				callOptions="$callOptions --quiet"
-				;;
-			--outfile | --output | -o)
-				outFile="$2"
-				callOptions="$callOptions --outfile $(enquote "$2")"
-				shift
-				;;
-			--suffix)
-				if test -n "$2"; then
-					suffix="$2"
-					callOptions="$callOptions $1 $(enquote "$2")"
-					shift
-				else
-					error_exit \
-						"'--suffix' string has zero length" \
-						$E_USAGE
-				fi
-				;;
-			--runs)
-				runs="$2"
-				## check if the argument is a number > 0
-				if [ "$runs" -lt 1 ] 2>/dev/null; then
-					error_exit \
-						"'--runs' number must be at least 1" \
-						$E_USAGE
-				fi
-				callOptions="$callOptions $1 $2"
-				shift
-				;;
-			--paper)
-				if ! paper=$(to_paper "$2"); then
-					paper="$2"
-					prattle "Paper '$paper' unknown to pdfjam."
-				fi
-				papersize=''
-				callOptions="$callOptions $1 $(enquote "$paper")"
-				shift
-				;;
-			--a?paper | --b?paper | --c?paper | --ansi?paper | \
-			--letterpaper | --legalpaper | --executivepaper | \
-			--b0j | --b1j | --b2j | --b3j | --b4j | --b5j | --b6j)
-				paper=$(to_paper "${1#--}") \
-					|| error_exit "Bad paper option '$1'." $E_USAGE
-				papersize=''
-				callOptions="$callOptions --paper $paper"
-				;;
-			--papersize)
-				paper=''
-				papersize=$(to_papersize "$2")
-				callOptions="$callOptions $1 $(enquote "$papersize")"
-				shift
-				;;
-			--preamble)
-				preamble="$preamble$newline$2"
-				shift
-				;;
-			--latex | --builddir | --enc | --pagecolor | \
-			--pdftitle | --pdfauthor | --pdfsubject | --pdfkeywords)
-				eval "${1#--}=$(escape_quote "$2")"
-				callOptions="$callOptions $1 $(enquote "$2")"
-				shift
-				;;
-			--tidy | --keepinfo | --landscape | --twoside | --otheredge)
-				eval "${1#--}=${1#--}"
-				callOptions="$callOptions $1"
-				;;
-			--no-tidy | --no-keepinfo | --no-landscape | --no-twoside | \
-			--no-otheredge)
-				eval "$(echo "${1#--no-}"|tr - _)="
-				callOptions="$callOptions $1"
-				;;
-			--longedge)  ##  legacy
-				otheredge=otheredge
-				callOptions="$callOptions --otheredge"
-				;;
-			--shortedge)  ##  legacy
-				otheredge=
-				callOptions="$callOptions --no-otheredge"
-				;;
-			--templatesize)  ##  provide more friendly syntax
-				case "$2" in
-					\{*\}) value="$2" ;;
-					*) value="{${2%%,*}}{${2#*,}}" ;;
-				esac
-				miscOptions="$miscOptions,${1#--}=$value"
-				callOptions="$callOptions ${1} $(enquote "$2")"
-				shift
-				;;
-			--*) ##  miscellaneous options for \includepdfmerge
-				miscOptions="$miscOptions,${1#--}=$(embrace "$2")"
-				callOptions="$callOptions ${1} $(enquote "$2")"
-				shift
-				;;
-			esac
-			;;
-		'' | *)
-			argUnmatched=true
-			;;
-		esac
-	fi
-	if test "$optionsFinished" = true || test "$argUnmatched" = true; then
-		case "$1" in
-		"" | /dev/stdin)
-			fileSpec="$fileSpec$newline/dev/stdin|unknown|awaited"
-			pageSpecAwaited=true
-			inputFromStdin=true
-			;;
-		*) ##  All other args should be source files or page selections; if not, we'll quit
-			if ! [ -e "$1" ]; then
-				valid_input=
-			elif extension="$(get_extension "$1")"; then
-				valid_input=input
-			else
-				valid_input=path
-			fi
-			if is_valid_pagespec "$1"; then valid_pagespec=pagespec; else valid_pagespec=; fi
-			case "$valid_input-$valid_pagespec-$pageSpecAwaited" in
-				##  12 combinations: 6 erroneous and 6 working.
-				##  Of the working combinations 1 is ambiguous and 1 dubious.
-				input-pagespec-true) prattle "Ambiguous argument '$1' interpreted as pagespec. If you meant the file, please write './$1' instead." ;;
-				input-pagespec-false) prattle "Dubious argument '$1' interpreted as file due to its position. (Write './$1' for extra clarity.)" ;;
-				path-pagespec-false) error_exit "The argument '$1' is both a valid path and a pagespec but a valid PDF/EPS/JPG/PNG file was expected." $E_NOINPUT ;;
-				path--false) error_exit "The argument '$1' is a valid path but not a valid PDF/EPS/JPG/PNG file." $E_NOINPUT ;;
-				path--true) error_exit "The argument '$1' is a valid path but not a valid PDF/EPS/JPG/PNG file or pagespec." $E_USAGE ;;
-				-pagespec-false) error_exit "The argument '$1' is a valid pagespec but not a valid PDF/EPS/JPG/PNG file." $E_NOINPUT ;;
-				--true) error_exit "Input file or pagespec expected, but '$1' neither exists in your file system nor is it a pagespec." $E_USAGE ;;
-				--false) error_exit "Input file expected, but '$1' does not even exist in your file system." $E_NOINPUT ;;
-			esac
-			case "$valid_input-$valid_pagespec-$pageSpecAwaited" in  ##  The 6=3+3 working combinations
-				*-pagespec-true) fileSpec="$(printf %s "$fileSpec" | sed "s/|awaited$/|$1/")"; pageSpecAwaited=false ;;
-				input-*-*) fileSpec="$fileSpec$newline$1|$extension|awaited"; pageSpecAwaited=true ;;
-			esac
-		esac
-	fi
-	shift
-done
-##
-##  Use the default page spec for any that remain unspecified:
-##
-fileSpec=$(printf "%s" "$fileSpec" | sed '/^$/d; s/^ //; s/|awaited$/|-/')
-##
-##  Check whether input from stdin should be used by default:
-if test "$PDFJAM_CALL_NUMBER" -eq 0 && test "$inputFromStdin" != true; then
-	## the special argument '/dev/stdin' was not used
-	if test -z "$fileSpec"; then
-		## no argument specifying a PDF source was given
-		inputFromStdin=true
-		fileSpec="/dev/stdin|unknown|-"
-		prattle "No PDF/EPS/JPG/PNG source specified: input is from stdin."
-	fi
-fi
-## Massage options
-[ "${paper:+set}" = "${papersize:+set}" ] && error_exit "Exactly one of \
-\$paper='$paper' and \$papersize='$papersize' must be set." $E_SOFTWARE
-miscOptions="${miscOptions#,}"
-if test -n "$preamble"; then
-	callOptions="$callOptions --preamble $(enquote "${preamble#"$newline"}")"
-fi
-callOptions="${callOptions# }"
-if [ -n "$otheredge" ]; then
-	otheredge='
-{\makeatletter\AddToHook{shipout/before}{\ifodd\c@page\pdfpageattr{/Rotate 180}\fi}}'
-fi
-if [ -n "$papersize" ]; then
-	if [ -n "$landscape" ]; then
-		## geometry package ignores landscape, thus swap x,y → y,x manually
-		papersize="${papersize#*,},${papersize%%,*}"
-	fi
-	papersize="papersize={$papersize}"
-fi
+		d = os.tmpname()
+		os.remove(d)
+		return mkdir(d), tidy and gcdir(d) or nil
+	end
+end
+slash = os.type == "windows" and "\\" or "/"
+function ismkdir(d)
+	if lfs.isdir(d) then
+	elseif string.sub(d, #d) == slash then mkdir(d)
+	else return end
+	return d
+end
 
-documentOptions=
-for i in "$paper" "$landscape" "$twoside"; do
-	[ -n "$i" ] && documentOptions="$documentOptions$i,"
-done
-##
-##  END OF ARGUMENT PROCESSING
-##
-#########################################################################
-##
-##  CHECK SYSTEM SETUP
-##
-##  These checks are not repeated in secondary calls.
-##
-if test "$PDFJAM_CALL_NUMBER" -eq 0; then ## not a secondary call
-	##  Check whether there's a suitable latex to use:
-	case "$latex" in
-	"not found")
-		error_exit "can't find pdflatex!" $E_UNAVAILABLE
-		;;
-	*) ##
-		if test ! -x "$latex"; then
-			error_exit \
-				"configuration error, $latex is not an executable file" \
-				$E_CONFIG
-		fi
-		;;
-	esac
-	##
-	##  Check that necessary LaTeX packages are installed:
-	##
-	modifyPath=$(printf "%s" "$latex" | sed 's/\/[^\/]*$//')
-	if [ -n "$modifyPath" ]; then
-		PATH="$modifyPath:$PATH"
-		export PATH
-	fi
-	case "$latex" in
-	*tectonic*) ;;
-	*)
-		(kpsewhich pdfpages.sty >/dev/null) \
-			|| error_exit \
-				"LaTeX package pdfpages.sty is not installed" \
-				$E_UNAVAILABLE
-		;;
-	esac
-fi
-if test -n "$keepinfo"; then
-	case "$pdfinfo" in
-	"not found")
-		if test "$PDFJAM_CALL_NUMBER" -eq 0; then
-			prattle \
-				"The pdfinfo utility was not found, so --keepinfo is ignored."
-		fi
-		keepinfo=
-		;;
-	pdfinfo) ;;
-	*) ## $pdfinfo was set in a configuration file
-		if test ! -x "$pdfinfo"; then
-			if test "$PDFJAM_CALL_NUMBER" -eq 0; then
-				prattle \
-					"No pdfinfo utility at $pdfinfo, so --keepinfo is ignored."
-				keepinfo=
-			fi
-		fi
-		;;
-	esac
-	case "$iconv" in
-	"not found")
-		if test "$PDFJAM_CALL_NUMBER" -eq 0; then
-			prattle \
-				"The iconv utility was not found, so --keepinfo is ignored."
-		fi
-		keepinfo=
-		;;
-	iconv) ;;
-	*) ## $iconv was set in a configuration file
-		if test ! -x "$iconv"; then
-			if test "$PDFJAM_CALL_NUMBER" -eq 0; then
-				prattle \
-					"No iconv utility at $iconv, so --keepinfo is ignored."
-				keepinfo=
-			fi
-		fi
-		;;
-	esac
-fi
-using_non_cygwin_latex_from_cygwin() {
-	if [ -z "${__cache__using_non_cygwin_latex_from_cygwin}" ]; then
-		if uname | grep -q CYGWIN \
-			&& "${latex}" -version | head -1 | grep -qv Cygwin; then
-			__cache__using_non_cygwin_latex_from_cygwin=0
+-- executable utilities --
+
+local lookup = os.type == "windows" and "where.exe" or "command -v"
+function executable(exe)
+	exe = enquote(exe)
+	return io.popen(lookup .. " " .. exe):read() and exe
+end
+function pread(t, mode, default)
+	default = default or ""
+	local o = popen(table.unpack(t))
+	return o and o:read(mode) or default
+end
+function popen(exe, ...)
+	exe = executable(exe)
+	return exe and io.popen(exe .. table.concat({"", ...}, " "))
+end
+function execute(exe, ...)
+	exe = executable(exe) or err("Command '" .. exe .. "' not found")
+	return os.execute(exe .. table.concat({"", ...}, " "))
+end
+
+-- option parser
+
+function getopt(arg)
+	local vanilla
+	for _, w in ipairs(arg) do
+		if w == "--" then break
+		elseif w == "--vanilla" then vanilla = true
+		elseif w == "--no-vanilla" then vanilla = nil
+		end
+	end
+	local options, t = define_options(), define_initial()
+	local a
+	if not vanilla then
+		local p = ConfigParser:new({options = options, default_handler = numberedopt, t = t})
+		for _, d in ipairs(configpath) do p:parse(file.join(d, "pdfjam.conf")) end
+		if home then p:parse(file.join(home, ".pdfjam.conf")) end
+		t = p.t
+	end
+	local parser = Parser:new({
+		options = options,
+		short_options = short_options,
+		default_handler = numberedopt,
+		t = t,
+	})
+	a, t = parser:parse(arg)
+	t.vanilla = nil
+	debugprint("Positional parameters: %T", a)
+	if DEBUG then io.stderr:write(table.serialize(t, "Options")) end
+	return Interpreter:new({a=a, t=t, options=options})
+end
+
+--- @class Option
+--- @field argument? boolean If set, defines whether an argument is required/forbidden. Used by Parser.
+--- @field func? fun(v:string, a:string, t:table): string|table Used by Parser for figuring out what to set in t
+--- @field show? fun(v:any, t:table): any Used by Interpreter to translate the value set by `func`
+--- @field retrieve? fun(v:any, t:table): string Used by Interpreter to translate the value returned by `show`
+
+--- Prototype for parsing
+--- @class Parser
+--- @field options {[string]: string|Option} Input map of option names to their respective parsers/handlers
+--- @field short_options {[string]: string} Input map of short aliases for long options
+--- @field default_handler Option Default option parser/handler
+--- @field t table<integer|string, string|table> Output of the parsed options and their order
+--- @field a string[] Output of the positional arguments
+--- @field private i integer current word counter, stepped by 1 or 2 for options
+Parser = {}
+function Parser:new(obj)
+	obj = obj or {}
+	obj.options = obj.options or {}
+	obj.short_options = obj.short_options or {}
+	obj.default_handler = obj.default_handler or {}
+	obj.t = obj.t or {}
+	self.__index = self
+	setmetatable(obj, self)
+	return obj
+end
+
+function Parser:parse(args)
+	self._args = args
+	self.a = {}
+	self.i = 1
+	while self.i <= #args do
+		self:parse_word(args[self.i])
+		self.i = self.i + 1
+	end
+	return self.a, self.t
+end
+
+function Parser:parse_word(word)
+	if not self.dash_seen and word == "--" then
+		self.dash_seen = true
+	elseif not self.dash_seen and string.sub(word, 1, 2) == "--" then
+		self:parse_long_option(string.sub(word, 3))
+	elseif self.dash_seen or string.sub(word, 1, 1) ~= "-"
+		or not self:parse_short_options(word) then
+		self:parse_positional_argument(word)
+	end
+end
+
+function Parser:parse_long_option(a)
+	self:set_option(lpeg.match(lpeg.splitat("=", true), a))
+end
+
+function Parser:parse_short_options(word)
+	self.j = 2
+	local s = string.sub(word, 2, 2)
+	if not self.short_options[s] then return false end
+	while s ~= "" do
+		local a = self.short_options[s]
+		if a then
+			self:set_option(a)
 		else
-			__cache__using_non_cygwin_latex_from_cygwin=1
-		fi
-	fi
-	return "${__cache__using_non_cygwin_latex_from_cygwin}"
-}
-##
-##  END OF CHECKING THE SETUP
-##
-#########################################################################
-##
-##  TEMPORARY FILES
-##
-##  Make a secure temporary directory (following
-##  the autoconf manual).
-##
-##  Use mktemp if possible; otherwise fall back on mkdir,
-##  with random name to make file collisions less likely.
-##
-if test "$PDFJAM_CALL_NUMBER" = 0; then ## don't repeat this work for secondary calls
-	if test -z "$builddir"; then
-		PDFJAM_TEMP_DIR=''
-		tidycode=$([ -n "$tidy" ] && echo ';cd "$pwd";rm -rf "$PDFJAM_TEMP_DIR"')
-		trap "IFS='$OIFS'$tidycode;exit 1" HUP INT TERM
-		trap "IFS='$OIFS'$tidycode" EXIT
-		get_tempfile_dir() {
-			for i in "$TMPDIR" "$TMP" /tmp /var/tmp .; do
-				[ -d "$i" ] && [ -w "$i" ] && printf %s "$i" && return
-			done
-			return 1
-		}
-		tempfileDir="$(get_tempfile_dir)" || error_exit \
-			'Cannot determine directory for temporary files.
-		Fix your installation or provide --builddir PATH.' $E_SOFTWARE
-		##  Try mktemp. If this fails, portably make up a random number.
-		PDFJAM_TEMP_DIR=$( (umask 077 && mktemp -d "$tempfileDir/pdfjam-XXXXXX") 2>/dev/null) \
-			|| {
-				random=$(awk 'END { srand(); printf ("%d\n", rand()*1000000); }' /dev/null)
-				PDFJAM_TEMP_DIR="$tempfileDir/pdfjam$$-$random"
-				(umask 077 && mkdir "$PDFJAM_TEMP_DIR")
-			} && [ -d "$PDFJAM_TEMP_DIR" ] && [ -w "$PDFJAM_TEMP_DIR" ] \
-			|| error_exit 'Failed to create a temporary directory.
-		Fix your installation or provide --builddir PATH.' $E_SOFTWARE
-		if [ -z "$tidy" ]; then
-			prattle "Temporary directory for this job is
-        $PDFJAM_TEMP_DIR"
-		fi
+			self:error("unknown option -" .. s)
+		end
+		self.j = self.j + 1
+		s = string.sub(word, self.j, self.j)
+	end
+	self.j = nil
+	return true
+end
+
+function Parser:set_option(a, v)
+	if string.sub(a, 1, 3) == "no-" then
+		self:unset(string.sub(a, 4))
+		if v then self:error("unsetting expects no value") end
+		return
+	end
+	local o = self.options[a] or self.default_handler
+	if type(o) == "string" then -- alias
+		return self:set_option(o, v)
+	end
+	assert(type(o) == "table")
+	if o.argument == false then
+		if v then self:error("no argument allowed") end
 	else
-		tidy=
-		(umask 077 && mkdir -p "$builddir") || error_exit \
-			"Cannot create build directory '$builddir'." $E_USAGE
-		PDFJAM_TEMP_DIR="$(realpath -- "$builddir")"
-	fi
-	export PDFJAM_TEMP_DIR ##  so that same dir is used in secondary calls
-	PDFJAM_MESSAGES_FILE="$PDFJAM_TEMP_DIR"/messages.txt
-	export PDFJAM_MESSAGES_FILE
-	## so that secondary calls can write messages there as well
-	printf "%s" "$messages" >"$PDFJAM_MESSAGES_FILE" ## initial file contents
-	messages=""                                      ## we won't be using this variable again!
-else
-	[ -d "$PDFJAM_TEMP_DIR" ] || error_exit \
-		"Temporary directory $PDFJAM_TEMP_DIR missing." $E_SOFTWARE
-	PDFJAM_TEMP_DIR="$PDFJAM_TEMP_DIR/file$PDFJAM_CALL_NUMBER"
-	(umask 077 && mkdir -p "$PDFJAM_TEMP_DIR")
-fi
-if using_non_cygwin_latex_from_cygwin; then
-	PDFJAM_TEMP_DIR=$(cygpath -w "$PDFJAM_TEMP_DIR")
-fi
-##
-##  TEMPORARY DIRECTORY ALL DONE
-##
-#########################################################################
-##
-##  HANDLING THE "--batch" OPTION
-##
-##  If --batch was used, we'll call pdfjam separately on each input
-##  file.
-##
-if test "$batch" = true; then
-	if test "$fileSpec" = ""; then
-		error_exit "--batch was used, but no PDF/EPS/JPG/PNG source file(s) specified" \
-			$E_USAGE
-	fi
-	if test "$inputFromStdin" = true; then
-		error_exit "--batch cannot be used with input from stdin" \
-			$E_USAGE
-	fi
-	IFS="$newline"
-	for k in $fileSpec; do # TODO
-		sourcePath=$(enquote "${k%\|*\|*}")
-		pageSpec=${k##*\|}
-		callNumber=$((PDFJAM_CALL_NUMBER + 1))
-		prattle "--"
-		prattle "Processing file ${callNumber}: $sourcePath ..."
-		prattle "Page spec is '$pageSpec'."
-		PDFJAM_EFFECTIVE_CALL="$0 $callOptions -- $sourcePath $pageSpec"
-		export PDFJAM_EFFECTIVE_CALL
-		PDFJAM_CALL_NUMBER=$callNumber
-		export PDFJAM_CALL_NUMBER
-		eval "$PDFJAM_EFFECTIVE_CALL"
-		## i.e., call pdfjam again with one input file
-	done
-	if [ "$verbose" = "true" ]; then cat "$PDFJAM_MESSAGES_FILE" >&2; fi
-	IFS=$OIFS
-	exit 0
-fi
-##
-##  END OF THE '--batch' PROCESSING
-##
-#########################################################################
-##
-##  RECORD THE EFFECTIVE CALL TO PDFJAM, FOR POSSIBLE DEBUGGING PURPOSES
-##
-##  Save the text of this (effective) call to pdfjam in a temporary file,
-##  for later inspection if necessary.
-##
-##  For secondary calls, the effective call text is already made;
-##  otherwise we make it here.
-##
-if test "$PDFJAM_CALL_NUMBER" -gt 0; then
-	theCall="$PDFJAM_EFFECTIVE_CALL"
-else
-	filePageSpec=""
-	IFS="$newline"
-	for k in $fileSpec; do
-		sourcePath=$(enquote "${k%\|*\|*}")
-		pageSpec=${k##*\|}
-		filePageSpec="$filePageSpec$sourcePath $pageSpec "
-	done
-	IFS="$OIFS"
-	theCall="$0 $callOptions -- $filePageSpec"
-fi
-printf "%s\n%s\n" "cd $pwd" "$theCall" >"$PDFJAM_TEMP_DIR"/call.txt
-prattle "Effective call for this run of pdfjam:"
-prattle "$theCall" 1
-##
-#########################################################################
-##
-##  NOW MAKE THE INPUT FILE ETC., READY FOR LATEX
-##
-## initialize a string to supply to \includepdfmerge, forbid basename 'a'.
-filePageList=",a."
-counter=0  ## for name generation for non-harmless names
-##
-##  Make symbolic link(s) to the source file(s) in the temporary dir,
-##  and make the $filePageList string for input to \includepdfmerge
-##
-stdinUnread=true
-IFS="$newline"
-for k in ${fileSpec}; do
-	sourcePath="${k%\|*\|*}"
-	pageSpec=${k##*\|}
-	if ! is_valid_pagespec "$pageSpec"; then
-		error_exit "Bug: Somehow an invalid page spec got here: $pageSpec" $E_SOFTWARE
-	fi
-	case "$sourcePath" in
-	/dev/stdin)
-		uniqueName=stdin
-		if test "$stdinUnread" = true; then
-			if tty -s; then
-				error_exit \
-					"tty is connected to stdin, no PDF/JPG/PNG file found" \
-					$E_NOINPUT
-			fi
-			cat >"$PDFJAM_TEMP_DIR/$uniqueName"
-			# Figure out the correct extension right now.
-			if extension="$(get_extension "$PDFJAM_TEMP_DIR/$uniqueName")"; then
-				mv "$PDFJAM_TEMP_DIR/$uniqueName" "$PDFJAM_TEMP_DIR/$uniqueName.$extension"
-				uniqueName="$uniqueName.$extension"
+		v = v or self:argument(o.argument) or self:error("argument required")
+	end
+	local value, err = o.func(v, a, self.t)
+	self:error(err)
+	self:set(a, value)
+end
+
+function Parser:parse_positional_argument(word)
+	if self.last_positional_argument and self.last_positional_argument < self.i - 1 then
+		table.insert(self.a, false)
+	end
+	table.insert(self.a, word)
+	self.last_positional_argument = self.i
+end
+
+function Parser:get(a) return self.t[a] end
+function Parser:set(a, value) if value ~= nil then self.t[a] = value end end
+function Parser:unset(a) self.t[a] = nil end
+function Parser:word(n) return self._args[self.i + (n or 0)] end
+
+--- Read argument `w`.
+--- If `options` is given, only read `w` if `options[w]` exists.
+--- If `w` could be an option (starts with -), throw error.
+function Parser:argument(options)
+	assert(options==nil or type(options) == "table")
+	local w
+	if self.j then
+		w = string.sub(self:word(), self.j+1)
+		if options and not options[w] then return end
+		if w ~= "" then self.j = #self:word() return w end
+	end
+	w = self:word(1)
+	if options and not options[w] then return end
+	if not w then
+		self:error("argument required, but end of command line reached")
+	elseif string.sub(w, 1, 2) == "--"
+		or string.sub(w, 1, 1) == "-" and self.short_options[string.sub(w, 2, 2)] then
+		self:error("argument required, but the following word '" .. w
+			.. "' seems to be an option.\n\n\z
+			Tip: For supplying an argument starting with '-' use " .. self:word()
+			.. (string.sub(self:word(), 2, 2) == "-" and "=" or "") .. w .. " instead")
+	end
+	self.i = self.i + 1
+	return w
+end
+
+function Parser:error(s, ...)
+	if not s then return end
+	collectgarbage()
+	error(string.format("Error while parsing %s: " .. s .. ".", self:word(), ...))
+end
+
+ConfigParser = Parser:new()
+do
+	local spaces = patterns.spacer^0
+	local rest = lpeg.P(1)^0
+	local key = lpeg.C((1 - lpeg.S(" \t\f\v="))^1)
+	local value = lpeg.C(rest)
+	local entry = key * spaces * ("=" * spaces * value)^-1
+	local comment = "#" * rest * lpeg.Cc(false)
+	local line = spaces * (comment + entry) * -1
+	function ConfigParser:parse(file)
+		local f = io.open(file)
+		if f then
+			self.file = file -- for error messages
+			for l in f:lines() do
+				self.current = l -- for error messages
+				self:parse_word(lpeg.match(line, l))
+			end
+			f:close()
+		end
+		return self.t
+	end
+end
+function ConfigParser:parse_word(k, v)
+	if k == nil then self:error("illegal syntax")
+	elseif k then return self:set_option(k, v) end
+end
+function ConfigParser:argument(optional)
+	if optional then self:error("argument needed") end
+end
+function ConfigParser:error(s, ...)
+	if not s then return end
+	print(string.format("Problem while parsing %s in line '%s': " .. s .. ".", self.file, self.current, ...))
+end
+
+Interpreter = {}
+function Interpreter:new(obj)
+	local obj = obj or {}
+	obj.t = obj.t or {}
+	obj.options = obj.options or {}
+	self.__index = self
+	setmetatable(obj, self)
+	return obj
+end
+
+function Interpreter:show(a)
+	local v = self.t[a]
+	local f = self.options[a] and self.options[a].show
+	return f and v and f(v, self.t) or v
+end
+function Interpreter:pop(a)
+	local v = self.t[a]
+	if v ~= nil then
+		self.t[a] = nil
+		local f = self.options[a] and self.options[a].show
+		return f and f(v, self.t) or v
+	end
+end
+function Interpreter:retrieve(a)
+	local v = self:pop(a)
+	if v then
+		local f = self.options[a] and self.options[a].retrieve
+		return f and f(v, self.t) or v == true and a or a .. "=" .. embrace(v)
+	else return ""
+	end
+end
+
+function Interpreter:list(...)
+	local r
+	for _, a in ipairs({...}) do
+		local x = self:retrieve(a)
+		if x and x ~= "" then
+			r = r and r .. "," .. x or x
+		end
+	end
+	return r or ""
+end
+
+function Interpreter:numberedoptions()
+	local r
+	for i, option in ipairs(self.t) do
+		self.t[i] = nil
+		r = (r and r .. "," or "") .. self:retrieve(option)
+	end
+	return r or ""
+end
+
+-- pdfjam options --
+
+---Insert `a` into the sequential part of `t`, deleting a previous entry
+---@generic K, V
+---@param a K Key
+---@param t table<integer, K> Lookup table
+---@param v V Value
+---@return V v
+function numbered(v, a, t)
+	local pos = table.contains(t, a)
+	if pos then table.remove(t, pos) end
+	table.insert(t, a)
+	return v
+end
+numberedopt = {func = numbered}
+
+do
+	local bool_prose = {["true"]="true", yes="true", on="true", ["false"]="false", no="false", off="false"}
+	local boolopt = {
+		argument = bool_prose,
+		func = function(v, a, t)
+			if not v then return numbered(true, a, t) end
+			local b = bool_prose[v]
+			if b == nil then
+				return nil, "Cannot interpret '" .. v .. "' as boolean value.\n\n\z
+				Tip: Accepted values are 'true', 'yes' and 'on', respectively 'false', 'no' and 'off'"
 			else
-				error_exit "Input from stdin is no legid PDF/EPS/JPG/PNG file." $E_NOINPUT
-			fi
-			stdinUnread=false
-		fi
-		;;
-	*)
-		extension="${k%\|*}"
-		extension="${extension##*\|}"
-		case "$extension" in
-			pdf|eps|jpg|png) ;;
-			*) error_exit "Bug: Somehow an invalid extension got here." $E_SOFTWARE
-		esac
-		sourceFullPath="$(realpath -- "$sourcePath")"
-		tmpName="$(basename -- "$sourcePath")"
-		tmpName="${tmpName%.*}"
-		if is_harmless "$tmpName" && [ -n "${filePageList##*,"$tmpName".*}" ]; then
-			uniqueName="$tmpName.$extension"
-		else
-			counter=$((counter + 1))
-			uniqueName="source-$counter.$extension"
-		fi
-		if using_non_cygwin_latex_from_cygwin; then
-			cp -f "$sourceFullPath" "$PDFJAM_TEMP_DIR/$uniqueName"
-		else
-			ln -fs "$sourceFullPath" "$PDFJAM_TEMP_DIR/$uniqueName"
-		fi
-		;;
-	esac
-	filePageList="$filePageList,$uniqueName,$pageSpec"
-done
-IFS="$OIFS"
-filePageList="${filePageList#,a.,}"
-if using_non_cygwin_latex_from_cygwin; then
-	filePageList=$(printf %s "$filePageList" | tr \\\\ /)
-fi
-
-##
-##  Finally enter build directory
-##
-cd "$PDFJAM_TEMP_DIR" || exit 1
-
-##
-##  Do the pdfinfo stuff (if relevant)...
-##
-select_pdfinfo() {
-	##  pdfinfo fields are 17 chars wide.
-	##  This implementation preserves leading spaces
-	printf %s "$2" | awk "/^$(printf %-17s "$1:")/{print substr(\$0,18)}"
-}
-if test -n "$keepinfo"; then
-	prattle "Calling ${pdfinfo}..."
-	PDFinfo=$(pdfinfo -enc UTF-8 "$uniqueName")
-	pdftitl=$(select_pdfinfo 'Title'    "$PDFinfo")
-	pdfauth=$(select_pdfinfo 'Author'   "$PDFinfo")
-	pdfsubj=$(select_pdfinfo 'Subject'  "$PDFinfo")
-	pdfkeyw=$(select_pdfinfo 'Keywords' "$PDFinfo")
-fi
-
-echo_iconv_from_enc() {
-	printf %s "$1" | "$iconv" -f "$enc" -t UTF-8
-}
-if test -n "${pdftitle+X}"; then
-	pdftitl=$(echo_iconv_from_enc "${pdftitle-}")
-fi
-if test -n "${pdfauthor+X}"; then
-	pdfauth=$(echo_iconv_from_enc "${pdfauthor-}")
-fi
-if test -n "${pdfsubject+X}"; then
-	pdfsubj=$(echo_iconv_from_enc "${pdfsubject-}")
-fi
-if test -n "${pdfkeywords+X}"; then
-	pdfkeyw=$(echo_iconv_from_enc "${pdfkeywords-}")
-fi
-
-echo_hex_iconv_utf16be() {
-	printf '%s' "$1" \
-		| "$iconv" -f UTF-8 -t UTF-16BE \
-		| od -An -v -tx1 \
-		| tr -d '[:space:]'
-}
-addto_pdfinfo() {
-	if [ -n "$2" ]; then
-		## Convert to PDF string and append
-		raw_pdfinfo="$raw_pdfinfo
-    /$1 <feff$(echo_hex_iconv_utf16be "$2")> %"
-	fi
-}
-raw_pdfinfo=
-addto_pdfinfo Title    "$pdftitl"
-addto_pdfinfo Author   "$pdfauth"
-addto_pdfinfo Subject  "$pdfsubj"
-addto_pdfinfo Keywords "$pdfkeyw"
-if [ -n "$raw_pdfinfo" ]; then
-	raw_pdfinfo='
-\ifdefined\luatexversion% LuaLaTeX
-  \protected\def\pdfinfo{\pdfextension info}
-\fi
-\ifdefined\XeTeXversion% XeLaTeX
-  \protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
-\fi
-\ifdefined\pdfinfo%
-  \pdfinfo{%'"$raw_pdfinfo"'
-  }%
-\fi'
-fi
-
-## Apply $pagecolor if set
-if [ -n "$pagecolor" ]; then
-	colorcode="
-\\usepackage{color}
-\\definecolor{bgclr}{RGB}{$pagecolor}
-\\pagecolor{bgclr}"
-else
-	colorcode=
-fi
-##
-##  Now set up the LaTeX file
-##
-fileName="$(pwd)/a"
-(cat <<EndTemplate
-\batchmode
-\documentclass[$documentOptions]{article}$colorcode
-\usepackage[$papersize]{geometry}
-\usepackage[utf8]{inputenc}$raw_pdfinfo
-\usepackage{pdfpages}$otheredge$preamble
-\begin{document}
-\includepdfmerge[$miscOptions]{$filePageList}
-\end{document}
-EndTemplate
-) >"$fileName.tex"
-##
-##  INPUT FILES ARE ALL READY
-##
-#########################################################################
-##
-##  RUN LATEX AND COPY THE RESULTING PDF FILE
-##
-if [ "$runs" -eq 1 ] ;
-then prattle "Calling ${latex}..."
-else prattle "Calling ${latex} $runs times..."
-fi
-failureText=\
-"FAILED.
-The call to $latex resulted in an error."
-if [ -n "$tidy" ]; then
-	failureText="$failureText
-Rerun with '--no-tidy' or '--builddir PATH' to diagnose the problem."
-else
-	failureText="$failureText
-You can examine the build directory at
-        $(pwd)
-to try to diagnose the problem."
-fi
-i=1
-while [ "$i" -le "$runs" ]; do
-	"$latex" "$fileName.tex" >"$fileName.msgs" || {
-		prattle "$failureText"
-		error_exit "Run $i: Output file not written" $E_SOFTWARE
+				return numbered(b, a, t)
+			end
+		end
 	}
-	i=$((i + 1))
-done
-cd "$pwd" || exit 1
-if test -f "$fileName".pdf; then ## if LaTeX didn't choke
-	##  Checks on output file path:
-	if test -d "$outFile"; then ## outfile is a directory
-		if test ! -w "$outFile"; then
-			error_exit \
-				"FAILED: no write permission on ${outFile}." \
-				$E_OSFILE
-		fi
-		separator="-"
-		if test "$pageSpec" != "-"; then
-			separator=-"$pageSpec"-
-		fi
-		outFile=$(printf "%s" "$outFile" | sed 's/\/$//') ## delete any trailing slash
-		pdfName=$(basename -- "$sourcePath")
-		pdfName=$(printf "%s" "$pdfName" |
-			sed 's/\.[pP][dD][fF]$//') ## strip extension
-		pdfName="$pdfName$separator$suffix".pdf
-		outFile="$outFile/$pdfName"
-	fi
-else
-	error_exit "$latex did not create the expected pdf file." $E_OSFILE
-fi
-if test -f "$outFile" && test ! -w "$outFile"; then
-	## file exists and we can't over-write it
-	error_exit "no write permission at ${outFile}" $E_CANTCREATE
-fi
-#fileSize=$(wc -c < "$fileName.pdf" | sed 's/^\ *//')
-## Avoid explicit output to /dev/stdout.
-if test "$outFile" = "/dev/stdout" \
-	&& cat "$fileName".pdf 2> /dev/null \
-	|| cat "$fileName".pdf > "$outFile" 2>/dev/null
-then prattle "Finished.  Output was written to '${outFile}'."
-else error_exit "cannot write output at ${outFile}" $E_CANTCREATE
-fi
-if [ "$PDFJAM_CALL_NUMBER" = "0" ] && [ "$verbose" = "true" ]; then
-	cat "$PDFJAM_MESSAGES_FILE" >&2
-fi
-exit 0
-##
-##  END
-##
-#########################################################################
+
+	-- TODO: Do they actually work without argument?
+	local bool_options = {
+		"flip-other-edge", "frame", "column", "columnstrict",
+		"openright", "openrighteach", "turn", "noautoscale", "fitpaper",
+		"reflect", "booklet", "booklet*", "rotateoversize",
+		"link", "thread", "keepaspectratio", "clip", "draft", "interpolate",
+		"doublepages", "doublepagestwist", "doublepagestwistodd",
+		"doublepagestwist*", "doublepagestwistodd*"
+	}
+
+	local normalopt = {func = identity}
+	local normal_options = {"builddir", "outfile", "suffix", "latex", "iconv",
+		"enc", "pdftitle", "pdfauthor", "pdfsubject", "pdfkeywords", "runs", "pages"
+	}
+
+	local flagopt = { argument = false, func = function() return true end }
+	local flag_options = {"vanilla", "quiet", "tidy", "keepinfo",
+		"landscape", "twoside", "checkfiles", "batch"
+	}
+
+	do -- overly complex pattern to match the most common ways to specify papersize/templatesize/offset/delta
+		local s = lpeg.S"\t\n\v\f\r "
+		local blank = s^0/""
+		local tex_unit = lpeg.P"pt" + "pc" + "in" + "bp" + "cm" + "mm" + "dd" + "cc" + "sp" + "em" + "ex"
+		local digit = patterns.digit
+		local tex_number = (lpeg.S"+-" * blank)^0 * (digit^1 * ("." * digit^0)^-1 + "." * digit^1)
+		local dimen = lpeg.Cs(tex_number * (blank * tex_unit + lpeg.P(true)/"bp") + (textoken - ",")^0)
+		size_pattern = lpeg.Ct(
+			"{" * s^0 * dimen * s^0 * "," * s^0 * dimen * s^0 * "}" * -1
+			+ "{" * s^0 * dimen * s^0 * "}" * s^0 * "{" * dimen * s^0 * "}" * -1
+			+ sep^0 * dimen * lpeg.S" ,"^1 * dimen * (sep + -1)
+		) + lpeg.C(lpeg.P(1)^0)
+	end
+	local sizefunc = function(v, a, t) return numbered(size_pattern:match(v), a, t) end
+	local sizeshow = function(f) return function(v, t) return type(v) == "table" and f(v, t) or v end end
+
+	local size_options = {
+		papersize = function(v, t) return t.landscape and v[2]..","..v[1] or v[1]..","..v[2] end,
+		templatesize = function(v, _) return "{" .. v[1] .. "}{" .. v[2] .. "}" end,
+		delta = function(v, _) return v[1] .. " " .. v[2] end,
+		offset = function(v, _) return v[1] .. " " .. v[2] end,
+	}
+
+	local paperopt = {
+		argument = false,
+		func = function(_, a, t) t.paper = a t.papersize = nil end
+	}
+	local paper_options = {
+		"a0paper","a1paper","a2paper","a3paper","a4paper","a5paper","a6paper",
+		"b0paper","b1paper","b2paper","b3paper","b4paper","b5paper","b6paper",
+		"c0paper","c1paper","c2paper","c3paper","c4paper","c5paper","c6paper",
+		"ansiapaper","ansibpaper","ansicpaper","ansidpaper","ansiepaper",
+		"letterpaper","legalpaper","executivepaper",
+		"b0j","b1j","b2j","b3j","b4j","b5j","b6j"
+	}
+	local paper_hash = table.tohash(paper_options)
+	local function to_paper(a)
+		a = string.lower(a)
+		return paper_hash[a] and a or paper_hash[a .. "paper"] and a .. "paper"
+	end
+
+	function show_help(_, _, t) print("This is how to use it.") provide_default_paper(t) table.print(t) exit() end -- TODO
+	function show_version() print("pdfjam version " .. version) exit() end
+	function show_configpath() print("configpath is ...") exit() end -- TODO
+
+	local mode_options = {help = show_help, version = show_version,
+		configpath = show_configpath
+	}
+
+	local function add_multioption(options, name, sep)
+		options[name] = {
+			func = function(v, _, t)
+				t[name] = t[name] or {}
+				table.insert(t[name], v)
+			end,
+			retrieve = function(v) return v and sep .. table.concat(v, sep) or "" end
+		}
+	end
+	local multi_options = {preamble = "\n", latexopts = " "}
+
+	local alias_options = {output = "outfile", longedge = "otheredge", shortedge = "no-otheredge"}
+
+	function define_options()
+		local options = {}
+		for _, o in ipairs(bool_options) do options[o] = boolopt end
+		for _, o in ipairs(normal_options) do options[o] = normalopt end
+		for _, o in ipairs(flag_options) do options[o] = flagopt end
+		for _, o in ipairs(paper_options) do options[o] = paperopt end
+		for o, f in pairs(mode_options) do options[o] = {argument = false, func = f} end
+		for o, f in pairs(size_options) do options[o] = {func = sizefunc, show = sizeshow(f)} end
+		for o, s in pairs(multi_options) do add_multioption(options, o, s) end
+		for o, a in pairs(alias_options) do options[o] = a end
+		options.paper = {
+			func = function(v, _, t)
+				t.papersize = nil -- papersize would overwrite paper, thus nil it.
+				local paper = to_paper(v)
+				if paper then return paper
+				else return nil, "Unknown paper format '" .. v .. "'"
+				end
+			end,
+			retrieve = identity
+		}
+		options.pagecolor = {
+			func = identity,
+			retrieve = function(v)
+				return "\n\z
+					\\usepackage{color}\n\z
+					\\definecolor{bgclr}{RGB}{"..v.."}\n\z
+					\\pagecolor{bgclr}"
+			end
+		}
+		options.otheredge = table.fastcopy(flagopt) -- copy before manipulating
+		options.otheredge.retrieve = function(v)
+			return "\n"..[[{\makeatletter\AddToHook{shipout/before}{\ifodd\c@page\pdfpageattr{/Rotate 180}\fi}}]]
+		end
+		return options
+	end
+
+	local paper_pattern = lpeg.C((1 - lpeg.P":")^1) * ": "
+		* (lpeg.C(patterns.cpnumber) * "x" * lpeg.C(patterns.cpnumber)
+		* " " * lpeg.C(lpeg.R"az"^1) * -1 / "%1%3,%2%3")
+	local paperconf_pattern = (lpeg.C(patterns.number) * " " * lpeg.C(patterns.number)) / "%1bp,%2bp" * -1
+
+	local function default_paper()
+		local o = popen("paper")
+		if o then
+			local p, xy = paper_pattern:match(o:read())
+			if xy then
+				local paper = to_paper(p)
+				if paper then
+					return paper
+				else
+					return nil, xy
+				end
+			else warn"The `paper` program seems not to be working; not using it"
+			end
+		end
+		o = popen("paperconf")
+		if o then
+			local p = to_paper(o:read())
+			if p then
+				return p
+			else
+				o = popen("paperconf", "-s")
+				if o then
+					o = o:read()
+					local xy = paperconf_pattern:match(o)
+					if xy then
+						return nil, xy
+					else warn"The `paperconf` program seems not to be working; not using it"
+					end
+				end
+			end
+		end
+		return "a4paper"
+	end
+	function provide_default_paper(t)
+		if not t.paper and not t.papersize then
+			t.paper, t.papersize = default_paper()
+		end
+	end
+
+	function define_initial()
+		local initial = {
+			tidy = true,
+			suffix = false,
+			runs = 1,
+			latex = "pdflatex",
+			latexopts = {"-interaction batchmode"},
+			pdfinfo = "pdfinfo",
+			iconv = "iconv",
+			checkfiles = magic_file(arg[0]) == "a texlua script",
+			pages = "-"
+		}
+		return initial
+	end
+end
+
+--- short options ---
+-- Used in pagespec: [-,0-9l].
+short_options = {h="help", V="version", q="quiet", o="outfile"}
+
+--- pdfinfo ---
+do
+local pdfkeys = {"Title", "Author", "Subject", "Keywords"}
+
+function pop_pdfinfo(x)
+	local iconv, enc = x:pop"iconv", x:pop"enc"
+	local to_utf16_be = utf.utf8_to_utf16_be
+	if enc then
+		local iconv_opts = "-f " .. enc .. " -t UTF-16BE -- iconv.txt"
+		to_utf16_be = function(s)
+			local f = io.savedata("iconv.txt", s)
+			local p = popen(iconv, iconv_opts)
+			local result = "\xfe\xff" .. p:read("a")
+			return result
+		end
+	end
+	local info = {}
+	for _, k in ipairs(pdfkeys) do
+		local v = x:pop("pdf" .. string.lower(k))
+		if v then info[k] = to_utf16_be(v) end
+	end
+	return info
+end
+
+local labels = {}
+for _, a in ipairs(pdfkeys) do
+	labels[string.format("%-17s", a..":")] = a
+end
+function read_pdfinfo(pdfinfo, f)
+	local info = {}
+	-- Note: There does not seem to be the choice of UTF-16BE.
+	for l in popen(pdfinfo, "-enc UTF-8 --", f):lines() do
+		local k = labels[string.sub(l, 1, 17)]
+		if k and #l > 17 then info[k] = utf.utf8_to_utf16_be(string.sub(l, 18)) end
+	end
+	return info
+end
+
+local pdfinfo_template = "\n" .. [[
+\ifdefined\luatexversion
+	\protected\def\pdfinfo{\pdfextension info}
+\fi
+\ifdefined\XeTeXversion
+	\protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
+\fi
+\ifdefined\pdfinfo
+	\pdfinfo{%]]
+local pdfinfo_template_end = "\n\t}\n\\fi"
+
+function pdfinfo_code(info)
+	local r = ""
+	if next(info) then
+		r = pdfinfo_template
+		for _, k in ipairs(pdfkeys) do
+			if info[k] and info[k] ~= "\xfe\xff" then
+				r = r .. "\n\t\t/" .. k .. " <" .. string.tohex(info[k]) .. ">"
+			end
+		end
+		r = r .. pdfinfo_template_end
+	end
+	return r
+end
+end -- /pdfinfo
+
+function merge_pdfinfo(overwrite, pdfinfo, file)
+	if pdfinfo and file then
+		local info = read_pdfinfo(pdfinfo, file)
+		table.merge(info, overwrite)
+		return info
+	else return overwrite
+	end
+end
+
+--- page specs ---
+
+do
+	local page = "last" + lpeg.R"09" ^ 0 -- any or no page
+	local range = page * ("-" * page) ^ -1 -- any or no page range (the latter being an implicit empty page)
+	local part = "{}" + range -- page range or implicit or explicit empty page
+	local spec = part * ("," * part) ^ 0 * -1 -- complete page spec
+	-- Note: if pagespec contains no proper page, the default pagespec is implicitely appended
+	function is_valid_pagespec(word)
+		return lpeg.match(spec, tocomma(word)) ~= nil
+	end
+end
+
+--- file utility ---
+
+function magic_file(f)
+	-- Note: 19 = #"PostScript document"
+	local ans = popen("file", "-Lb", enquote(file.collapsepath(f, true))):read(19)
+	return string.split(ans, ",")[1]
+end
+
+do
+	local magic_names = {
+		["PDF document"]="pdf", ["PostScript document"]="eps",
+		["JPEG image data"]="jpg", ["PNG image data"]="png"
+	}
+	local ext_names = {pdf="pdf", eps="eps", jpg="jpg", png="png",
+		ps="eps", jpeg="jpg"}
+
+	function get_extension(f, checkfiles)
+		if checkfiles then
+			return magic_names[magic_file(f)]
+		else
+			return ext_names[string.lower(file.extname(f))]
+		end
+	end
+end
+
+function new_name(f, checkfiles)
+	local ext = get_extension(f, checkfiles) or "pdf"
+	return file.addsuffix(file.robustname(file.basename(f)), ext, ext), ext
+end
+
+--- file and pagespec list ---
+
+function out_name(out, last_in, suffix)
+	local name = file.nameonly(last_in)
+	if not out then
+		suffix = (suffix and "-" .. suffix or suffix == false and "-pdfjam" or "") .. ".pdf"
+	elseif out == "" then -- To stdout
+		return out
+	elseif ismkdir(out) then
+		suffix = (suffix and "-" .. suffix or "") .. ".pdf"
+		name = file.join(out, name)
+	else
+		suffix = ""
+		name = out
+	end
+	return file.collapsepath(name .. suffix, true)
+end
+
+function out_names(out, files, suffix)
+	out = out or "."
+	if not ismkdir(out) and files[2] then err("Output must go to directory in batch mode") end
+	suffix = suffix and "-"..suffix or ""
+	local dir = file.collapsepath(out, true) -- bug when out contains :
+	local r = {}
+	for _, name in ipairs(files) do
+		table.insert(r, file.join(dir, file.nameonly(name) .. suffix .. ".pdf"))
+	end
+	return r
+end
+
+function make_filepagelist(args, d, batch, checkfiles)
+	local filepagelist, l = {}, {}
+	local last_in, last_in_renamed
+	local add_file, add_pagespec
+	if batch then
+		function add_pagespec(ps)
+			ps = ps and tocomma(ps)
+			for _, a in ipairs(l) do table.insert(filepagelist, {a, ps}) end
+			l = {}
+		end
+		local i = 0
+		function add_file(a, b)
+			b = new_name(b or a, checkfiles)
+			i = i + 1
+			mkdir(file.join(d, i))
+			file_copy(a, file.join(d, i, b))
+			table.insert(l, b)
+		end
+	else
+		function add_pagespec(ps)
+			ps = ps and tocomma(ps)
+			for _, a in ipairs(l) do
+				table.insert(filepagelist, a)
+				table.insert(filepagelist, ps)
+			end
+			l = {}
+		end
+		local names = {["a.pdf"]=true}
+		local function robustname(a)
+			local b, ext = new_name(a, checkfiles)
+			if names[b] then
+				ext = "."..ext
+				local i = 0
+				local c = string.sub(b, 1, #b-#ext).."+"
+				repeat i=i+1 b = c .. i .. ext until not names[b]
+			end
+			names[b] = true
+			return b
+		end
+		function add_file(a, b)
+			last_in, last_in_renamed = a, robustname(b or a)
+			file_copy(a, file.join(d, last_in_renamed))
+			table.insert(l, last_in_renamed)
+		end
+	end
+	local cases = { -- binary coded index
+		"Input file expected, but '%s' does not even exist in your file system",
+		"Input file or pagespec expected, but '%s' neither exists in your file system nor is it a pagespec",
+		"The argument '%s' is a valid pagespec but a valid PDF/EPS/JPG/PNG file was expected",
+		add_pagespec,
+		"The argument '%s' is a valid path but not a valid PDF/EPS/JPG/PNG file",
+		"The argument '%s' is a valid path but not a valid PDF/EPS/JPG/PNG file or pagespec",
+		"The argument '%s' is both a valid path and a pagespec but a valid PDF/EPS/JPG/PNG file was expected",
+		add_pagespec,
+		add_file,
+		add_file,
+		{add_file, "Dubious argument '%s' interpreted as file due to its position.\n\nTip: Write './%s' for extra clarity"},
+		{add_pagespec, "Ambiguous argument '%s' interpreted as pagespec. If you meant the file, please write './%s' instead"},
+	}
+	local function add_argument(a)
+		if a == "" then add_file("", "stdin") return end
+		local valid = io.exists(a) and ((not checkfiles or get_extension(a, true)) and 8 or 4) or 0
+		local pagespec = is_valid_pagespec(a) and 2 or 0
+		local awaited = next(l) and 1 or 0
+		local c = cases[valid + pagespec + awaited + 1]
+		if type(c) == "function" then c(a)
+		elseif type(c) == "string" then err(c, a)
+		else c[1](a) warn(c[2], a, a)
+		end
+	end
+	for _, a in ipairs(args) do
+		if a == false then add_pagespec()
+		else add_argument(a)
+		end
+	end
+	add_pagespec()
+	if not next(filepagelist) then add_file("", "stdin") add_pagespec() end
+	return filepagelist, last_in, last_in_renamed
+end
+
+--- main ---
+
+template = [[
+\documentclass[$documentoptions]{article}$colorcode
+\usepackage[$geometryoptions]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{pdfpages}$rawinfo$otheredge$preamble
+\begin{document}
+\includepdf$merge[$pages$comma$options]{$filepagelist}
+\end{document}
+]]
+function run(tab, d, outfile, infofile)
+	assert(lfs.chdir(d) or print(d))
+	tab.rawinfo = pdfinfo_code(merge_pdfinfo(tab.info, tab.pdfinfo, infofile))
+	tab.comma = tab.pages ~= "" and tab.options ~= "" and "," or ""
+	debugprint("Running %s in %s to produce %s using %T", tab.latex, lfs.currentdir(), outfile, tab)
+	local pattern = lpeg.Cs((lpeg.P"$" * lpeg.C(lpeg.R"az" ^ 1) / tab + 1) ^ 0)
+	local content = pattern:match(template)
+	io.savedata("a.tex", content)
+	for _ = 1, tab.runs do execute(tab.latex, tab.latexopts, "a.tex", ">/dev/null") end
+	file_copy("a.pdf", outfile)
+end
+
+function main(args)
+	args = args or arg
+	local x = getopt(args)
+	provide_default_paper(x.t)
+
+	local batch, outfile, suffix = x:pop"batch", x:pop"outfile", x:pop"suffix"
+
+	local tab = {
+		latex = x:pop"latex",
+		latexopts = x:retrieve"latexopts",
+		pdfinfo = x:pop"pdfinfo",
+		info = pop_pdfinfo(x),
+		runs = tonumber(x:pop"runs"),
+		geometryoptions = x:retrieve"papersize", -- before `landscape`
+		documentoptions = x:list("paper", "landscape", "twoside"),
+		colorcode = x:retrieve"pagecolor",
+		otheredge = x:retrieve"otheredge",
+		preamble = x:retrieve"preamble",
+		merge = "merge",
+		pages = x:retrieve"pages",
+		options = x:numberedoptions(),
+		-- `rawinfo`, `comma` and `filepagelist` set later
+	}
+	if not x:pop"keepinfo" then tab.pdfinfo = nil end
+	if not (tab.runs and tab.runs > 0) then err("The number of runs must be at least 1") end
+
+	local d, gc_dummy = providedir(x:pop"builddir", x:pop"tidy")
+
+	local filepagelist, last_in, last_in_renamed = make_filepagelist(x.a, d, batch, x:pop"checkfiles")
+
+	assert(not next(x.t) or table.print(x.t))
+
+	if not batch then
+		local outfile = out_name(outfile, last_in, suffix)
+		tab.merge = "merge"
+		tab.filepagelist = table.concat(filepagelist, ",")
+		run(tab, d, outfile, last_in_renamed)
+	else
+		local outfiles = out_names(outfile, x.a, suffix)
+		for i, fp in ipairs(filepagelist) do
+			local f, pagespec = fp[1], fp[2]
+			tab.filepagelist = f
+			if pagespec then tab.pages = "pages=" .. embrace(pagespec) end
+			run(tab, file.join(d, i), outfiles[i], f)
+		end
+	end
+end
+
+success, msg = xpcall(main, function(msg) return explicit_error and "" or debug.traceback(msg) end)
+
+collectgarbage()
+if not success then
+	print(msg)
+	exit(1)
+end

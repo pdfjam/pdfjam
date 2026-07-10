@@ -5,10 +5,6 @@ File: a4abc.pdf Graphic file (type pdf)
 <use a4abc.pdf>
 Package pdftex.def Info: a4abc.pdf  used on input line ....
 (pdftex.def)             Requested size: 597.506pt x 845.045pt.
-File: a4abc.pdf Graphic file (type pdf)
-<use a4abc.pdf>
-Package pdftex.def Info: a4abc.pdf  used on input line ....
-(pdftex.def)             Requested size: 597.506pt x 845.045pt.
 <a4abc.pdf, id=00, page=1, 597.508pt x 845.047pt>
 File: a4abc.pdf Graphic file (type pdf)
 <use a4abc.pdf, page 1>
@@ -60,4 +56,4 @@ Page size:       72 x 144 pts
 Page rot:        0
 File size:       0000 bytes
 Optimized:       no
-PDF version:     1.5
+PDF version:     1.7

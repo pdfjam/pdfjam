@@ -59,19 +59,6 @@ typesetsuppfiles = { "run.lua", "opts.lua", "README.in.md", "Makefile.in", "pdfj
 typesetfiles = { "pdfjam", "pdfjam.x" } -- the `pdfjam` gets copied and the pdfjam.x makes `l3build install --full` install the .pdf
 
 ---- Test setup
-local escape_pattern = function(s)
-	return string.gsub(s,"[][^$()%%.*+?-]", "%%%0")
-end
-local rewrite_test_dir = function(s)
-	return (string.gsub(s, escape_pattern(abspath(builddir)), "$BUILDDIR"))
-end
-local rewrite_subdir = function(engine, s)
-	return (string.gsub(s, "( --builddir [^ ]+%.d)/" .. escape_pattern(engine) .. " ", "%1/dryrun "))
-end
-local rewrite_version = function(s)
-	return (string.gsub(s, "pdfjam version [%x.gN-]+", "pdfjam version N.NN."))
-end
-
 read_file = function(name)
 	f = io.open(name)
 	if not f then
@@ -139,20 +126,8 @@ test_types = {
 	jam = {
 		test = ".jam",
 		reference = ".jamref",
-		generated = "", -- it gets an implicit .engine anyway
-		rewrite = function(source, normalized, engine)
-			local dir=source .. ".d/" .. engine .. "/"
-			local f = io.open(normalized, "w")
-			local atex = read_file(dir.."a.tex")
-			local calltxt = read_file(dir.."call.txt")
-			local messagestxt = read_file(dir.."messages.txt")
-			if not (f and atex and calltxt and messagestxt) then return 1 end
-			f:write("%%% a.tex\n", atex,
-				"\n%%% call.txt\n", rewrite_subdir(engine, rewrite_test_dir(calltxt)),
-				"\n%%% messages.txt\n",
-				rewrite_subdir(engine, rewrite_version(rewrite_test_dir(messagestxt))))
-			f:close()
-		end
+		generated = "", -- it gets an implicit .dryrun anyway
+		rewrite = function(source, normalized, engine) cp("a.tex", source..".d/"..engine, normalized) end
 	},
 	sh = {
 		test = ".sh",

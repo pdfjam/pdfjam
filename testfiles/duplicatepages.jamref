@@ -1,23 +1,7 @@
-%%% a.tex
-\batchmode
-\documentclass[a4paper,landscape,]{article}
+\documentclass[a4paper,landscape]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{pdfpages}
 \begin{document}
-\includepdfmerge[nup=2x1,duplicatepages=2]{a4abc.pdf,-}
+\includepdfmerge[pages=-,nup=2x1,duplicatepages=2]{a4abc.pdf}
 \end{document}
-
-%%% call.txt
-cd $BUILDDIR/test
-./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir duplicatepages.d/dryrun --outfile duplicatepages.pdf --landscape --nup 2x1 --duplicatepages 2 -- a4abc.pdf - 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir duplicatepages.d/dryrun --outfile duplicatepages.pdf --landscape --nup 2x1 --duplicatepages 2 -- a4abc.pdf - 
-  pdfjam: Calling $BUILDDIR/test/engine...
-  pdfjam: Finished.  Output was written to 'duplicatepages.pdf'.

@@ -12,9 +12,9 @@ jobs:
     - name: Unpack
       run: MINIMAL_BUILD=1 utils/build.sh N.NN
     - name: Shellcheck
-      run: shellcheck build/pdfjam/bin/pdfjam
+      run: shellcheck build/pdfjam/bin/pdfjam.sh
     - name: Check Bash-isms
-      run: checkbashisms -xp build/pdfjam/bin/pdfjam
+      run: checkbashisms -xp build/pdfjam/bin/pdfjam.sh
     - name: Check man page (groff)
       run: groff -mandoc -t -K utf8 -b -rCHECKSTYLE=10 -ww -z build/pdfjam/man/pdfjam.1
     - name: Check man page (nroff)

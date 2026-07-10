@@ -11,12 +11,12 @@ File: lion.png Graphic file (type bmp)
 File: lion.png Graphic file (type bmp)
 <lion.png>
 [1]
-File: source-1.jpg Graphic file (type bmp)
-<source-1.jpg>
-File: source-1.jpg Graphic file (type bmp)
-<source-1.jpg>
-File: source-1.jpg Graphic file (type bmp)
-<source-1.jpg>
+File: a.jpg Graphic file (type bmp)
+<a.jpg>
+File: a.jpg Graphic file (type bmp)
+<a.jpg>
+File: a.jpg Graphic file (type bmp)
+<a.jpg>
 [2](a.aux)
 Creator:         TeX
 Producer:        TeXengine
@@ -34,4 +34,4 @@ Page size:       595.28 x 841.89 pts (A4)
 Page rot:        0
 File size:       0000 bytes
 Optimized:       no
-PDF version:     1.5
+PDF version:     1.7

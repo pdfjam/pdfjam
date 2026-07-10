@@ -3,8 +3,6 @@ Don't change this file in any respect.
 File: test.pdf Graphic file (type pdf)
 <use test.pdf>
 File: test.pdf Graphic file (type pdf)
-<use test.pdf>
-File: test.pdf Graphic file (type pdf)
 <use test.pdf, page 1>
 File: test.pdf Graphic file (type pdf)
 <use test.pdf, page 1>
@@ -31,4 +29,4 @@ Page size:       595.28 x 841.89 pts (A4)
 Page rot:        0
 File size:       0000 bytes
 Optimized:       no
-PDF version:     1.5
+PDF version:     1.7

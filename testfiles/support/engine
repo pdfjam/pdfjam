@@ -28,11 +28,12 @@ case "$1" in
 pdftex|xetex|luatex)
 	latex=$(command -v "${1%tex}latex") \
 		|| { echo Command "'${1%tex}latex'" not found; exit 1; }
-	preamble=" --preamble '"'\input{regression-test.tex}\AtBeginDocument{\START}'\'
+	opts="--preamble '"'\input{regression-test.tex}\AtBeginDocument{\START}'\'
 	;;
 sh|bash|ksh|zsh)
 	SH="$1"
 	latex=$(realpath "$0")
+	opts="--no-latexopts"
 	case "$in" in
 		*.sh) "$SH" "$in" | sed "s=$basedir=\$BUILDDIR=g" >"$job.$1.log"; exit ;;
 		*.jam) ;;
@@ -45,7 +46,7 @@ sh|bash|ksh|zsh)
 	;;
 *) echo "Unknown engine '$1'"; exit 1 ;;
 esac
-export pdfjam="./pdfjam --latex '$latex' --vanilla --builddir '$dir' --outfile '$out'$preamble"
+export pdfjam="./pdfjam --latex '$latex' --vanilla --builddir '$dir' --outfile '$out' $opts"
 
 # Evaluate .jam files
 case "$job" in
@@ -67,7 +68,7 @@ esac
 	| sed '/^ *\[[0-9]/s/ //g
 		s/\.\([0-9]\{3\}\)[0-9]*pt/.\1pt/g
 		s/luatex\.def/pdftex.def/
-		/^<[A-Za-z0-9_-]\+\.pdf,/s/id=[0-9]*/id=00/
+		/^<[A-Za-z0-9_+-]\+\.pdf,/s/id=[0-9]*/id=00/
 		s/^\((epstopdf) *date: \)....-..-.. ..:..:..$/\1....-..-.. ..:..:../
 		s/^\((epstopdf) *size: \|File size:       \)[0-9]\{4,\} bytes\(\.\?\)$/\10000 bytes\2/
 		s/^\(Producer:        \).*$/\1TeXengine/

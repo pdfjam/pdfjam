@@ -1,37 +1,20 @@
-%%% a.tex
-\batchmode
-\documentclass[a4paper,]{article}
+\documentclass[a4paper]{article}
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
-\ifdefined\luatexversion% LuaLaTeX
-  \protected\def\pdfinfo{\pdfextension info}
-\fi
-\ifdefined\XeTeXversion% XeLaTeX
-  \protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
-\fi
-\ifdefined\pdfinfo%
-  \pdfinfo{%
-    /Title <feff00500072006500730065006e00740069006e006700200074006800650020006e0075006d0062006500720073> %
-    /Author <feff00200073007000610063006500200067007500790020> %
-    /Keywords <feff0020006e0075006d006200650072002000700072006900640065002c0020d83cdff3200dd83cdf080020> %
-  }%
-\fi
 \usepackage{pdfpages}
+\ifdefined\luatexversion
+	\protected\def\pdfinfo{\pdfextension info}
+\fi
+\ifdefined\XeTeXversion
+	\protected\def\pdfinfo#1{\AddToHook{shipout/firstpage}{\special{pdf:docinfo << #1 >>}}}
+\fi
+\ifdefined\pdfinfo
+	\pdfinfo{%
+		/Title <feff00500072006500730065006e00740069006e006700200074006800650020006e0075006d0062006500720073>
+		/Author <feff00200073007000610063006500200067007500790020>
+		/Keywords <feff0020006e0075006d006200650072002000700072006900640065002c0020d83cdff3200dd83cdf080020>
+	}
+\fi
 \begin{document}
-\includepdfmerge[]{beamer.pdf,3-1}
+\includepdfmerge[pages=-]{beamer.pdf,3-1}
 \end{document}
-
-%%% call.txt
-cd $BUILDDIR/test
-./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir pdfinfo1.d/dryrun --outfile pdfinfo1.pdf --keepinfo -- beamer.pdf 3-1 
-
-%%% messages.txt
-          ----
-  pdfjam: This is pdfjam version N.NN.
-  pdfjam: Called with '--vanilla': no user or site configuration
-          files will be read.
-  pdfjam: Effective call for this run of pdfjam:
-          ./pdfjam --latex $BUILDDIR/test/engine --vanilla --builddir pdfinfo1.d/dryrun --outfile pdfinfo1.pdf --keepinfo -- beamer.pdf 3-1 
-  pdfjam: Calling $BUILDDIR/bin/pdfinfo...
-  pdfjam: Calling $BUILDDIR/test/engine...
-  pdfjam: Finished.  Output was written to 'pdfinfo1.pdf'.
